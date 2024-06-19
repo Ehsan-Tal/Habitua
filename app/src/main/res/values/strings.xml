@@ -1,7 +1,10 @@
 <resources>
-    <string name="app_name" translatable="false">Habitua</string>
-    <string name="title_data">Data</string>
-    <string name="title_home">Habits</string>
-    <string name="title_settings">Settings</string>
-    <string name="card_condition_prefix">Condition</string>
+    <string name="app_name">Habitua</string>
+    <string name="habit_name_1">Pet Cat</string>
+    <string name="habit_description_1">"7 times at least"</string>
+    <string name="habit_name_2">Water Cat</string>
+    <string name="habit_description_2">Refill his water bowl before breakfast</string>
+
+    <string name="expand_button_content_description">Expand</string>
+    <string name="new_habit_receipt">New Habit Receipt</string>
 </resources>

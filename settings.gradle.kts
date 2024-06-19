@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Habitua"
 include(":app")
+ 
