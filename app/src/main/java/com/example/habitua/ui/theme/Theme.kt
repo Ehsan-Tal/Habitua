@@ -8,10 +8,16 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.habitua.ui.AppViewModelProvider
+import com.example.habitua.ui.settings.SettingUiState
+import com.example.habitua.ui.settings.SettingViewModel
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -98,9 +104,12 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun HabituaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    uiState: SettingUiState = viewModel.uiState.collectAsState().value,
     content: @Composable() () -> Unit
 ) {
+    val darkTheme = uiState.isDarkMode
+
   val colorScheme = when {
       darkTheme -> darkScheme
       else -> lightScheme
