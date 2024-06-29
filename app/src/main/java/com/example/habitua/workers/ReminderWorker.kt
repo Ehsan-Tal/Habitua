@@ -31,14 +31,7 @@ class ReminderWorker(
     // we then want to define its logic and behaviour in doWork
     override fun doWork(): Result {
         createNotificationChannel()
-
-        val hasNotificationPermission = inputData.getBoolean(
-            KEY_NOTIFICATION_PERMISSION_GRANTED, false
-        )
-
-        if (hasNotificationPermission) {
-            showNotification()
-        }
+        showNotification()
 
         return Result.success()
     }
@@ -69,7 +62,7 @@ class ReminderWorker(
 
     // this would result in a notification that would launch/open the application
     // we can suppress the missing permission warning as we check for the permission in doWork()
-    @SuppressLint("MissingPermission")
+
     private fun showNotification(){
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -80,47 +73,22 @@ class ReminderWorker(
 
         val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(R.string.worker_reminder_content_title.toString())
-            .setContentText(R.string.worker_reminder_content_text.toString())
+            .setContentTitle(applicationContext.getString(R.string.worker_reminder_content_title))
+            .setContentText(applicationContext.getString(R.string.worker_reminder_content_text))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-
-
         with(NotificationManagerCompat.from(applicationContext)) {
-            notify(NOTIFICATION_REMINDER_ID, builder.build())
-        }
-
-/* // I will r
-        //TODO: Remove this spaghetti code as soon as you commit your changes
-
-        // we should handle the permission request in the MainActivity
-        // and just an if/else over here
-        with(NotificationManagerCompat.from(applicationContext)) {
-            // SDK is always above 33, but we could downgrade soon...
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
-                // if notification permission is not granted, skip
-                if (ActivityCompat.checkSelfPermission(
-                        applicationContext,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // we do not call to ask because it needs an Activity passed into it
-                    // I do not know how to resolve that
-                    return@with
-                    // exits the with block if not given the permission
-                    // it would be neat if I could store a pref to
-                    // not ask for the permission
-                }
-                // since there is a return@with, if the app gets to this line
-                // assume permission is granted
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return@with
             }
             notify(NOTIFICATION_REMINDER_ID, builder.build())
-
         }
-        // end of the with block
-        */
+
     }
 }

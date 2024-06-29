@@ -1,5 +1,6 @@
 package com.example.habitua
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.LocaleConfig
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,6 +24,13 @@ import androidx.core.content.ContextCompat
 import com.example.habitua.workers.KEY_NOTIFICATION_PERMISSION_GRANTED
 import java.util.Locale
 import androidx.work.Data
+import androidx.work.ForegroundUpdater
+import androidx.work.ProgressUpdater
+import androidx.work.WorkerFactory
+import androidx.work.WorkerParameters
+import com.example.habitua.workers.ReminderWorker
+import java.util.UUID
+import java.util.concurrent.Executor
 
 class MainActivity : ComponentActivity() {
 
@@ -75,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
     private fun scheduleReminderWorker(inputData: Data?) {
         // scheduling logic
+
     }
 }
 
