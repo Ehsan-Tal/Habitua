@@ -5,6 +5,60 @@
     <string name="habit_name_2">Water Cat</string>
     <string name="habit_description_2">Refill his water bowl before breakfast</string>
 
+    <string name="generic_habit_name">Generic Habit</string>
+    <string name="generic_habit_description">At least 5 times</string>
+
     <string name="expand_button_content_description">Expand</string>
     <string name="new_habit_receipt">New Habit Receipt</string>
+
+    <string name="screen_your">Your</string>
+
+    <string name="screen_home">Habits</string>
+    <string name="screen_data">Data</string>
+    <string name="screen_settings">Settings</string>
+    <string name="habit_body_no_habits">No habits yet, add some with the button</string>
+
+    <string name="habit_save_name">Name</string>
+    <string name="habit_save_description">Description</string>
+    <string name="habit_save_button">Create Habit</string>
+    <string name="habit_save_required">All fields are required</string>
+
+    <string name="habit_card_text_field_name">Name</string>
+    <string name="habit_card_text_field_description">Description</string>
+
+    <string name="content_description_navigate_back">Go Back</string>
+    <string name="content_description_FAB_habit_create">Add a habit</string>
+
+    <string name="form_required_name">Name</string>
+    <string name="form_required_description">Description</string>
+    <string name="form_required_current_streak_origin">Streak Origin</string>
+    <string name="habit_button_create">Add a habit</string>
+    <string name="habit_button_delete">Delete Habit</string>
+    <string name="dialog_affirmation">Yes</string>
+    <string name="dialog_negation">No</string>
+    <string name="dialog_title">Attention !</string>
+    <string name="dialog_question_delete">Delete this habit ?</string>
+    <string name="habit_button_update">Update Habit</string>
+    <string name="habit_edit_prefix_date">"You've been on a streak since: "</string>
+    <string name="visualization_pie_chart_Streak_on">In a Streak</string>
+    <string name="visualization_pie_chart_Streak_off">Not in a Streak</string>
+    <string name="visualization_pie_chart_Acquired_on">Acquired</string>
+    <string name="visualization_pie_chart_Acquired_off">Not Acquired</string>
+    <string name="visualization_pie_chart_title_Streak_Comparison">Streak On/Streak Off</string>
+    <string name="visualization_pie_chart_title_Acquired_Habits">Acquired or no ?</string>
+    <string name="visualization_header_InStreaks">Habits in a Streak</string>
+    <string name="visualization_header_Acquired">Habits Acquired</string>
+    <string name="visualization_header_Total">Total Habits</string>
+    <string name="preferences_dark_mode_on">Dark Mode</string>
+    <string name="preferences_dark_mode_title">Dark Mode/Light Mode</string>
+    <string name="preferences_dark_mode_off">Light Mode</string>
+    <string name="worker_reminder_content_title">Review Time</string>
+    <string name="worker_reminder_content_text">Tap Tap the Habits</string>
+
+
+    <!--
+        <string name=""></string>
+        <string name="content_description_"></string>
+
+        -->
 </resources>
