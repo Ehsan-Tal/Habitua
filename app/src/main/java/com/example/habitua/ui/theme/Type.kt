@@ -28,6 +28,11 @@ val AppTypography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp
     ),
+    displaySmall = TextStyle(
+        fontFamily = SingleDay,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp
+    ),
     labelSmall = TextStyle(
         fontFamily = UbuntuMono,
         fontWeight = FontWeight.Bold,
@@ -36,7 +41,7 @@ val AppTypography = Typography(
     bodyLarge = TextStyle(
         fontFamily = UbuntuMono,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontSize = 18.sp
     ),
     bodySmall = TextStyle(
         fontFamily = UbuntuMono,

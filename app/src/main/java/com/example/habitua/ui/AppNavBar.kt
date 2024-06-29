@@ -10,8 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.navigation.NavHostController
-import com.example.habitua.HabitScreen
 import com.example.habitua.R
+import com.example.habitua.ui.home.HabitDestination
+import com.example.habitua.ui.settings.SettingDestination
+import com.example.habitua.ui.visual.VisualizationDestination
 
 
 @Composable
@@ -25,22 +27,22 @@ fun HabitNavBar(
             .padding(dimensionResource(R.dimen.padding_small))
     ) {
         HabitNavButton(
-            text = HabitScreen.Start.name,
+            text = HabitDestination.title,
             currentScreenName = currentScreenName,
             onNextButtonClicked = {
-                navController.navigate(HabitScreen.Start.name)
+                navController.navigate(HabitDestination.route)
             })
         HabitNavButton(
-            text = HabitScreen.Data.name,
+            text = VisualizationDestination.title,
             currentScreenName = currentScreenName,
             onNextButtonClicked = {
-                navController.navigate(HabitScreen.Data.name)
+                navController.navigate(VisualizationDestination.route)
             })
         HabitNavButton(
-            text = HabitScreen.Settings.name,
+            text = SettingDestination.title,
             currentScreenName = currentScreenName,
             onNextButtonClicked = {
-                navController.navigate(HabitScreen.Settings.name)
+                navController.navigate(SettingDestination.route)
             })
     }
 }
