@@ -427,26 +427,25 @@ fun HabitCard (
     }
 }
 
+//TODO: This does not work anymore
+//TODO: (1) add a default resource
+
 @Composable
 fun HabitIcon(
     @DrawableRes habitIcon: Int
 ){
-    /*
     Image(
-        /*
         modifier = Modifier
             .size(dimensionResource(R.dimen.image_size))
             .clip(RoundedCornerShape(100))
             .border(width = 2.dp, color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
             .shadow(elevation = 6.dp),
 
-         */
         contentScale = ContentScale.Crop,
         contentDescription = null,
-        //imageVector = habitIcon
         //painter = painterResource(habitIcon),
+        painter = painterResource(id = R.drawable.tal_derpy),
 
         )
-     */
 }
 
