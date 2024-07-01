@@ -12,6 +12,12 @@ import java.util.Locale
 
 
 private const val TAG = "HabitEntryViewModel"
+
+/**
+ * The View Model for the Habit Entry screen
+ *
+ * @param appRepository is the repo relevant to Room and the Database
+ */
 class HabitEntryViewModel(
     private val appRepository: AppRepository
 ): ViewModel() {
@@ -19,6 +25,13 @@ class HabitEntryViewModel(
     var habitUiState by mutableStateOf(HabitUiState())
         private set
 
+    /**
+     * Updates state based on entry details
+     *
+     * this function also calls validateInput and passes in habitDetails to ensure it
+     *
+     * @param habitDetails - the details gathered from entry
+     */
     fun updateUiState(habitDetails: HabitDetails) {
         habitUiState = HabitUiState(
             habitDetails = habitDetails,
@@ -26,14 +39,30 @@ class HabitEntryViewModel(
         )
     }
 
-    private fun validateInput(uiState: HabitDetails = habitUiState.habitDetails): Boolean {
-        return with(uiState) {
+    /**
+     * Validates input based on given entry details
+     *
+     * this function ensures name and description are not blank
+     * //TODO: add length-based validation - we'd need to share that with HabitEdit.
+     *
+     * @param habitDetails - details gathered from entry
+     * @return true if it passes validation, false otherwise
+     */
+    private fun validateInput(habitDetails: HabitDetails): Boolean {
+        return with(habitDetails) {
             name.isNotBlank() && description.isNotBlank()
         }
     }
 
+    /**
+     * Saves Habit to the DB using the appRepository
+     *
+     * Translates to Habit the habitDetails of habitUiState -
+     * only after that value has passed validation
+     *
+     */
     suspend fun saveHabit(){
-        if (validateInput()) {
+        if (validateInput(habitUiState.habitDetails)) {
             appRepository.insertHabit((habitUiState.habitDetails.toHabit()))
         }
     }

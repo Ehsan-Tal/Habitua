@@ -11,7 +11,7 @@
     <string name="expand_button_content_description">Expand</string>
     <string name="new_habit_receipt">New Habit Receipt</string>
 
-    <string name="screen_your">Your</string>
+    <string name="screen_your">Your </string>
 
     <string name="screen_home">Habits</string>
     <string name="screen_data">Data</string>
@@ -27,13 +27,13 @@
     <string name="habit_card_text_field_description">Description</string>
 
     <string name="content_description_navigate_back">Go Back</string>
-    <string name="content_description_FAB_habit_create">Add a habit</string>
+    <string name="content_description_FAB_habit_create">Create habit</string>
 
     <string name="form_required_name">Name</string>
     <string name="form_required_description">Description</string>
     <string name="form_required_current_streak_origin">Streak Origin</string>
-    <string name="habit_button_create">Add a habit</string>
-    <string name="habit_button_delete">Delete Habit</string>
+    <string name="habit_button_create">Create</string>
+    <string name="habit_button_delete">Delete this habit</string>
     <string name="dialog_affirmation">Yes</string>
     <string name="dialog_negation">No</string>
     <string name="dialog_title">Attention !</string>
@@ -54,6 +54,13 @@
     <string name="preferences_dark_mode_off">Light Mode</string>
     <string name="worker_reminder_content_title">Review Time</string>
     <string name="worker_reminder_content_text">Tap Tap the Habits</string>
+    <string name="habit_button_review">Review</string>
+    <string name="review_dialog_title">Review Habit Record</string>
+    <string name="review_dialog_text">You can undo the review, but are you sure you\'re done ?
+        \n\nYou can still create and edit, but you won\'t be able to toggle their active-ness.</string>
+    <string name="toast_habit_card_disabled">No more today - check again tomorrow :)</string>
+    <string name="review_dialog_negation">Not yet</string>
+    <string name="review_dialog_affirmation">I\'m ready for review</string>
 
 
     <!--

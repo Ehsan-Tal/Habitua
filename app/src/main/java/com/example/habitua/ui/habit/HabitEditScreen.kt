@@ -209,8 +209,10 @@ fun HabitEditForm(
         // currentStreakOrigin != null
         if (habitValues.currentStreakOrigin != null) {
             Text(
-                text = stringResource(id = R.string.habit_edit_prefix_date) + habitValues.formattedOriginDate(),
-                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.habit_edit_prefix_date)
+            )
+            Text(
+                text = habitValues.formattedOriginDate()
             )
         }
 

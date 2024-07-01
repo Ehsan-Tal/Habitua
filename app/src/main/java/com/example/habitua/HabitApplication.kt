@@ -46,7 +46,6 @@ class HabitApplication: Application() {
         val workManager =
             WorkManager.getInstance(applicationContext)
 
-        //TODO: Build the constraint of chronos
 
         val currentTime = Calendar.getInstance()
         val dueTime = Calendar.getInstance().apply{

@@ -1,7 +1,6 @@
 package com.example.habitua.workers
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -17,23 +16,55 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.habitua.MainActivity
 import com.example.habitua.R
+import com.example.habitua.data.UserPreferencesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 const val CHANNEL_ID = "reminder_habitua_1"
 const val NOTIFICATION_REMINDER_ID = 1
-const val KEY_NOTIFICATION_PERMISSION_GRANTED = "notification_permission_granted"
 
 class ReminderWorker(
-    context: Context, workerParameters: WorkerParameters
+    context: Context, workerParameters: WorkerParameters,
+    private val preferencesRepository: UserPreferencesRepository
 ): Worker(context, workerParameters) {
 
     // we define a class to create the reminder worker thing
     // we then want to define its logic and behaviour in doWork
     override fun doWork(): Result {
-        createNotificationChannel()
-        showNotification()
 
-        return Result.success()
+        // we need to create a coroutineScope - tied to this thing's lifecycle
+        // I somewhat get Scope and lifecycles, but the context provided is black box x2
+        val scope = CoroutineScope(SupervisorJob()  + Dispatchers.IO)
+
+        //TODO: figure out a neat way to test this - you know, editing the time of the AVD
+        // through the command line or somethin'
+        //TODO: figure out a way to stop this from launching when the app is open
+
+        scope.launch {
+            val lastReviewedString =  preferencesRepository.lastReviewedFlow.first()
+
+            // this is a scuffed way to compare dates, but it's the way I choose.
+            val converter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+            val lastReviewedDate = LocalDate.parse(lastReviewedString, converter)
+            val currentDate = LocalDate.now()
+
+            // we want to add more conditions so we don't come close to over-notifying
+            if (currentDate.isAfter(lastReviewedDate)) {
+                createNotificationChannel()
+                showNotification()
+            }
+
+        }
+
+        // this is a black box too
+        return Result.retry()
     }
 
     // taken from https://developer.android.com/develop/ui/views/notifications/build-notification

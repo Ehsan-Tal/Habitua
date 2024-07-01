@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import com.example.habitua.data.Habit
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
@@ -22,8 +25,11 @@ private const val TAG = "HomeViewModel"
 // only toggling whether or not an item is active
 // and that is an individual item.
 // I can probably add HabitDetails here instead.
-class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
+class HomeViewModel(
+    private val appRepository: AppRepository
+): ViewModel() {
 
+    /*
     val homeUiState: StateFlow<HomeUiState> =
         appRepository.getAllHabitsByAcquiredStream(false).map { HomeUiState(it) }
             .stateIn(
@@ -31,7 +37,16 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = HomeUiState()
             )
+    */
 
+    val homeUiState: StateFlow<HomeUiState> =
+        appRepository.getAllHabitsByAcquiredStream(false)
+            .map {HomeUiState(it)}
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = HomeUiState()
+            )
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
@@ -49,10 +64,10 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
     }
 
     suspend fun reviewHabits() {
-        //TODO: we need to attach this to the button
         homeUiState.value.habitList.map {
             habit -> reviewHabit(habit)
         }
+        homeUiState.value.userReviewedToday = true
     }
 
     // ideally this should run also when an item is toggled
@@ -63,7 +78,6 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
 
         // only runs the rest of the logic if the habit has not been acquired
         if (!habit.hasBeenAcquired) {
-            //TODO: this needs to ensure that it always reset
 
             // refills the missedOpportunity
             if (habit.isActive) {
@@ -75,12 +89,12 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
 
                 // if active, if no streak - create streak
                 if (!habitHasAStreak) {
-                    //TODO: create streak, enable !
+                    updateHabit(habit.copy(currentStreakOrigin = System.currentTimeMillis()))
+
+                    //TODO: create streak, enable history !
                     //appRepository.createStreak(habit.id, System.currentTimeMillis())
                  }
             }
-
-            //TODO: How do we start a streak ?
 
             // check if the habit has a streak and if warrants being acquired
             if( habitHasAStreak && checkIfHabitIsAcquired(habit)) {
@@ -101,6 +115,10 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
                 isActive = false,
             ))
         }
+    }
+
+    private suspend fun checkIfUserReviewed(){
+
     }
 
     private suspend fun breakHabitStreak(habit: Habit) {
@@ -124,10 +142,20 @@ class HomeViewModel(private val appRepository: AppRepository): ViewModel() {
             (System.currentTimeMillis() - habit.currentStreakOrigin!!)
         ) > 66
         // 66 days, needs to be edited
+        //TODO: en-variable 66 days as not all habits occupy this form
+
+        //TODO: en-variable missed opportunities as they can afford much looser and
+        // dynamic opportunities
+
+        //TODO: change from Long to string + date comparisons
+
+        //val isAcquired: Boolean =
 
         return isAcquired
     }
 }
 data class HomeUiState(
     val habitList: List<Habit> = listOf(),
+    var userReviewedToday: Boolean = false
+    //TODO: edit this so userReviewedToday comes from a preference check
 )

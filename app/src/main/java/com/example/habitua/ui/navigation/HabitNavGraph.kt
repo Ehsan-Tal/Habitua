@@ -27,7 +27,7 @@ fun HabitNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = SettingDestination.route,
+        startDestination = HabitDestination.route,
         modifier = modifier
     ) {
         // Habit Home
