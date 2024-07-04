@@ -13,18 +13,28 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
+/**
+ * Class that handles saving and retrieving user preferences.
+ * @param dataStore - the method by which we store user preferences
+ */
 class UserPreferencesRepository(
     private val dataStore: DataStore<Preferences>
 ) {
+
+    /**
+     * A companion object to hold keys
+     */
     private companion object{
-        //val nightmode
         val IS_DARK_MODE = booleanPreferencesKey("is_dark_mode")
         val LANGUAGE_KEY = stringPreferencesKey("language")
 
         const val TAG = "UserPreferencesRepository"
     }
 
-    // A flow and catch attempting to read the preferences
+    /**
+     * A flow that emits a boolean value indicating whether dark mode is enabled.
+     * Default return is false
+     */
     val isDarkMode: Flow<Boolean> = dataStore.data
         .catch {
             if (it is IOException) {
@@ -38,22 +48,38 @@ class UserPreferencesRepository(
             preferences[IS_DARK_MODE] ?: false
         }
 
+    /**
+     * A suspend function to save the theme preference.
+     */
     suspend fun saveThemePreference(isDarkMode: Boolean) {
         dataStore.edit { prefers ->
             prefers[IS_DARK_MODE] = isDarkMode
         }
     }
-/*
-    suspend fun writeLanguagePreference(context: Context, langCode: String) {
-        context.dataStore.edit { settings ->
+
+    /**
+     * A flow that emits a string value indicating the language preference.
+     * @return a Flow of a string value - default is "en"
+     */
+    val readLangPref: Flow<String> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                Log.e(TAG, "Error reading preferences.", it)
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map { preferences ->
+            preferences[LANGUAGE_KEY] ?: "en"
+        }
+
+    /**
+     * A suspend function to save the language preference.
+     */
+    suspend fun writeLangPref(langCode: String) {
+        dataStore.edit { settings ->
             settings[LANGUAGE_KEY] = langCode
         }
     }
-
-    suspend fun readLanguagePreference(context: Context): String? {
-        val preferences = context.dataStore.data.firstOrNull()[LANGUAGE_KEY] ?: null
-        return preferences
-    }
-*/
-
 }

@@ -24,8 +24,6 @@ data class Habit (
     // var currentStreakOrigin exists in the ViewModel
     //      and from the Streaks query
     // var isExpanded exists in the ViewModel
-    // var isAcquired exists in the viewModel collecting the
-    //      foreign id and query the Streaks
 )
 //TODO: Streak entities
 

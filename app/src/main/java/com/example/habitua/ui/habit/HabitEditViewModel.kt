@@ -16,16 +16,28 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/**
+ * The View Model for the state of the Habit Editing Screen
+ *
+ * @param savedStateHandle - a [SavedStateHandle] responsible for persisting data between
+ * process death between destinations (e.g., the ID argument the habit edit destination)
+ * @param appRepository - allows access to the app database of habits
+ */
 class HabitEditViewModel (
     savedStateHandle: SavedStateHandle,
     private val appRepository: AppRepository
 ): ViewModel(){
 
-    private val habitId: Int =
+    val habitId: Int =
         checkNotNull(savedStateHandle[HabitEditDestination.HABIT_ID_ARG])
 
     var habitUiState by mutableStateOf(HabitEditUiState())
         private set
+
+    /**
+     * collects the specific habit from the DB by habitId
+     * filters out Null, collects the first from the flow, and converts it into the UiState
+     */
     init {
         viewModelScope.launch {
             habitUiState = appRepository.getHabitStream(habitId)
@@ -35,21 +47,33 @@ class HabitEditViewModel (
         }
     }
 
+    /**
+     * function to save changes into the db
+     */
     suspend fun updateHabit(){
         if (validateInput()) {
             appRepository.updateHabit(habitUiState.habit)
         }
     }
 
+    /**
+     * function to delete changes into the db
+     */
     suspend fun deleteHabit(){
         appRepository.deleteHabit(habitUiState.habit)
     }
 
+    /**
+     * function to update the State not the DB
+     */
     fun updateUiState(habit: Habit) {
         habitUiState =
             HabitEditUiState(habit = habit, isValid = validateInput())
     }
 
+    /**
+     * Validation to ensure the current habit in state does not have blank names or description
+     */
     private fun validateInput(): Boolean {
         return with(habitUiState.habit) {
             name.isNotBlank() && description.isNotBlank()
