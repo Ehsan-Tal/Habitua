@@ -27,6 +27,7 @@ class UserPreferencesRepository(
     private companion object{
         val IS_DARK_MODE = booleanPreferencesKey("is_dark_mode")
         val LANGUAGE_KEY = stringPreferencesKey("language")
+        val LAST_REVIEWED_KEY = stringPreferencesKey("reviewed")
 
         const val TAG = "UserPreferencesRepository"
     }
@@ -56,6 +57,36 @@ class UserPreferencesRepository(
             prefers[IS_DARK_MODE] = isDarkMode
         }
     }
+
+    //TODO: Change this to a boolean that checks if today's date matches what's stored in
+    //TODO: Change the view model to init one single current date !
+    /**
+     * SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+     * */
+    val lastReviewedFlow: Flow<String> = dataStore.data
+        .catch {
+            if (it is IOException) {
+                Log.e(TAG, "Error reading preferences.", it)
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map { preferences ->
+            preferences[LAST_REVIEWED_KEY] ?: "2023-12-08"
+        }
+
+    suspend fun saveDateReviewed(date: String) {
+        if (date.matches(Regex(
+                "\\d{4}-\\d{2}-\\d{2}"
+            ))) {
+            dataStore.edit {prefs ->
+
+                prefs[LAST_REVIEWED_KEY] = date
+            }
+        }
+    }
+
 
     /**
      * A flow that emits a string value indicating the language preference.

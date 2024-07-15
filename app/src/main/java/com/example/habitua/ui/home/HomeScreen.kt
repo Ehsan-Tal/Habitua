@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -28,9 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -38,17 +34,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +60,6 @@ import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -123,7 +113,6 @@ fun HabitScreen(
         HabitBody(
             habitList = homeUiState.habitList,
             currentScreenName = currentScreenName,
-            modifier = Modifier.fillMaxSize(),
             contentPadding = innerPadding,
             navController = navController,
             viewModel = viewModel,
@@ -138,7 +127,6 @@ fun HabitScreen(
 private fun HabitBody(
     habitList: List<Habit>,
     currentScreenName: String,
-    modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     navController: NavHostController,
     viewModel: HomeViewModel,
@@ -180,7 +168,6 @@ private fun HabitBody(
 @Composable
 private fun HabitColumn(
     habitList: List<Habit>,
-    modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     viewModel: HomeViewModel,
     onMoreOptionsClick: (Int) -> Unit

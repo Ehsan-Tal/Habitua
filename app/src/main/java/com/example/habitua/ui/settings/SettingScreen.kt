@@ -1,5 +1,6 @@
 package com.example.habitua.ui.settings
 
+import android.provider.Contacts.SettingsColumns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,8 +68,8 @@ fun SettingScreen (
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row (
@@ -82,22 +84,84 @@ fun SettingScreen (
             Column (
                 modifier = Modifier
                     .weight(8f)
-                    .padding(innerPadding)
+                    .padding(dimensionResource(id = R.dimen.padding_small))
             ){
-                SettingColumn(
-                    uiState = uiState,
-                    viewModel = viewModel,
-                )
-                /*
+                Column (
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                {
+                    val rowModifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+                        .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
 
-                // I'm keeping this here, the onClick must exist elsewhere
-                Button(
-                    onClick = {
-                        onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        Text(
+                            text = "Enable Notifications"
+                        )
                     }
-                ){
 
-                }*/
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        ToggleButton(
+                            titleString = stringResource(id = R.string.preferences_dark_mode_title),
+                            onString = stringResource(id = R.string.preferences_dark_mode_on),
+                            offString = stringResource(id = R.string.preferences_dark_mode_off),
+                            isOn = uiState.isDarkMode,
+                            onToggle = viewModel::selectThemeMode,
+                            onIcon = Icons.Outlined.DarkMode,
+                            offIcon = Icons.Outlined.LightMode,
+                        )
+                    }
+
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        Text(
+                            text = "Language"
+                        )
+                    }
+
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        Text(
+                            text = "Share"
+                        )
+                    }
+
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        Text(
+                            text = "About Habitua"
+                        )
+                    }
+                    /*
+                    SettingColumn(
+                        uiState = uiState,
+                        viewModel = viewModel,
+                    )
+
+    * */
+                    /*
+
+                    // I'm keeping this here, the onClick must exist elsewhere
+                    Button(
+                        onClick = {
+                            onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                        }
+                    ){
+
+                    }*/
+
+                }
             }
             HabitNavBar(
                 navController = navController,
@@ -122,15 +186,7 @@ fun SettingColumn(
     ){
 
         //dark mode to light mode
-        ToggleButton(
-            titleString = stringResource(id = R.string.preferences_dark_mode_title),
-            onString = stringResource(id = R.string.preferences_dark_mode_on),
-            offString = stringResource(id = R.string.preferences_dark_mode_off),
-            isOn = uiState.isDarkMode,
-            onToggle = viewModel::selectThemeMode,
-            onIcon = Icons.Outlined.DarkMode,
-            offIcon = Icons.Outlined.LightMode,
-        )
+
 
         LocaleDropdown()
         // need a locale list
@@ -198,14 +254,6 @@ fun ToggleButton(
 @Composable
 fun PreviewSettings(){
     HabituaTheme {
-        ToggleButton(
-            titleString = stringResource(id = R.string.preferences_dark_mode_title),
-            onString = stringResource(id = R.string.preferences_dark_mode_on),
-            offString = stringResource(id = R.string.preferences_dark_mode_off),
-            isOn = true,
-            onToggle = {},
-            onIcon = Icons.Outlined.DarkMode,
-            offIcon = Icons.Outlined.LightMode,
-        )
+
     }
 }

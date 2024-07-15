@@ -53,7 +53,6 @@ fun HabitNavHost(
         }
 
         // Habit Edit
-        //TODO needs an id based thing !
         composable(
             route = HabitEditDestination.routeWithArgs,
             arguments = listOf(navArgument(HabitEditDestination.HABIT_ID_ARG) {
