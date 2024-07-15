@@ -20,10 +20,12 @@ data class Habit (
     var isActive: Boolean = false,
     var hasMissedOpportunity: Boolean = true,
     var hasBeenAcquired: Boolean = false,
-    var currentStreakOrigin: Long? = null, // only changes in the review Habit
+    var currentStreakOrigin: String? = null, // only changes in the review Habit - yyyy-MM-dd
     // var currentStreakOrigin exists in the ViewModel
     //      and from the Streaks query
     // var isExpanded exists in the ViewModel
+    // var isAcquired exists in the viewModel collecting the
+    //      foreign id and query the Streaks
 )
 //TODO: Streak entities
 
