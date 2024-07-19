@@ -1,7 +1,5 @@
 package com.example.habitua.ui.visual
 
-import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,32 +23,27 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.habitua.R
-import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
-import com.example.habitua.ui.home.HomeViewModel
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
-import com.example.habitua.ui.theme.outlineDark
-import kotlin.math.cos
-import kotlin.math.sin
 
 object VisualizationDestination: NavigationDestination {
     override val route = "visualization"
-    override val title = "Data"
+    override val title = R.string.visualization_title
+    val navTitle = R.string.visualization_nav_title
 }
 @Composable
 fun VisualizationScreen (
@@ -63,12 +58,11 @@ fun VisualizationScreen (
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
-        // floater button
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row (
@@ -76,21 +70,29 @@ fun VisualizationScreen (
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = ("Your $currentScreenName"), // should be a str resource,
+                    text = stringResource(id = R.string.visualization_title),
                     style = MaterialTheme.typography.displayLarge,
                 )
-
             }
+
             Column (
                 modifier = Modifier
                     .weight(8f)
-                    .padding(innerPadding)
-                    .fillMaxSize()
+                    .padding(dimensionResource(id = R.dimen.padding_small))
             ){
-            VisualizationColumn(
-                viewModel = viewModel,
-                habitVizUiState = habitVizUiState
-            )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+
+                    VisualizationData(
+                        viewModel = viewModel,
+                        habitVizUiState = habitVizUiState
+                    )
+                }
+
             }
             HabitNavBar(
                 navController = navController,
@@ -102,74 +104,80 @@ fun VisualizationScreen (
 }
 
 @Composable
-fun VisualizationColumn(
+fun VisualizationData(
     viewModel: VisualizationViewModel,
     habitVizUiState: HabitVizUiState
 ){
-    Column(
+    Column (
         modifier = Modifier
-            .padding(dimensionResource(id = R.dimen.padding_small))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        PieChart(
-            data = viewModel.preparePieDataSetForStreakComparisons(),
-            colors = listOf(Color.Magenta, Color.LightGray),
-            title = stringResource(id = R.string.visualization_pie_chart_title_Streak_Comparison),
-            portion = habitVizUiState.portionInStreaks,
-            totalSize = habitVizUiState.totalSize,
-        )
-        PieChart(
-            data = viewModel.preparePieDataSetForAcquiredHabits(),
-            colors = listOf(Color.Yellow, Color.LightGray),
-            title = stringResource(id = R.string.visualization_pie_chart_title_Acquired_Habits),
-            portion = habitVizUiState.portionAcquired,
-            totalSize = habitVizUiState.totalSize,
-        )
+            .fillMaxSize()
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(id = R.dimen.padding_small))
+        ){
+            PieChart(
+                data = viewModel.preparePieDataSetForStreakComparisons(),
+                colors = listOf(Color.Magenta, Color.LightGray),
+                title = stringResource(id = R.string.visualization_pie_chart_title_Streak_Comparison),
+                modifier = Modifier
+                    .weight(1f)
+            )
+            PieChart(
+                data = viewModel.preparePieDataSetForAcquiredHabits(),
+                colors = listOf(Color.Yellow, Color.LightGray),
+                title = stringResource(id = R.string.visualization_pie_chart_title_Acquired_Habits),
+                modifier = Modifier
+                    .weight(1f)
+            )
 
-        HeaderCount(
-            header = stringResource(id = R.string.visualization_header_InStreaks),
-            count = habitVizUiState.portionInStreaks.toString()
-        )
-
-        HeaderCount(
-            header = stringResource(id = R.string.visualization_header_Acquired),
-            count = habitVizUiState.portionAcquired.toString()
-        )
-        HeaderCount(
-            header = stringResource(id = R.string.visualization_header_Total),
-            count = habitVizUiState.totalSize.toString()
+        }
+        DataTable(
+            listOf(
+                listOf(
+                    stringResource(id = R.string.visualization_header_InStreaks),
+                    habitVizUiState.portionInStreaks.toString(),
+                ),
+                listOf(
+                    stringResource(id = R.string.visualization_header_Acquired),
+                    habitVizUiState.portionAcquired.toString(),
+                ),
+                listOf(
+                    stringResource(id = R.string.visualization_header_Total),
+                    habitVizUiState.totalSize.toString()
+                ),
+            )
         )
     }
 }
 
+
 @Composable
-fun HeaderCount(
-    header: String,
-    count: String
+fun DataTable(
+    tableData: List<List<String>>
 ){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(dimensionResource(id = R.dimen.padding_medium))
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(id = R.dimen.padding_small))
+    LazyColumn {
+        items(items = tableData) { item ->
+            Column (
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_medium))
+                    .border(1.dp, MaterialTheme.colorScheme.outline)
 
-        ) {
-            Text(
-                text = header,
-                style = MaterialTheme.typography.displaySmall
-            )
-            Text(
-                text = count,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            ) {
+                Row {
+                    item.forEach { cell ->
+                        Text(
+                            text = cell,
+                            modifier = Modifier
+                                .padding(dimensionResource(id = R.dimen.padding_medium))
+                                .weight(1f),
+                            textAlign = TextAlign.Left
+                        )
+                    }
+                }
+            }
         }
-
     }
 }
 
@@ -179,16 +187,11 @@ fun PieChart(
     data: Map<Int, Float>,
     colors: List<Color>,
     title: String,
-    portion: Int,
-    totalSize: Int,
     modifier: Modifier = Modifier
 ) {
-    // this should work to produce a pie chart
-    // each iteration updates the start angle
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
     ) {
         Text(
             text = title,
@@ -201,25 +204,25 @@ fun PieChart(
         ) {
             var startAngle = 0f
             data.values.forEachIndexed {
-                   index, value ->
-                       val sweepAngle = value / data.values.sum() * 360f
-                       drawArc(
-                           color = colors[index % colors.size],
-                           startAngle = startAngle,
-                           sweepAngle = sweepAngle,
-                           useCenter = true,
-                           style = Fill
-                       )
-                       drawArc(
-                           color = Color.Black,
-                           startAngle = startAngle,
-                           sweepAngle = sweepAngle,
-                           useCenter = true,
-                           style = Stroke(width = 2f),
-                       )
-                       startAngle += sweepAngle
-                   }
+                    index, value ->
+                val sweepAngle = value / data.values.sum() * 360f
+                drawArc(
+                    color = colors[index % colors.size],
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    style = Fill
+                )
+                drawArc(
+                    color = Color.Black,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    style = Stroke(width = 2f),
+                )
+                startAngle += sweepAngle
             }
+        }
 
         // outlined box
         // color + label
@@ -242,6 +245,7 @@ fun PieChart(
                 }
             }
         }
+
     }
 }
 
@@ -252,22 +256,19 @@ fun PreviewVisualization(){
         Column {
 
 
-        PieChart(
-            data = mapOf(
-                R.string.visualization_pie_chart_Acquired_on to
-                        40f,
-                R.string.visualization_pie_chart_Acquired_off to
-                        60f,
-            ),
-            colors = listOf(
-                Color.Yellow,
-                Color.LightGray
-            ),
-            title = "Preview",
-            portion = 40,
-            totalSize = 100,
-        )
-        HeaderCount(header = "Preview", count = "40")
+            PieChart(
+                data = mapOf(
+                    R.string.visualization_pie_chart_Acquired_on to
+                            40f,
+                    R.string.visualization_pie_chart_Acquired_off to
+                            60f,
+                ),
+                colors = listOf(
+                    Color.Yellow,
+                    Color.LightGray
+                ),
+                title = "Preview",
+            )
         }
     }
 }

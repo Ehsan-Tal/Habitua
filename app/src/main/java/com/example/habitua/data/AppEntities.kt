@@ -7,9 +7,19 @@ import com.example.habitua.R
 
 
 /**
- * A data class to represent the information presented in the habit card
+ * Represents a Habit entity in the database.
+ *
+ * @property id The unique identifier for the habit (auto-generated).
+ * @property imageResId The resource ID of the image associated with the habit.
+ * @property name The name of the habit.
+ * @property description A description of the habit.
+ * @property isActive Whether the habit is currently active (being tracked).
+ * @property hasMissedOpportunity Indicates if the user has missed an opportunity to perform the
+ * habit.
+ * @property hasBeenAcquired Whether the habit has been fully acquired (goal achieved).
+ * @property currentStreakOrigin A string representing the origin or start date of the current
+ * streak (optional). Is in the form `yyyy-MM-dd`
  */
-
 @Entity(tableName = "habits")
 data class Habit (
     @PrimaryKey(autoGenerate = true)
@@ -20,12 +30,8 @@ data class Habit (
     var isActive: Boolean = false,
     var hasMissedOpportunity: Boolean = true,
     var hasBeenAcquired: Boolean = false,
-    var currentStreakOrigin: Long? = null, // only changes in the review Habit
-    // var currentStreakOrigin exists in the ViewModel
-    //      and from the Streaks query
-    // var isExpanded exists in the ViewModel
+    var currentStreakOrigin: String? = null,
 )
-//TODO: Streak entities
 
 /**
  *
@@ -45,20 +51,3 @@ data class Habit (
  * )
  */
 
-/**
- *
- * this should be converted into a UIState item, this file is for the Entities now.
- * data class Habit(
- *     val id: Int = 0, // need some way to auto increment
- *     @DrawableRes val imageResourceId: Int = R.drawable.tal_derpy,
- *     val name: String = "",
- *     val description: String = "",
- *     var currentStreakOrigin: Long? = null,
- *     var isActive: Boolean = false,
- *     var isExpanded: Boolean = false,
- *     var hasMissableOpportunity: Boolean = true,
- *     var isAcquired: Boolean = false
- * )
- *
- *
- */

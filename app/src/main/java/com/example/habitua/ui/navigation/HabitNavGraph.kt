@@ -2,6 +2,7 @@ package com.example.habitua.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,22 +19,36 @@ import com.example.habitua.ui.habit.HabitEntryScreen
 import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.home.HabitScreen
 
-// what tis a nav graph ?
-// ah, it makes the graph for navigation
+/**
+ * Main navigation graph for the app.
+ *
+ * @param navController The navigation controller for the app.
+ * @param modifier The modifier to apply to the navigation graph.
+ */
 @Composable
 fun HabitNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
+    /**
+     * This composable is the root of the navigation graph.
+     *
+     * sets the StartDestination of the application
+     */
     NavHost(
         navController = navController,
-        startDestination = SettingDestination.route,
+        startDestination = VisualizationDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
-        // Habit Home
+
+        /**
+         * The home screen
+         *
+         * The screen takes in its name, nav controller, navigate to habit entry, and navigate to habit edit
+         */
         composable(route = HabitDestination.route) {
             HabitScreen(
-                currentScreenName = HabitDestination.title,
+                currentScreenName = stringResource(id = HabitDestination.navTitle),
 
                 navigateToHabitEntry = {
                     navController.navigate(HabitEntryDestination.route)
@@ -44,7 +59,12 @@ fun HabitNavHost(
                 navController = navController
                 )
         }
-        // Habit Entry
+
+        /**
+         * The habit entry screen
+         *
+         * The screen composable takes the navigate back and up as parameters
+         */
         composable( route = HabitEntryDestination.route ) {
             HabitEntryScreen(
                 navigateBack = { navController.popBackStack() },
@@ -52,7 +72,14 @@ fun HabitNavHost(
             )
         }
 
-        // Habit Edit
+        /**
+         * The habit edit screen
+         *
+         * The destination route contains the habit ID as a parameter
+         * It's view models perform the fetch function
+         *
+         * The screen composable takes the navigate back and up as parameters
+         */
         composable(
             route = HabitEditDestination.routeWithArgs,
             arguments = listOf(navArgument(HabitEditDestination.HABIT_ID_ARG) {
@@ -65,19 +92,30 @@ fun HabitNavHost(
             )
         }
 
-        // Data Visualization
+        /**
+         * The data visualization screen
+         *
+         * Takes the name of the current screen as a parameter
+         * Takes the name of navigation controller as a parameter
+         */
         composable(route = VisualizationDestination.route) {
             VisualizationScreen(
-                currentScreenName = VisualizationDestination.title,
+                currentScreenName = stringResource(id = VisualizationDestination.navTitle),
                 navController = navController
             )
         }
 
-        // Setting
+        /**
+         * The setting screen
+         *
+         * Takes the name of the current screen as a parameter
+         * Takes the name of navigation controller as a parameter
+         */
         composable(route = SettingDestination.route) {
-            SettingScreen(currentScreenName = SettingDestination.title, navController = navController)
+            SettingScreen(
+                currentScreenName = stringResource(id = SettingDestination.navTitle),
+                navController = navController
+            )
         }
-
-
     }
 }
