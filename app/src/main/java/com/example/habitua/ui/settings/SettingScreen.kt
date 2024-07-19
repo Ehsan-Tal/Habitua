@@ -124,43 +124,44 @@ fun SettingScreen (
                         modifier = rowModifier
                     ) {
                         Text(
-                            text = "Language"
-                        )
-                    }
-
-                    Row(
-                        modifier = rowModifier
-                    ) {
-                        Text(
                             text = "Share"
                         )
+
+                        /*
+
+                        // I'm keeping this here, the onClick must exist elsewhere
+                        Button(
+                            onClick = {
+                                onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                            }
+                        ){
+
+                        }*/
                     }
 
-                    Row(
-                        modifier = rowModifier
-                    ) {
+                    Row{
                         Text(
-                            text = "About Habitua"
+                            text = "About Habitua",
+                            style = MaterialTheme.typography.displayMedium
                         )
-                    }
-                    /*
-                    SettingColumn(
-                        uiState = uiState,
-                        viewModel = viewModel,
+
+                }
+                    //TODO: Cut a lot of fru fru and keep design decisions standard
+                    Text(
+                        text = """
+                                Let's talk 66. It's not just a cool order, but the average number of consecutive days one must commit to an average habit in order to have acquired it.
+
+                                Twice did "average" appear in that sentence. 
+
+                                Habits vary in the time they afford the brain to reconsider doing something less complex or less effortful, like drinking a glass of water before breakfast VS doing 20 push-ups every day. The variance between the two is quite significant.
+
+                                A person may also have previous memory with that activity or set of activities, leading to quicker acquirement time.
+
+                                A lot of things effect acquirement time and this app does not yet comprehensively take them into account.
+
+                                Also, missed opportunity covers the fact that missed days do not necessarily translate into significantly longer acquirement times. Some activities - if the triggers and environment stay standard - can even become acquired with only 1 day a week performance.
+                            """.trimIndent()
                     )
-
-    * */
-                    /*
-
-                    // I'm keeping this here, the onClick must exist elsewhere
-                    Button(
-                        onClick = {
-                            onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
-                        }
-                    ){
-
-                    }*/
-
                 }
             }
             HabitNavBar(
@@ -171,54 +172,6 @@ fun SettingScreen (
     }
 }
 
-@Composable
-fun SettingColumn(
-    uiState: SettingUiState,
-    viewModel: SettingViewModel,
-) {
-
-    Column (
-        modifier = Modifier
-            .padding(dimensionResource(id = R.dimen.padding_small))
-            .fillMaxSize()
-            .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-    ){
-
-        //dark mode to light mode
-
-
-        LocaleDropdown()
-        // need a locale list
-        // expanded state
-        // selected locale is a mutable state
-        // a dropdown menu
-        // we then need for each each of the supported locale lists
-        // import locale Manager and do it there.
-
-        //w we need some reference to current Loacle
-    }
-}
-
-@Composable
-fun LocaleDropdown(){
-
-//    val supportedLocales = listOf("en") // edit this to add more locales- alongside everything else
-//
-//    var selectedLocale by remember {
-//        mutableStateOf(currentLocale.ifEmpty{ "Not Set" })
-//    }
-
-    //I'm going to work on the locales later
-    //There seems to be a way even if it's a bit clunky
-
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-        ){
-
-        }
-}
 
 @Composable
 fun ToggleButton(
@@ -230,13 +183,11 @@ fun ToggleButton(
     onIcon: ImageVector,
     offIcon: ImageVector,
 ){
-
     Column {
         Text(
-            text = titleString,
+            text = if (isOn) onString else offString,
             style = MaterialTheme.typography.displaySmall
         )
-        //TODO: find some other way to incorporate a toggle Button
         IconToggleButton(
             checked = isOn,
             onCheckedChange = onToggle
@@ -254,6 +205,5 @@ fun ToggleButton(
 @Composable
 fun PreviewSettings(){
     HabituaTheme {
-
     }
 }
