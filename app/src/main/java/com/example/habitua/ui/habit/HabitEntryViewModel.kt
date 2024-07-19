@@ -10,15 +10,29 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
+/**
+ * View Model to keep a reference to the app repository and an up-to-date list of all habits.
+ *
+ * Manages the UI state for habit creation
+ *
+ * @param appRepository the data source this ViewModel will fetch habits from.
+ */
 private const val TAG = "HabitEntryViewModel"
 class HabitEntryViewModel(
     private val appRepository: AppRepository
 ): ViewModel() {
 
+    /**
+     * Stream of habits
+     */
     var habitUiState by mutableStateOf(HabitUiState())
         private set
 
+    /**
+     * Updates the UI state with the provided [HabitDetails] and validates input
+     *
+     * @param habitDetails the new habit's details
+     */
     fun updateUiState(habitDetails: HabitDetails) {
         habitUiState = HabitUiState(
             habitDetails = habitDetails,
@@ -26,12 +40,18 @@ class HabitEntryViewModel(
         )
     }
 
+    /**
+     * Validates the user input - ensures name and description aren't blank
+     */
     private fun validateInput(uiState: HabitDetails = habitUiState.habitDetails): Boolean {
         return with(uiState) {
             name.isNotBlank() && description.isNotBlank()
         }
     }
 
+    /**
+     * Inserts the new habit into the database
+     */
     suspend fun saveHabit(){
         if (validateInput()) {
             appRepository.insertHabit((habitUiState.habitDetails.toHabit()))
@@ -42,46 +62,28 @@ class HabitEntryViewModel(
 
 
 // this is for the UI State, not for any specific data point
+/**
+ * Represents the UI state for an entry form.
+ */
 data class HabitUiState(
     val habitDetails: HabitDetails = HabitDetails(),
     val isEntryValid: Boolean = false
 )
 
-// also store counts of various categories of habits
-// maybe this does not need to have as many fields because this is the
-// entry field for habit cards
-//TODO: How do we save the habits ?
+/**
+ * Represents the user input for creating a new habit.
+ */
 data class HabitDetails(
     val name: String = "",
     val description: String = "",
 
 )
-/*
-
-    @DrawableRes val imageResId: Int = R.drawable.tal_derpy,
-    val name: String = "",
-    val description: String = "",
-    val isActive: Boolean = false,
-    val hasMissedOpportunity: Boolean = true,
-    val hasBeenAcquired: Boolean = false,
-    val currentStreakOrigin: Long? = null,
-* */
-// now how do we avoid lossy details ?
-// by using other items of course, right now, we can afford to lose them.
-
-// now to convert them to their convertables
 
 fun HabitDetails.toHabit(): Habit = Habit(
     name = name,
     description = description,
 )
-
-// fun Habit.formattedDate(): String {return }
-
-// I'm not sure what their default values would - how would they be invalid ?
-// now, would we need to convert items into things ? probably the date
-
-
+/*
 fun Habit.toHabitEntryUiState(isEntryValid: Boolean = false): HabitUiState = HabitUiState(
     habitDetails = this.toHabitDetails(),
     isEntryValid = isEntryValid
@@ -91,7 +93,11 @@ fun Habit.toHabitDetails(): HabitDetails = HabitDetails(
     name = name,
     description = description,
 )
+*/
 
+/**
+ * Formats the date for display
+ */
 fun Habit.formattedOriginDate(): String {
 
     var formattedDate: String

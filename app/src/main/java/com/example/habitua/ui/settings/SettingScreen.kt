@@ -44,7 +44,8 @@ import com.example.habitua.ui.theme.HabituaTheme
 
 object SettingDestination: NavigationDestination {
     override val route = "settings"
-    override val title = "Settings"
+    override val title = R.string.setting_title
+    val navTitle = R.string.setting_nav_title
 }
 
 // we need a button to initiate the toggling
@@ -64,7 +65,6 @@ fun SettingScreen (
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
-        // floater button
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -77,7 +77,7 @@ fun SettingScreen (
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = (stringResource(id = R.string.screen_your) + currentScreenName), // should be a str resource,
+                    text = stringResource(id = SettingDestination.title),
                     style = MaterialTheme.typography.displayLarge,
                 )
             }

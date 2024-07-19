@@ -17,6 +17,9 @@ import com.example.habitua.workers.ReminderWorker
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
+/**
+ * Application class for Habitua
+ */
 class HabitApplication: Application() {
 
     // so, we instance this so that the rest can obtain dependencies
@@ -24,7 +27,14 @@ class HabitApplication: Application() {
     // I think this thing doesn't work
     // very complicated - will learn in 3-5 business months
 
+    /**
+     * Container for the app
+     */
     lateinit var container: AppContainer
+
+    /**
+     * Called when the application is starting, before any other application objects have been created.
+     */
     override fun onCreate() {
         super.onCreate()
         container = AppDataContainer(this)
@@ -33,6 +43,11 @@ class HabitApplication: Application() {
     }
 
     // this creates a schedule to send out the defined notification
+    /**
+     * Schedules a daily notification to be sent to the user
+     * Sets it, ideally, at around 2000.
+     * TODO: There seems to be some issue with the entire notification system, fix it
+     */
     private fun scheduleDailyNotification() {
         val workManager =
             WorkManager.getInstance(applicationContext)

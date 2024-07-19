@@ -48,7 +48,7 @@ import androidx.compose.material3.TextButton
 
 object HabitEditDestination: NavigationDestination{
     override val route = "habit_edit"
-    override val title = "The Edit Screen" //R.string.app_name
+    override val title = R.string.habit_edit_title
     const val HABIT_ID_ARG = "habitId"
     val routeWithArgs = "$route/{$HABIT_ID_ARG}"
 }
@@ -84,7 +84,7 @@ fun HabitEditScreen (
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
-                                text = HabitEditDestination.title,
+                                text = stringResource(id = HabitEditDestination.title),
                                 style = MaterialTheme.typography.displayLarge
                             )
                         }

@@ -68,7 +68,8 @@ import kotlinx.coroutines.launch
 
 object HabitDestination : NavigationDestination {
     override val route = "home"
-    override val title = "Habits" //R.string.app_name
+    override val title = R.string.habit_title
+    val navTitle = R.string.habit_nav_title
 }
 
 // try not to retrofit your arch here
@@ -125,8 +126,6 @@ fun HabitScreen(
                 reviewConfirmationRequired = false
             },
             userReviewedToday = homeUiState.userReviewedToday,
-            //TODO: Change this to a uiState thing !!!
-            //,
         )
     }
 }
@@ -159,9 +158,7 @@ private fun HabitBody(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                //TODO: make 3 string resources that includes currentScreen Name as
-                // different locales may have different indicates of possession
-                text = (stringResource(R.string.screen_your) + currentScreenName), // should be a str resource,
+                text = stringResource(id = HabitDestination.title),
                 style = MaterialTheme.typography.displayLarge,
             )
         }

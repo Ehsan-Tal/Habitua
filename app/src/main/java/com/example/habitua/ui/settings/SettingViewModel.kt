@@ -10,11 +10,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-
 const val TAG = "SettingViewModel"
+
+/**
+ * ViewModel for [SettingScreen]
+ *
+ * @param userPreferencesRepository - used to save and retrieve user preferences
+ */
 class SettingViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
+
+    /**
+     * UI state exposed to the UI
+     *
+     * Uses a StateFlow to hold the current setting
+     */
     val uiState: StateFlow<SettingUiState> =
         userPreferencesRepository.isDarkMode.map { isDarkMode ->
             SettingUiState(isDarkMode)
@@ -24,15 +35,21 @@ class SettingViewModel(
             initialValue = SettingUiState()
         )
 
+    /**
+     * Saves the new theme preference
+     */
     fun selectThemeMode(isDarkMode: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.saveThemePreference(isDarkMode)
         }
-        Log.d(TAG, "$isDarkMode")
+        //Log.d(TAG, "$isDarkMode")
     }
 
 }
 
+/**
+ * UI state for [SettingScreen]
+ */
 data class SettingUiState(
     val isDarkMode: Boolean = true
 )

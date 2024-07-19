@@ -1,9 +1,13 @@
 package com.example.habitua.ui.navigation
 
+
+/**
+ * A navigation destination.
+ * route is a String
+ * title is a temp String
+ */
 interface NavigationDestination {
 
     val route: String
-    val title: String
-    // replace with a string resource
-    // val titleRes: Int
+    val title: Int
 }
