@@ -149,18 +149,12 @@ fun SettingScreen (
                     //TODO: Cut a lot of fru fru and keep design decisions standard
                     Text(
                         text = """
-                                Let's talk 66. It's not just a cool order, but the average number of consecutive days one must commit to an average habit in order to have acquired it.
+                 These concepts came from my reading of 'How are habits formed' by Lally, P. et al. (2009). Inaccuracies and assumptions from my design decisions are my responsibility.
 
-                                Twice did "average" appear in that sentence. 
+                 Acquirement times: Very dependent on its factors, particularly the activity's step complexity. 66 days is an average, though acquisition can come a lot sooner or a lot later. The more chances the mind has to move the self to another action, the more chances it will do so, etc.
 
-                                Habits vary in the time they afford the brain to reconsider doing something less complex or less effortful, like drinking a glass of water before breakfast VS doing 20 push-ups every day. The variance between the two is quite significant.
-
-                                A person may also have previous memory with that activity or set of activities, leading to quicker acquirement time.
-
-                                A lot of things effect acquirement time and this app does not yet comprehensively take them into account.
-
-                                Also, missed opportunity covers the fact that missed days do not necessarily translate into significantly longer acquirement times. Some activities - if the triggers and environment stay standard - can even become acquired with only 1 day a week performance.
-                            """.trimIndent()
+                 Missed Opportunities: Missing a day does not break your streak - why ? Well, a single day does not translate into SIGNIFICANTLY longer acquirement times.
+                             """.trimIndent()
                     )
                 }
             }
