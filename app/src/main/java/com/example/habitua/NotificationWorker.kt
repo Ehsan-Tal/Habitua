@@ -13,9 +13,19 @@ const val notificationChannelId = "reminder_notification_channel"
 const val titleExtra = "Reviewer Reminder-er"
 const val messageExtra = "Review your habits ?"
 
+/**
+ * Worker class for scheduling notifications
+ */
 class NotificationWorker(private val context: Context, workerParams: WorkerParameters):
     Worker(context, workerParams){
 
+    /**
+     * Method for scheduling notifications
+     *
+     * makes an intent to open MainActivity
+     * builds the notification according to some specification
+     * sends it to the NotificationManager
+     */
     override fun doWork(): Result {
 
         val intent = Intent(context, MainActivity::class.java).apply {

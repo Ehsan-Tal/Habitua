@@ -32,23 +32,32 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    /**
+     * WorkerManager's queue is cleared
+     *
+     * onResume collects the current time and the target time
+     * If current time exceeds target time, add one day to the target
+     *  the difference marks the initial delay, which is then used to schedule the notification
+     *
+     *  The notification is of type NotificationWorker and is enqueued using WorkManager
+     */
     override fun onResume(){
         super.onResume()
 
         WorkManager.getInstance(this).cancelAllWork()
 
-        val nowTime = Calendar.getInstance()
+        val currentTime = Calendar.getInstance()
         val targetTime = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 20)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
 
-            if (before(nowTime)) {
+            if (before(currentTime)) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
         }
 
-        val initialDelay = targetTime.timeInMillis - nowTime.timeInMillis
+        val initialDelay = targetTime.timeInMillis - currentTime.timeInMillis
 
         val notificationWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
