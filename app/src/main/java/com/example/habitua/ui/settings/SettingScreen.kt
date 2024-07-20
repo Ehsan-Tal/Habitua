@@ -124,38 +124,43 @@ fun SettingScreen (
                         modifier = rowModifier
                     ) {
                         Text(
-                            text = "Share"
+                            text = "Language"
                         )
-
-                        /*
-
-                        // I'm keeping this here, the onClick must exist elsewhere
-                        Button(
-                            onClick = {
-                                onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
-                            }
-                        ){
-
-                        }*/
                     }
 
-                    Row{
+                    Row(
+                        modifier = rowModifier
+                    ) {
                         Text(
-                            text = "About Habitua",
-                            style = MaterialTheme.typography.displayMedium
+                            text = "Share"
                         )
+                    }
 
-                }
-                    //TODO: Cut a lot of fru fru and keep design decisions standard
-                    Text(
-                        text = """
-                 These concepts came from my reading of 'How are habits formed' by Lally, P. et al. (2009). Inaccuracies and assumptions from my design decisions are my responsibility.
-
-                 Acquirement times: Very dependent on its factors, particularly the activity's step complexity. 66 days is an average, though acquisition can come a lot sooner or a lot later. The more chances the mind has to move the self to another action, the more chances it will do so, etc.
-
-                 Missed Opportunities: Missing a day does not break your streak - why ? Well, a single day does not translate into SIGNIFICANTLY longer acquirement times.
-                             """.trimIndent()
+                    Row(
+                        modifier = rowModifier
+                    ) {
+                        Text(
+                            text = "About Habitua"
+                        )
+                    }
+                    /*
+                    SettingColumn(
+                        uiState = uiState,
+                        viewModel = viewModel,
                     )
+
+    * */
+                    /*
+
+                    // I'm keeping this here, the onClick must exist elsewhere
+                    Button(
+                        onClick = {
+                            onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                        }
+                    ){
+
+                    }*/
+
                 }
             }
             HabitNavBar(
@@ -166,6 +171,54 @@ fun SettingScreen (
     }
 }
 
+@Composable
+fun SettingColumn(
+    uiState: SettingUiState,
+    viewModel: SettingViewModel,
+) {
+
+    Column (
+        modifier = Modifier
+            .padding(dimensionResource(id = R.dimen.padding_small))
+            .fillMaxSize()
+            .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ){
+
+        //dark mode to light mode
+
+
+        LocaleDropdown()
+        // need a locale list
+        // expanded state
+        // selected locale is a mutable state
+        // a dropdown menu
+        // we then need for each each of the supported locale lists
+        // import locale Manager and do it there.
+
+        //w we need some reference to current Loacle
+    }
+}
+
+@Composable
+fun LocaleDropdown(){
+
+//    val supportedLocales = listOf("en") // edit this to add more locales- alongside everything else
+//
+//    var selectedLocale by remember {
+//        mutableStateOf(currentLocale.ifEmpty{ "Not Set" })
+//    }
+
+    //I'm going to work on the locales later
+    //There seems to be a way even if it's a bit clunky
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+
+        }
+}
 
 @Composable
 fun ToggleButton(
@@ -177,11 +230,13 @@ fun ToggleButton(
     onIcon: ImageVector,
     offIcon: ImageVector,
 ){
+
     Column {
         Text(
-            text = if (isOn) onString else offString,
+            text = titleString,
             style = MaterialTheme.typography.displaySmall
         )
+        //TODO: find some other way to incorporate a toggle Button
         IconToggleButton(
             checked = isOn,
             onCheckedChange = onToggle
@@ -199,5 +254,6 @@ fun ToggleButton(
 @Composable
 fun PreviewSettings(){
     HabituaTheme {
+
     }
 }
