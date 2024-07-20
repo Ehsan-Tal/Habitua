@@ -18,6 +18,25 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+        setContent {
+            HabituaTheme {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    HabitApp()
+                }
+            }
+        }
+
+    }
+
+    override fun onResume(){
+        super.onResume()
+
+        WorkManager.getInstance(this).cancelAllWork()
+
         val nowTime = Calendar.getInstance()
         val targetTime = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 20)
@@ -36,20 +55,6 @@ class MainActivity : ComponentActivity() {
             .build()
 
         WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-
-        enableEdgeToEdge()
-        setContent {
-            HabituaTheme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    HabitApp()
-                }
-            }
-        }
-
-
 
     }
 
