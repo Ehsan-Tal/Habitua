@@ -1,17 +1,17 @@
 package com.example.habitua.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -102,6 +102,30 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+/**
+ *     acquired = reviewedLight
+ *     acquired = reviewedDark
+ *
+ */
+
+@Immutable
+data class CustomColorsPalette(
+    val acquired: Color = Color.Unspecified,
+    val onAcquired: Color = Color.Unspecified,
+)
+
+private val LightCustomColorsPalette = CustomColorsPalette(
+    acquired = reviewedLight,
+    onAcquired = onReviewedLight,
+)
+
+private val DarkCustomColorsPalette = CustomColorsPalette(
+    acquired = reviewedDark,
+    onAcquired = onReviewedDark,
+)
+
+val LocalCustomColorsPalette = staticCompositionLocalOf { CustomColorsPalette() }
+
 @Composable
 fun HabituaTheme(
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -110,24 +134,34 @@ fun HabituaTheme(
 ) {
     val darkTheme = uiState.isDarkMode
 
-  val colorScheme = when {
+    val colorScheme = when {
       darkTheme -> darkScheme
       else -> lightScheme
-  }
-  val view = LocalView.current
-  if (!view.isInEditMode) {
-    SideEffect {
-      val window = (view.context as Activity).window
-      window.statusBarColor = colorScheme.primary.toArgb()
-      WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
     }
-  }
 
-  MaterialTheme(
-    colorScheme = colorScheme,
-    typography = AppTypography,
-    shapes = Shapes,
-    content = content
-  )
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+          val window = (view.context as Activity).window
+          window.statusBarColor = colorScheme.primary.toArgb()
+          WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
+
+    // custom colors
+    val customColorsPalette =
+        if (darkTheme) DarkCustomColorsPalette else LightCustomColorsPalette
+
+
+    CompositionLocalProvider(
+        LocalCustomColorsPalette provides customColorsPalette
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            shapes = Shapes,
+            content = content
+        )
+    }
 }
 

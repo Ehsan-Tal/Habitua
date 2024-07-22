@@ -32,6 +32,7 @@ data class Habit (
     var hasBeenAcquired: Boolean = false,
     var currentStreakOrigin: String? = null,
 )
+//TODO: currentAcquiredOrigin: String? = null
 
 /**
  *

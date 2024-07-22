@@ -24,9 +24,9 @@ val AppTypography = Typography(
         fontSize = 36.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = UbuntuMono,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
+        fontFamily = SingleDay,
+        fontWeight = FontWeight.Normal,
+        fontSize = 26.sp
     ),
     displaySmall = TextStyle(
         fontFamily = SingleDay,

@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +42,7 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
+import com.example.habitua.ui.theme.LocalCustomColorsPalette
 
 object VisualizationDestination: NavigationDestination {
     override val route = "visualization"
@@ -111,11 +115,11 @@ fun VisualizationData(
     Column (
         modifier = Modifier
             .fillMaxSize()
+            .padding(dimensionResource(id = R.dimen.padding_small))
     ){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(id = R.dimen.padding_small))
         ){
             PieChart(
                 data = viewModel.preparePieDataSetForStreakComparisons(),
@@ -149,6 +153,73 @@ fun VisualizationData(
                 ),
             )
         )
+
+        // Acquired Habits
+        if (habitVizUiState.acquiredHabitList.isNotEmpty()) {
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.padding_large))
+            ){
+                Text(
+                    text="Acquired Habits",
+                    style = MaterialTheme.typography.displayMedium,
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+                )
+                LazyColumn {
+                    items(items = viewModel.habitVizUiState.value.acquiredHabitList) {
+                        OutlinedCard(
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = LocalCustomColorsPalette.current.acquired
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(dimensionResource(R.dimen.padding_small))
+                                .padding(bottom = 0.dp)
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.tertiary,
+                                    MaterialTheme.shapes.medium
+                                )
+                        ){
+                            Column(
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_medium))
+                            ){
+                                Text(
+                                    text=it.name,
+                                    style = MaterialTheme.typography.displaySmall,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text=it.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small))
+                                )
+                                Text(
+                                    text="Practicing since: ${it.currentStreakOrigin!!}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small))
+                                )
+                                /*
+                                Text(
+                                    text="Acquired at: ${it.currentAcquiredOrigin!!}",
+                                    color = LocalCustomColorsPalette.current.onAcquired
+                                )
+                                 */
+
+
+                            }
+                                                  }
+                    }
+                }
+            }
+        }
     }
 }
 

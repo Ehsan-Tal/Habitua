@@ -1,24 +1,14 @@
 package com.example.habitua.ui.visual
 
-import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
-import com.example.habitua.ui.home.HomeUiState
-import com.example.habitua.ui.home.HomeViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 private const val TAG = "VisualizationViewModel"
 
@@ -40,7 +30,7 @@ class VisualizationViewModel(
             .map { habIt ->
                 if (habIt.isEmpty()) {
                     HabitVizUiState(
-                        habitList = habIt,
+                        acquiredHabitList = habIt,
                         totalSize = 0,
                         portionAcquired = 0,
                         portionInStreaks = 0,
@@ -49,7 +39,7 @@ class VisualizationViewModel(
                     )
                 } else {
                     HabitVizUiState(
-                        habitList = habIt,
+                        acquiredHabitList = habIt.filter { it.hasBeenAcquired },
                         totalSize = habIt.size,
                         portionAcquired = habIt.count{ it.hasBeenAcquired },
                         portionInStreaks = habIt.count{ it.currentStreakOrigin != null && !it.hasBeenAcquired },
@@ -123,7 +113,7 @@ class VisualizationViewModel(
 /**
  * Represents the state for the visualization composable.
  *
- * @property habitList
+ * @property acquiredHabitList
  * @property totalSize
  * @property portionAcquired
  * @property portionInStreaks
@@ -131,7 +121,7 @@ class VisualizationViewModel(
  * @property perCentInStreak
  */
 data class HabitVizUiState(
-    val habitList: List<Habit> = listOf(),
+    val acquiredHabitList: List<Habit> = listOf(),
     val totalSize: Int = 0,
     val portionAcquired: Int = 0,
     val portionInStreaks: Int = 0,

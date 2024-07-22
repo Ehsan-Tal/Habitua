@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -22,6 +23,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.habitua.HabitTopAppBar
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.theme.HabituaTheme
@@ -33,22 +35,20 @@ object HabitEntryDestination : NavigationDestination {
     override val title =  R.string.habit_entry_title
 }
 
-// we are going to need to significantly alter our navigation
-
-
-
 @Composable
 fun HabitEntryScreen(
     navigateBack: () -> Unit,
-    onNavigateUp: () -> Unit,
-    canNavigateBack: Boolean = true,
     viewModel: HabitEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    // this isn't working, we need to figure out if the repo or the vM is at fault
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-
+        topBar = {
+            HabitTopAppBar(
+                navigateBack = navigateBack,
+                title = stringResource(HabitEntryDestination.title),
+            )
+        }
     ) { innerPadding ->
         HabitEntryBody(
             habitUiState = viewModel.habitUiState,
@@ -62,8 +62,8 @@ fun HabitEntryScreen(
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    top = innerPadding.calculateTopPadding(),
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-                    top = innerPadding.calculateTopPadding()
                 )
                 .verticalScroll(rememberScrollState())
                 .fillMaxWidth()

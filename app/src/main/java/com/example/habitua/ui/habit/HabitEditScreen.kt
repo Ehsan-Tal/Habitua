@@ -1,50 +1,44 @@
 package com.example.habitua.ui.habit
 
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.habitua.HabitTopAppBar
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
 import kotlinx.coroutines.launch
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
 
 object HabitEditDestination: NavigationDestination{
     override val route = "habit_edit"
@@ -56,43 +50,17 @@ object HabitEditDestination: NavigationDestination{
 @Composable
 fun HabitEditScreen (
     navigateBack: () -> Unit,
-    onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitEditViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
-        bottomBar = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(dimensionResource(id = R.dimen.padding_small))
-                    ){
-                        IconButton(
-                            onClick = onNavigateUp,
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.content_description_navigate_back),
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .weight(9f),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = stringResource(id = HabitEditDestination.title),
-                                style = MaterialTheme.typography.displayLarge
-                            )
-                        }
-                    }
+        topBar = {
+                HabitTopAppBar(
+                    title = stringResource(id = HabitEditDestination.title),
+                    navigateBack = navigateBack,
+                )
         },
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding(),
     ){
         innerPadding ->
         HabitEditBody(
@@ -116,7 +84,8 @@ fun HabitEditScreen (
                     top = innerPadding.calculateTopPadding(),
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
-                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
         )
     }
 }
@@ -132,7 +101,7 @@ fun HabitEditBody (
     var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
 
     Column (
-        modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large)),
+        modifier = modifier.padding(dimensionResource(id = R.dimen.padding_large)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large))
     ) {
         HabitEditForm(
@@ -182,7 +151,6 @@ fun HabitEditForm(
     habitValues: Habit,
     modifier: Modifier = Modifier,
     onValueChange: (Habit) -> Unit = {},
-    enabled: Boolean = true,
 ){
     Column(
         modifier = modifier,
@@ -209,15 +177,27 @@ fun HabitEditForm(
         // currentStreakOrigin != null
         if (habitValues.currentStreakOrigin != null) {
             Text(
-                text = stringResource(id = R.string.habit_edit_prefix_date) + habitValues.formattedOriginDate(),
+                text = stringResource(id = R.string.habit_edit_prefix_date),
                 modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.displaySmall
+            )
+            Text(
+                text = habitValues.formattedOriginDate(),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.displaySmall
+            )
+            Text(
+                text = "That was ${habitValues.streakLength()} days ago",
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.displaySmall
+
             )
         }
 
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class) // We need this
+// We need this
 @Composable
 private fun DeleteConfirmationDialog(
     onDeleteConfirm: () -> Unit,
