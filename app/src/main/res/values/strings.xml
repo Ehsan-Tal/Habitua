@@ -11,11 +11,6 @@
     <string name="expand_button_content_description">Expand</string>
     <string name="new_habit_receipt">New Habit Receipt</string>
 
-    <string name="screen_your">Your</string>
-
-    <string name="screen_home">Habits</string>
-    <string name="screen_data">Data</string>
-    <string name="screen_settings">Settings</string>
     <string name="habit_body_no_habits">No habits yet, add some with the button</string>
 
     <string name="habit_save_name">Name</string>
@@ -40,7 +35,7 @@
     <string name="dialog_question_delete">Delete this habit ?</string>
 
     <string name="habit_button_update">Update Habit</string>
-    <string name="habit_edit_prefix_date">"You've been on a streak since: "</string>
+    <string name="habit_edit_prefix_date">"Your streak started on: "</string>
 
     <string name="visualization_pie_chart_title_Streak_Comparison">In a Streak</string>
     <string name="visualization_pie_chart_Streak_on">In a Streak</string>
@@ -55,7 +50,6 @@
     <string name="visualization_header_Total">Total Habits</string>
 
     <string name="preferences_dark_mode_on">Dark Mode</string>
-    <string name="preferences_dark_mode_title">Dark Mode/Light Mode</string>
     <string name="preferences_dark_mode_off">Light Mode</string>
 
     <string name="worker_reminder_content_title">Review Time</string>
@@ -77,6 +71,14 @@
     <string name="setting_nav_title">Settings</string>
     <string name="habit_edit_title">The Edit Screen</string>
     <string name="habit_entry_title">The Entry Screen</string>
+
+    <string name="about_section_paragraph">"\nThese concepts came from my reading of 'How are habits formed' by Lally, P. et al. (2009). \nInaccuracies and assumptions from my design decisions are my responsibility.\n\nAcquirement times: \nVery dependent on its factors, e.g., activity's step complexity. \n66 days is an average built on another average.\n\nMissed Opportunities: \nMissing a day does not break your streak - why ? Well, a single day does not translate into SIGNIFICANT damage as long as you continue it afterwards.\n\nThere are some extra conditions, but that's the gist of it. You don't need have to be absolutely flawless as long as you keep at it.\n                             "</string>
+    <string name="about_habitua_title">About Habitua</string>
+
+    <string name="dialog_reminder_notification_title">Reminder Notification</string>
+    <string name="dialog_reminder_notification_paragraph">Let he app remind you to review every day at 2000 hours - your phone time</string>
+    <string name="notifications_enabled">Notifications Enabled</string>
+    <string name="notifications_disabled">Enable Notifications</string>
     <!--
         <string name=""></string>
         <string name="content_description_"></string>

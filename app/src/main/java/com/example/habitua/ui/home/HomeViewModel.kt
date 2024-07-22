@@ -1,5 +1,6 @@
 package com.example.habitua.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.habitua.data.AppRepository
 import kotlinx.coroutines.flow.StateFlow
@@ -8,7 +9,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import com.example.habitua.data.Habit
 import com.example.habitua.data.UserPreferencesRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -47,18 +50,16 @@ class HomeViewModel(
         combine(
             appRepository.getAllHabitsByAcquiredStream(false),
             userPreferencesRepository.lastReviewedFlow
-        ) {
-                habits, lastReviewedDate ->
-
+        ) { habits, lastReviewedDate ->
             val reviewedToday = (dateToday == lastReviewedDate)
-
             HomeUiState(habits, reviewedToday)
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = HomeUiState()
-            )
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = HomeUiState()
+        )
+
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
@@ -126,7 +127,10 @@ class HomeViewModel(
 
             // Check if the habit should be marked as acquired
             if (habitHasAStreak && checkIfHabitIsAcquired(habit)) {
+                //TODO: Make this as recently acquired
+                //TODO: Then add a delay of 0.5 seconds - and then mark it as updated
                 updateHabit(habit.copy(hasBeenAcquired = true))
+
             } else {
                 // Handle inactive habits or those that don't meet acquisition criteria
                 if (habit.hasMissedOpportunity) {
@@ -141,11 +145,6 @@ class HomeViewModel(
             // Deactivate the habit
             updateHabit(habit.copy(isActive = false))
         }
-    }
-
-    //TODO: How do we remove this ?
-    private suspend fun checkIfUserReviewed(){
-
     }
 
     /**

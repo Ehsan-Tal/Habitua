@@ -1,6 +1,5 @@
 package com.example.habitua.data
 
-import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -26,7 +25,6 @@ class UserPreferencesRepository(
      */
     private companion object{
         val IS_DARK_MODE = booleanPreferencesKey("is_dark_mode")
-        val LANGUAGE_KEY = stringPreferencesKey("language")
         val LAST_REVIEWED_KEY = stringPreferencesKey("reviewed")
 
         const val TAG = "UserPreferencesRepository"
@@ -58,8 +56,6 @@ class UserPreferencesRepository(
         }
     }
 
-    //TODO: Change this to a boolean that checks if today's date matches what's stored in
-    //TODO: Change the view model to init one single current date !
     /**
      * SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
      * */
@@ -80,37 +76,9 @@ class UserPreferencesRepository(
         if (date.matches(Regex(
                 "\\d{4}-\\d{2}-\\d{2}"
             ))) {
-            dataStore.edit {prefs ->
-
-                prefs[LAST_REVIEWED_KEY] = date
-            }
+            dataStore.edit { prefs -> prefs[LAST_REVIEWED_KEY] = date }
         }
     }
 
 
-    /**
-     * A flow that emits a string value indicating the language preference.
-     * @return a Flow of a string value - default is "en"
-     */
-    val readLangPref: Flow<String> = dataStore.data
-        .catch {
-            if (it is IOException) {
-                Log.e(TAG, "Error reading preferences.", it)
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map { preferences ->
-            preferences[LANGUAGE_KEY] ?: "en"
-        }
-
-    /**
-     * A suspend function to save the language preference.
-     */
-    suspend fun writeLangPref(langCode: String) {
-        dataStore.edit { settings ->
-            settings[LANGUAGE_KEY] = langCode
-        }
-    }
 }

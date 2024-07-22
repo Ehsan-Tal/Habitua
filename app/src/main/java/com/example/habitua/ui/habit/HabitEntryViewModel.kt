@@ -1,13 +1,16 @@
 package com.example.habitua.ui.habit
 
-import com.example.habitua.data.AppRepository
-import androidx.lifecycle.ViewModel
-import com.example.habitua.data.Habit
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import java.text.SimpleDateFormat
-import java.util.Date
+import androidx.lifecycle.ViewModel
+import com.example.habitua.data.AppRepository
+import com.example.habitua.data.Habit
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 /**
@@ -15,7 +18,7 @@ import java.util.Locale
  *
  * Manages the UI state for habit creation
  *
- * @param appRepository the data source this ViewModel will fetch habits from.
+ * @param AppRepository the data source this ViewModel will fetch habits from.
  */
 private const val TAG = "HabitEntryViewModel"
 class HabitEntryViewModel(
@@ -100,17 +103,23 @@ fun Habit.toHabitDetails(): HabitDetails = HabitDetails(
  */
 fun Habit.formattedOriginDate(): String {
 
-    var formattedDate: String
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val currentStreakOriginDate = LocalDate.parse(currentStreakOrigin, formatter)
 
-    if (currentStreakOrigin != null) {
-        val date = Date(currentStreakOrigin!!)
-        val format = SimpleDateFormat(
-            "dd MMMM yyyy", Locale.getDefault()
-        )
-        formattedDate = format.format(date)
-    } else {
-        formattedDate = ""
-    }
+    val newFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
+    val formattedDate = currentStreakOriginDate.format(newFormatter)
 
     return formattedDate
+}
+
+fun Habit.streakLength(): Int {
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val currentStreakOriginDate = LocalDate.parse(currentStreakOrigin, formatter)
+
+    val today = LocalDate.now()
+    val period = ChronoUnit.DAYS.between(currentStreakOriginDate, today)
+    Log.d(TAG, period.toString())
+
+    return period.toInt() + 1
 }

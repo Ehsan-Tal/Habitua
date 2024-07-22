@@ -1,8 +1,13 @@
 package com.example.habitua.ui.settings
 
-import android.provider.Contacts.SettingsColumns
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,15 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,9 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -89,75 +96,161 @@ fun SettingScreen (
                 Column (
                     modifier = Modifier
                         .fillMaxSize()
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outlineVariant,
+                            RectangleShape
+                        )
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        )
-                {
+                ){
+                    val context = LocalContext.current
+                    var showDialog by remember { mutableStateOf(false) }
+                    val hasNotificationPermission by viewModel.hasNotificationPermission
+                        .collectAsState()
+
                     val rowModifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.padding_large))
                         .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
-                        .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
-
-                    Row(
-                        modifier = rowModifier
-                    ) {
-                        Text(
-                            text = "Enable Notifications"
-                        )
-                    }
-
-                    Row(
-                        modifier = rowModifier
-                    ) {
-                        ToggleButton(
-                            titleString = stringResource(id = R.string.preferences_dark_mode_title),
-                            onString = stringResource(id = R.string.preferences_dark_mode_on),
-                            offString = stringResource(id = R.string.preferences_dark_mode_off),
-                            isOn = uiState.isDarkMode,
-                            onToggle = viewModel::selectThemeMode,
-                            onIcon = Icons.Outlined.DarkMode,
-                            offIcon = Icons.Outlined.LightMode,
-                        )
-                    }
-
-                    Row(
-                        modifier = rowModifier
-                    ) {
-                        Text(
-                            text = "Share"
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline,
+                            MaterialTheme.shapes.small
                         )
 
-                        /*
+                    Column(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.onPrimaryContainer)
+                    ){
 
-                        // I'm keeping this here, the onClick must exist elsewhere
-                        Button(
-                            onClick = {
-                                onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                    // Notification Permission
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        viewModel.checkNotificationPermission(context)
+
+                        EnableNotificationDialog(
+                            showDialog = showDialog,
+                            onDismiss = {showDialog = false}
+                        )
+
+                        OutlinedCard(
+                            colors = CardDefaults.outlinedCardColors(
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            modifier = rowModifier
+                                .clickable {
+                                    if(!hasNotificationPermission) {
+                                        showDialog = ! showDialog
+                                    }
+                                },
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_small))
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(dimensionResource(id = R.dimen.padding_large)),
+                                    text = if (hasNotificationPermission)
+                                        stringResource(R.string.notifications_enabled)
+                                    else
+                                        stringResource(R.string.notifications_disabled),
+                                )
                             }
-                        ){
-
-                        }*/
+                        }
                     }
 
-                    Row{
+                    // DarkMode / LightMode
+                    OutlinedCard(
+                        colors = CardDefaults.outlinedCardColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = rowModifier
+                            .clickable { viewModel.selectThemeMode(!uiState.isDarkMode) }
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(dimensionResource(id = R.dimen.padding_small))
+                                .fillMaxWidth()
+                        ){
+                            Text(
+                                text = if (uiState.isDarkMode)
+                                    stringResource(id = R.string.preferences_dark_mode_on)
+                                else stringResource(id = R.string.preferences_dark_mode_off),
+
+                                style = MaterialTheme.typography.displaySmall,
+
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_large))
+                            )
+                            Icon(
+                                imageVector = if (uiState.isDarkMode)
+                                    Icons.Outlined.DarkMode
+                                else Icons.Outlined.LightMode,
+
+                                tint = MaterialTheme.colorScheme.tertiary,
+
+                                contentDescription = if (uiState.isDarkMode)
+                                    stringResource(id = R.string.preferences_dark_mode_on)
+                                else stringResource(id = R.string.preferences_dark_mode_off),
+                            )
+                        }
+                    }
+
+                    // Share buttons
+                    //TODO: Cancel share or keep it
+                    OutlinedCard(
+                        colors = CardDefaults.outlinedCardColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = rowModifier
+                            .clickable {
+
+                            }
+                        //onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(dimensionResource(id = R.dimen.padding_small))
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_large)),
+                                text = "Share"
+                            )
+                        }
+                    }
+                }
+
+                    // About Section
+                    Column(
+                        modifier = Modifier
+                            .padding(dimensionResource(id = R.dimen.padding_large))
+                    ){
                         Text(
-                            text = "About Habitua",
+                            text = stringResource(R.string.about_habitua_title),
                             style = MaterialTheme.typography.displayMedium
                         )
 
-                }
-                    //TODO: Cut a lot of fru fru and keep design decisions standard
-                    Text(
-                        text = """
-                 These concepts came from my reading of 'How are habits formed' by Lally, P. et al. (2009). Inaccuracies and assumptions from my design decisions are my responsibility.
-
-                 Acquirement times: Very dependent on its factors, particularly the activity's step complexity. 66 days is an average, though acquisition can come a lot sooner or a lot later. The more chances the mind has to move the self to another action, the more chances it will do so, etc.
-
-                 Missed Opportunities: Missing a day does not break your streak - why ? Well, a single day does not translate into SIGNIFICANTLY longer acquirement times.
-                             """.trimIndent()
-                    )
+                        Text(
+                            text = stringResource(R.string.about_section_paragraph).trimIndent()
+                        )
+                    }
                 }
             }
+
             HabitNavBar(
                 navController = navController,
                 currentScreenName = currentScreenName
@@ -166,34 +259,35 @@ fun SettingScreen (
     }
 }
 
-
 @Composable
-fun ToggleButton(
-    titleString: String,
-    onString: String,
-    offString: String,
-    isOn: Boolean,
-    onToggle: (Boolean) -> Unit,
-    onIcon: ImageVector,
-    offIcon: ImageVector,
-){
-    Column {
-        Text(
-            text = if (isOn) onString else offString,
-            style = MaterialTheme.typography.displaySmall
+fun EnableNotificationDialog(showDialog: Boolean, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.dialog_reminder_notification_title)) },
+            text = { Text(stringResource(R.string.dialog_reminder_notification_paragraph)) },
+            confirmButton = {
+                Button(onClick = {
+                    // Navigate to app settings
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                    onDismiss() // Close the dialog
+                }) {
+                    Text(stringResource(id = R.string.dialog_affirmation))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(id = R.string.dialog_negation))
+                }
+            }
         )
-        IconToggleButton(
-            checked = isOn,
-            onCheckedChange = onToggle
-        ) {
-            Icon(
-                imageVector = if (isOn) onIcon else offIcon,
-                contentDescription = if (isOn) onString else offString
-            )
-        }
-
     }
 }
+
 
 @Preview
 @Composable

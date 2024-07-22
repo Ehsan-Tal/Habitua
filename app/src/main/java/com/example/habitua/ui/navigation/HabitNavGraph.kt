@@ -8,16 +8,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.habitua.ui.settings.SettingDestination
-import com.example.habitua.ui.settings.SettingScreen
-import com.example.habitua.ui.visual.VisualizationDestination
-import com.example.habitua.ui.visual.VisualizationScreen
 import com.example.habitua.ui.habit.HabitEditDestination
 import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitEntryDestination
 import com.example.habitua.ui.habit.HabitEntryScreen
 import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.home.HabitScreen
+import com.example.habitua.ui.settings.SettingDestination
+import com.example.habitua.ui.settings.SettingScreen
+import com.example.habitua.ui.visual.VisualizationDestination
+import com.example.habitua.ui.visual.VisualizationScreen
 
 /**
  * Main navigation graph for the app.
@@ -37,7 +37,7 @@ fun HabitNavHost(
      */
     NavHost(
         navController = navController,
-        startDestination = HabitDestination.route, //HabitDestination.route,
+        startDestination = SettingDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
 
@@ -46,7 +46,12 @@ fun HabitNavHost(
          *
          * The screen takes in its name, nav controller, navigate to habit entry, and navigate to habit edit
          */
-        composable(route = HabitDestination.route) {
+        composable(
+            route = HabitDestination.route,
+
+        ) {
+
+
             HabitScreen(
                 currentScreenName = stringResource(id = HabitDestination.navTitle),
 
@@ -56,7 +61,7 @@ fun HabitNavHost(
                 navigateToHabitEdit = {
                     navController.navigate("${HabitEditDestination.route}/${it}")
                 },
-                navController = navController
+                navController = navController,
                 )
         }
 
@@ -67,8 +72,7 @@ fun HabitNavHost(
          */
         composable( route = HabitEntryDestination.route ) {
             HabitEntryScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                navigateBack = { navController.popBackStack() }
             )
         }
 
@@ -87,8 +91,7 @@ fun HabitNavHost(
             })
         ) {
             HabitEditScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                navigateBack = { navController.popBackStack() }
             )
         }
 

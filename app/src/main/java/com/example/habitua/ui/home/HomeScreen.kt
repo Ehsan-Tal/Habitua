@@ -1,11 +1,17 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.example.habitua.ui.home
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,9 +43,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -47,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -63,7 +72,9 @@ import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.theme.LocalCustomColorsPalette
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 object HabitDestination : NavigationDestination {
@@ -201,12 +212,6 @@ private fun HabitBody(
                 Text(text = stringResource(id = R.string.habit_button_create), style = MaterialTheme.typography.displaySmall)
             }
 
-            //TODO: change enabled to a function in view Model
-            // if clicked while disabled, return a toast
-
-            //TODO: Differentiate the review Habit by color
-            //E.g., make it Golden
-
             ElevatedButton(
                 onClick = onReviewClick,
                 enabled = !userReviewedToday && habitList.isNotEmpty(),
@@ -301,14 +306,20 @@ private fun HabitList(
         modifier = modifier,
         contentPadding = contentPadding
     ) {
-        items(habitList) {habit ->
-
-            HabitCard(
-                habit = habit,
-                viewModel = viewModel,
-                onMoreOptionsClick = { onMoreOptionsClick(it.id) },
-                userReviewedToday = userReviewedToday,
-            )
+        items(habitList, key = { habit -> habit.id }) { habit ->
+            Row (
+                modifier = Modifier
+                    .animateItemPlacement(
+                        tween(200)
+                    )
+            ){
+                HabitCard(
+                    habit = habit,
+                    viewModel = viewModel,
+                    onMoreOptionsClick = { onMoreOptionsClick(habit.id) },
+                    userReviewedToday = userReviewedToday,
+                )
+            }
         }
     }
 }
@@ -317,30 +328,43 @@ private fun HabitList(
 fun HabitCard (
     habit: Habit,
 //    onHabitIconChanged: (Int) -> Unit,
-
     userReviewedToday: Boolean,
     modifier: Modifier = Modifier,
     onMoreOptionsClick: (Habit) -> Unit,
     viewModel: HomeViewModel
 ) {
 
-    //TODO: try to upstream viewModel and like functions
-    //TODO: especially this coroutineScope
-    //REASON: easier time to preview UI changes
     val coroutineScope = rememberCoroutineScope()
+    val scale = remember { Animatable(1f) }
 
     val foregroundColor by animateColorAsState(
-        targetValue = if (habit.isActive){ MaterialTheme.colorScheme.primary }
+        targetValue =
+        if (habit.isActive){ MaterialTheme.colorScheme.primary }
         else MaterialTheme.colorScheme.secondary,
         label = "Foreground color change")
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (habit.isActive){ MaterialTheme.colorScheme.primaryContainer }
-        else MaterialTheme.colorScheme.secondaryContainer,
+        targetValue =
+            if (habit.isActive){ MaterialTheme.colorScheme.primaryContainer }
+            else MaterialTheme.colorScheme.secondaryContainer,
         label = "Background color change"
     )
 
-    // Find a way to perform this while ensuring the .alpha only receives the float
+    // Animating card.
+
+    // Trigger animation when either color changes
+    LaunchedEffect(key1 = habit.isActive) {
+        val randomDelay = 0.2f
+
+        scale.animateTo(
+            targetValue = 0.9f,
+            animationSpec = tween( (randomDelay * 1000).toInt(), easing = LinearEasing)
+        )
+        scale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(easing = LinearEasing)
+        )
+    }
 
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(
@@ -351,12 +375,13 @@ fun HabitCard (
             4.dp
         ),
         modifier = Modifier
+            .scale(scale.value)
             .padding(dimensionResource(R.dimen.padding_small))
             .padding(bottom = 0.dp)
             .alpha(if (userReviewedToday) 0.8f else 1f)
             .clickable {
                 if (!userReviewedToday) {
-                    coroutineScope.launch {
+                       coroutineScope.launch {
                         viewModel.toggleHabitActive(habit)
                     }
                 }
@@ -420,8 +445,6 @@ fun HabitCard (
         }
     }
 }
-
-//TODO: This does not work anymore
 
 @Composable
 fun HabitIcon(
