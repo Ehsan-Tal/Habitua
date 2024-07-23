@@ -79,6 +79,9 @@
     <string name="dialog_reminder_notification_paragraph">Let he app remind you to review every day at 2000 hours - your phone time</string>
     <string name="notifications_enabled">Notifications Enabled</string>
     <string name="notifications_disabled">Enable Notifications</string>
+    <string name="streak_length_multiple_days_count">That was %1$s days ago</string>
+    <string name="streak_length_single_day_count">That was yesterday, believe it or not</string>
+    <string name="streak_length_zero_day_count">That was today, believe it or not</string>
     <!--
         <string name=""></string>
         <string name="content_description_"></string>

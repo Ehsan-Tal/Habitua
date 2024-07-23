@@ -121,5 +121,5 @@ fun Habit.streakLength(): Int {
     val period = ChronoUnit.DAYS.between(currentStreakOriginDate, today)
     Log.d(TAG, period.toString())
 
-    return period.toInt() + 1
+    return period.toInt()
 }

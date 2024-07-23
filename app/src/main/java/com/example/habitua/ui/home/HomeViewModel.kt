@@ -52,6 +52,7 @@ class HomeViewModel(
             userPreferencesRepository.lastReviewedFlow
         ) { habits, lastReviewedDate ->
             val reviewedToday = (dateToday == lastReviewedDate)
+
             HomeUiState(habits, reviewedToday)
         }
         .stateIn(
@@ -78,8 +79,6 @@ class HomeViewModel(
         appRepository.updateHabit(habit)
     }
 
-    //TODO: some way to habits are being reviewed -
-    // e.g., make them do a jig and delay changes by 0.5 seconds
     /**
      * Goes through each each habit in the UiState and passes them to reviewHabit
      *
@@ -109,33 +108,33 @@ class HomeViewModel(
     suspend fun reviewHabit(habit: Habit) {
         val habitHasAStreak: Boolean = habit.currentStreakOrigin != null
 
+        var updatedHabit: Habit = habit
+
         // Only proceed if the habit has not been acquired yet
         if (!habit.hasBeenAcquired) {
-
             //Handle active habits
             if (habit.isActive) {
                 // Refill missed opportunity if not already available
                 if (!habit.hasMissedOpportunity) {
-                    updateHabit(habit.copy(hasMissedOpportunity = true))
+                    updatedHabit = updatedHabit.copy(hasMissedOpportunity = true)
                 }
 
                 // Start a streak if the habit doesn't have one
                 if (!habitHasAStreak) {
-                    updateHabit(habit.copy(currentStreakOrigin = dateToday))
+                    updatedHabit = updatedHabit.copy(currentStreakOrigin = dateToday)
                 }
+
             }
 
             // Check if the habit should be marked as acquired
             if (habitHasAStreak && checkIfHabitIsAcquired(habit)) {
-                //TODO: Make this as recently acquired
-                //TODO: Then add a delay of 0.5 seconds - and then mark it as updated
-                updateHabit(habit.copy(hasBeenAcquired = true))
+                updatedHabit = updatedHabit.copy(hasBeenAcquired = true)
 
             } else {
                 // Handle inactive habits or those that don't meet acquisition criteria
                 if (habit.hasMissedOpportunity) {
                     // Remove a missed opportunity
-                    updateHabit(habit.copy(hasMissedOpportunity = false))
+                    updatedHabit = updatedHabit.copy(hasMissedOpportunity = false)
                 } else {
                     // Break the habit streak
                     breakHabitStreak(habit)
@@ -143,8 +142,10 @@ class HomeViewModel(
             }
 
             // Deactivate the habit
-            updateHabit(habit.copy(isActive = false))
+            updatedHabit = updatedHabit.copy(isActive = false)
         }
+
+        updateHabit(updatedHabit)
     }
 
     /**

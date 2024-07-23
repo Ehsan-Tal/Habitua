@@ -30,7 +30,7 @@ class SettingViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
 
-    private val _hasNotificationPermission = MutableStateFlow(false)
+    private val _hasNotificationPermission = MutableStateFlow(true)
     val hasNotificationPermission: StateFlow<Boolean> = _hasNotificationPermission
 
     /**
@@ -84,7 +84,6 @@ class SettingViewModel(
                 .checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_DENIED
 
         }
-        Log.d(TAG, "checkNotificationPermission: ")
     }
 
 }

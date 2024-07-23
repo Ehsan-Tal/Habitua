@@ -21,7 +21,7 @@ val AppTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = SingleDay,
         fontWeight = FontWeight.Normal,
-        fontSize = 36.sp
+        fontSize = 46.sp
     ),
     displayMedium = TextStyle(
         fontFamily = SingleDay,

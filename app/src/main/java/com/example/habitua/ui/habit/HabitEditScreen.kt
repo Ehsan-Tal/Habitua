@@ -5,16 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -186,14 +183,33 @@ fun HabitEditForm(
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.displaySmall
             )
-            Text(
-                text = "That was ${habitValues.streakLength()} days ago",
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.displaySmall
+            if (habitValues.streakLength() > 0) {
+                Text(
+                    text = stringResource(
+                        R.string.streak_length_multiple_days_count,
+                        habitValues.streakLength()
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.displaySmall
 
-            )
+                )
+            }
+            else if (habitValues.streakLength() == 1) {
+                Text(
+                    text = stringResource(R.string.streak_length_single_day_count),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.displaySmall
+
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.streak_length_zero_day_count),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.displaySmall
+
+                )
+            }
         }
-
     }
 }
 

@@ -33,7 +33,7 @@ class VisualizationViewModelTest {
 
         val uiState = viewModel.habitVizUiState.value
 
-        assertEquals(emptyList<Habit>(), uiState.habitList)
+        assertEquals(emptyList<Habit>(), uiState.acquiredHabitList)
         assertEquals(0, uiState.totalSize)
         assertEquals(0, uiState.portionAcquired)
         assertEquals(0, uiState.portionInStreaks)
