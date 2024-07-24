@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,12 +60,10 @@ object SettingDestination: NavigationDestination {
 fun SettingScreen (
     currentScreenName: String,
     navController: NavHostController,
-    //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
     uiState: SettingUiState = viewModel.uiState.collectAsState().value,
 ) {
-    val newReceipt = stringResource(R.string.new_habit_receipt)
 
     Scaffold(
         modifier = Modifier
@@ -201,35 +198,6 @@ fun SettingScreen (
                                 contentDescription = if (uiState.isDarkMode)
                                     stringResource(id = R.string.preferences_dark_mode_on)
                                 else stringResource(id = R.string.preferences_dark_mode_off),
-                            )
-                        }
-                    }
-
-                    // Share buttons
-                    //TODO: Cancel share or keep it
-                    OutlinedCard(
-                        colors = CardDefaults.outlinedCardColors(
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        shape = MaterialTheme.shapes.small,
-                        modifier = rowModifier
-                            .clickable {
-
-                            }
-                        //onShareButtonClicked(newReceipt, habitViewModel.createHabitsString())
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(dimensionResource(id = R.dimen.padding_small))
-                                .fillMaxWidth()
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(dimensionResource(id = R.dimen.padding_large)),
-                                text = "Share"
                             )
                         }
                     }

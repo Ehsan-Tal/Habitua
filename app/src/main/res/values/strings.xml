@@ -58,9 +58,6 @@
     <string name="habit_button_review">Review</string>
     <string name="review_dialog_title">Review Habit Record</string>
     <string name="review_dialog_text">You won\'t be able to toggle their active-ness for today, but you can still create and edit new ones.</string>
-    <string name="toast_habit_card_disabled">No more today - check again tomorrow :)</string>
-    <string name="review_dialog_negation">Not yet</string>
-    <string name="review_dialog_affirmation">I\'m ready for review</string>
 
     <string name="visualization_title">Your Data</string>
     <string name="visualization_nav_title">Data</string>

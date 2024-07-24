@@ -72,9 +72,7 @@ import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
-import com.example.habitua.ui.theme.LocalCustomColorsPalette
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 
 object HabitDestination : NavigationDestination {
@@ -230,12 +228,12 @@ private fun HabitBody(
                     text = {Text(stringResource(id = R.string.review_dialog_text))},
                     dismissButton = {
                         TextButton(onClick = onReviewDismiss) {
-                            Text(text = stringResource(id = R.string.review_dialog_negation))
+                            Text(text = stringResource(id = R.string.dialog_negation))
                         }
                     },
                     confirmButton = {
                         TextButton(onClick = onReviewAccept) {
-                            Text(text = stringResource(id = R.string.review_dialog_affirmation))
+                            Text(text = stringResource(id = R.string.dialog_affirmation))
                         }
                     }
                 )
@@ -403,8 +401,6 @@ fun HabitCard (
             ) {
                 IconButton(
                     onClick = {},
-                    //TODO:  change this to an img button !
-
                     modifier = Modifier
                         .padding(dimensionResource(R.dimen.padding_small))
                         .weight(1f)
@@ -449,17 +445,6 @@ fun HabitCard (
 fun HabitIcon(
     @DrawableRes habitIcon: Int
 ){
-
-    /*
-    val painter = remember(habitIcon) {
-        try {
-            painterResource(id = habitIcon)
-        } catch(e: Exception) {
-            Log.w("HabitIcon", "Invalid imageResId: $habitIcon", e)
-            painterResource(id = R.drawable.tal_derpy)
-        }
-    }
-    */
     Image(
         modifier = Modifier
             .size(dimensionResource(R.dimen.image_size))
@@ -469,7 +454,6 @@ fun HabitIcon(
 
         contentScale = ContentScale.Crop,
         contentDescription = null,
-        //painter = painterResource(habitIcon),
         painter = painterResource(id = R.drawable.tal_derpy),
 
         )

@@ -32,7 +32,6 @@ fun HabitNavHost(
 ) {
     /**
      * This composable is the root of the navigation graph.
-     *
      * sets the StartDestination of the application
      */
     NavHost(

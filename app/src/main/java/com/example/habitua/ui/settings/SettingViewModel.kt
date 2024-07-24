@@ -2,7 +2,6 @@ package com.example.habitua.ui.settings
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,10 +13,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import android.Manifest
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.habitua.R
 
 const val TAG = "SettingViewModel"
 
@@ -54,26 +51,6 @@ class SettingViewModel(
         viewModelScope.launch {
             userPreferencesRepository.saveThemePreference(isDarkMode)
         }
-    }
-
-    //fun createHabitsString(){}
-
-    // I think it'd be fun to share habits, there should be a button to take all the habits and share.
-    private fun shareHabitTracking(context: Context, subject: String, habits: String) {
-        // createHabitsString() <- requires this
-
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            // we need to make a string of it
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, habits)
-        }
-        context.startActivity(
-            Intent.createChooser(
-                intent,
-                context.getString(R.string.new_habit_receipt)
-            )
-        )
     }
 
     //Had to check the documentation for this one
