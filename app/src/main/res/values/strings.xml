@@ -35,7 +35,7 @@
     <string name="dialog_question_delete">Delete this habit ?</string>
 
     <string name="habit_button_update">Update Habit</string>
-    <string name="habit_edit_prefix_date">"Your streak started on: "</string>
+    <string name="habit_edit_prefix_date">"Your streak started: "</string>
 
     <string name="visualization_pie_chart_title_Streak_Comparison">In a Streak</string>
     <string name="visualization_pie_chart_Streak_on">In a Streak</string>
@@ -57,8 +57,7 @@
 
     <string name="habit_button_review">Review</string>
     <string name="review_dialog_title">Review Habit Record</string>
-    <string name="review_dialog_text">You can undo the review, but are you sure you\'re done ?
-        \n\nYou can still create and edit, but you won\'t be able to toggle their active-ness.</string>
+    <string name="review_dialog_text">You won\'t be able to toggle their active-ness for today, but you can still create and edit new ones.</string>
     <string name="toast_habit_card_disabled">No more today - check again tomorrow :)</string>
     <string name="review_dialog_negation">Not yet</string>
     <string name="review_dialog_affirmation">I\'m ready for review</string>

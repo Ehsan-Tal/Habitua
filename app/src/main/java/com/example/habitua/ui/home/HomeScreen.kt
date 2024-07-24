@@ -83,15 +83,6 @@ object HabitDestination : NavigationDestination {
     val navTitle = R.string.habit_nav_title
 }
 
-// try not to retrofit your arch here
-//
-
-// we need a way
-// view Model functions
-// a way to get to the habit and habit details
-// time to study !s
-
-//    val homeUiState by viewModel.homeUiState.collectAsState()
 @Composable
 fun HabitScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -215,6 +206,7 @@ private fun HabitBody(
                 Text(text = stringResource(id = R.string.habit_button_create), style = MaterialTheme.typography.displaySmall)
             }
 
+
             ElevatedButton(
                 onClick = onReviewClick,
                 enabled = !userReviewedToday && habitList.isNotEmpty(),
@@ -279,13 +271,13 @@ private fun HabitColumn(
                 text = stringResource(R.string.habit_body_no_habits),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier.padding(contentPadding)
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_large))
             )
         } else {
             HabitList(
                 habitList = habitList,
                 contentPadding = contentPadding,
-                modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_medium)),
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_large)),
                 viewModel = viewModel,
                 onMoreOptionsClick = onMoreOptionsClick,
                 userReviewedToday = userReviewedToday,
@@ -381,8 +373,11 @@ fun HabitCard (
             .scale(scale.value)
             .padding(dimensionResource(R.dimen.padding_small))
             .padding(bottom = 0.dp)
-            .border(1.dp, MaterialTheme.colorScheme.tertiary, MaterialTheme.shapes.medium)
-            .alpha(if (userReviewedToday) 0.8f else 1f)
+            .border(
+                if (userReviewedToday) 0.dp else if (habit.isActive) 3.dp else 1.dp,
+                MaterialTheme.colorScheme.tertiary, MaterialTheme.shapes.medium
+            )
+            .alpha(if (userReviewedToday) 0.5f else 1f)
             .clickable {
                 if (!userReviewedToday) {
                     coroutineScope.launch {
