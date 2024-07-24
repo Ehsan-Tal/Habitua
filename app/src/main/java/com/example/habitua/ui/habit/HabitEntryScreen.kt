@@ -2,6 +2,7 @@ package com.example.habitua.ui.habit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -143,6 +144,18 @@ fun HabitInputForm(
                 text = stringResource(R.string.habit_save_required),
                 modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
             )
+        }
+
+        // OPTIONAL
+        // These two should ideally be a part of calculating daysTillAcquired
+        Column {
+            Text(
+                text = "Habit Type - one-step, simple, complex"
+            )
+            Text(
+                text = "Habit Chrono Type - daily, bi-daily, weekly"
+            )
+
         }
     }
 }

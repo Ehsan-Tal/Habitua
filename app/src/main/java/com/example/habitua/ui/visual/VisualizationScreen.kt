@@ -70,7 +70,8 @@ fun VisualizationScreen (
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row (
-                modifier = Modifier,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_large)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -123,14 +124,14 @@ fun VisualizationData(
         ){
             PieChart(
                 data = viewModel.preparePieDataSetForStreakComparisons(),
-                colors = listOf(Color.Magenta, Color.LightGray),
+                colors = listOf(MaterialTheme.colorScheme.tertiary, Color.LightGray),
                 title = stringResource(id = R.string.visualization_pie_chart_title_Streak_Comparison),
                 modifier = Modifier
                     .weight(1f)
             )
             PieChart(
                 data = viewModel.preparePieDataSetForAcquiredHabits(),
-                colors = listOf(Color.Yellow, Color.LightGray),
+                colors = listOf(LocalCustomColorsPalette.current.acquired, Color.LightGray),
                 title = stringResource(id = R.string.visualization_pie_chart_title_Acquired_Habits),
                 modifier = Modifier
                     .weight(1f)

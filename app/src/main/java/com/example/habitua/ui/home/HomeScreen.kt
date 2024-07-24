@@ -166,7 +166,9 @@ private fun HabitBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Row (
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(dimensionResource(id = R.dimen.padding_large))
         ) {
             Text(
                 text = stringResource(id = HabitDestination.title),
@@ -188,6 +190,7 @@ private fun HabitBody(
                 )
         }
 
+        // habit buttons
         Row (
             modifier = Modifier
                 .padding(dimensionResource(id = R.dimen.padding_medium))
@@ -378,10 +381,11 @@ fun HabitCard (
             .scale(scale.value)
             .padding(dimensionResource(R.dimen.padding_small))
             .padding(bottom = 0.dp)
+            .border(1.dp, MaterialTheme.colorScheme.tertiary, MaterialTheme.shapes.medium)
             .alpha(if (userReviewedToday) 0.8f else 1f)
             .clickable {
                 if (!userReviewedToday) {
-                       coroutineScope.launch {
+                    coroutineScope.launch {
                         viewModel.toggleHabitActive(habit)
                     }
                 }

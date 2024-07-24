@@ -80,7 +80,8 @@ fun SettingScreen (
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row (
-                modifier = Modifier,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_large)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
