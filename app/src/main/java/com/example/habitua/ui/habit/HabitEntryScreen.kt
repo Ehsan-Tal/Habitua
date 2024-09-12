@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -36,6 +37,19 @@ object HabitEntryDestination : NavigationDestination {
     override val title =  R.string.habit_entry_title
 }
 
+//TODO: reduce the renderer's reliance on the view model
+/**
+@Composable
+fun HabitEntryPostview(
+    navigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: HabitEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    HabitEntryScreen(
+
+    )
+}
+*/
 @Composable
 fun HabitEntryScreen(
     navigateBack: () -> Unit,
@@ -52,7 +66,8 @@ fun HabitEntryScreen(
         }
     ) { innerPadding ->
         HabitEntryBody(
-            habitUiState = viewModel.habitUiState,
+            habitDetails = viewModel.habitUiState.habitDetails,
+            isEntryValid = viewModel.habitUiState.isEntryValid,
             onHabitValueChange = viewModel::updateUiState,
             onSaveClick = {
                 coroutineScope.launch {
@@ -74,7 +89,8 @@ fun HabitEntryScreen(
 
 @Composable
 fun HabitEntryBody(
-    habitUiState: HabitUiState,
+    habitDetails: HabitDetails,
+    isEntryValid: Boolean,
     onHabitValueChange: (HabitDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -84,13 +100,13 @@ fun HabitEntryBody(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium))
     ) {
         HabitInputForm(
-            habitDetails = habitUiState.habitDetails,
+            habitDetails = habitDetails,
             onValueChange = onHabitValueChange,
             modifier = Modifier.fillMaxWidth()
         )
         Button(
             onClick = onSaveClick,
-            enabled = habitUiState.isEntryValid,
+            enabled = isEntryValid,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -139,6 +155,68 @@ fun HabitInputForm(
             enabled = enabled,
             singleLine = true
         )
+
+        //TODO: connect these two items with the viewModel.
+        // they need the enum class - and a function to pass the value
+        // it should only allow one button to be pressed
+        // it should have values according to the enum
+        // the selected one should be coloured with tertiary colours.
+
+        Text(
+            text = "Complexity",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Row {
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+        }
+
+
+        Text(
+            text = "Frequency",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Row(
+
+        ){
+
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+
+            ElevatedButton(
+                onClick = { }
+            ) {
+                Text("Filled")
+            }
+        }
+
+
+        //
+
         if (enabled) {
             Text(
                 text = stringResource(R.string.habit_save_required),
@@ -146,17 +224,6 @@ fun HabitInputForm(
             )
         }
 
-        // OPTIONAL
-        // These two should ideally be a part of calculating daysTillAcquired
-        Column {
-            Text(
-                text = "Habit Type - one-step, simple, complex"
-            )
-            Text(
-                text = "Habit Chrono Type - daily, bi-daily, weekly"
-            )
-
-        }
     }
 }
 
@@ -164,10 +231,11 @@ fun HabitInputForm(
 @Composable
 private fun HabitEntryScreenPreview() {
     HabituaTheme {
-        HabitEntryBody(habitUiState = HabitUiState(
-            HabitDetails(
-                name = "Brush Cat", description = "1-over and continue for loose hairs"
-            )
-        ), onHabitValueChange = {}, onSaveClick = {})
+        HabitEntryBody(
+            habitDetails = HabitDetails(),
+            isEntryValid = false,
+            onHabitValueChange = {},
+            onSaveClick = {}
+        )
     }
 }

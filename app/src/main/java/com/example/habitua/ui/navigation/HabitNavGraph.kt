@@ -3,11 +3,13 @@ package com.example.habitua.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.habit.HabitEditDestination
 import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitEntryDestination
