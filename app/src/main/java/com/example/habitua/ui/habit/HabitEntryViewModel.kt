@@ -43,6 +43,14 @@ class HabitEntryViewModel(
         )
     }
 
+    fun updateName(newName:String ) {
+        habitUiState.habitDetails = habitUiState.habitDetails.copy(name = newName)
+    }
+
+    fun updateDescription( newDescription: String ) {
+        habitUiState.habitDetails = habitUiState.habitDetails.copy(description = newDescription)
+    }
+
     /**
      * Validates the user input - ensures name and description aren't blank
      */
@@ -69,7 +77,7 @@ class HabitEntryViewModel(
  * Represents the UI state for an entry form.
  */
 data class HabitUiState(
-    val habitDetails: HabitDetails = HabitDetails(),
+    var habitDetails: HabitDetails = HabitDetails(),
     val isEntryValid: Boolean = false
 )
 

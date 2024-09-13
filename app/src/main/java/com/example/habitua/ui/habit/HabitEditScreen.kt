@@ -35,6 +35,7 @@ import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
+import com.example.habitua.ui.theme.PreviewHabituaTheme
 import kotlinx.coroutines.launch
 
 object HabitEditDestination: NavigationDestination{
@@ -44,13 +45,42 @@ object HabitEditDestination: NavigationDestination{
     val routeWithArgs = "$route/{$HABIT_ID_ARG}"
 }
 
+
 @Composable
-fun HabitEditScreen (
+fun HabitEditScreen(
     navigateBack: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: HabitEditViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
 ){
     val coroutineScope = rememberCoroutineScope()
+
+    HabitEditBody(
+        habitUiState = viewModel.habitUiState,
+        onHabitValueChange = viewModel::updateUiState,
+        onSaveClick = {
+            coroutineScope.launch {
+                viewModel.updateHabit()
+                navigateBack()
+            }
+        },
+        onDelete = {
+            coroutineScope.launch {
+                viewModel.deleteHabit()
+                navigateBack()
+            }
+        },
+        navigateBack = navigateBack
+    )
+}
+
+@Composable
+fun HabitEditBody (
+    habitUiState: HabitEditUiState,
+    onHabitValueChange: (Habit) -> Unit,
+    onSaveClick: () -> Unit,
+    onDelete: () -> Unit,
+    navigateBack: () -> Unit,
+){
     Scaffold(
         topBar = {
                 HabitTopAppBar(
@@ -60,21 +90,11 @@ fun HabitEditScreen (
         },
     ){
         innerPadding ->
-        HabitEditBody(
-            habitUiState = viewModel.habitUiState,
-            onHabitValueChange = viewModel::updateUiState,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.updateHabit()
-                    navigateBack()
-                }
-            },
-            onDelete = {
-               coroutineScope.launch {
-                   viewModel.deleteHabit()
-                   navigateBack()
-               }
-            },
+        HabitEditSkeleton(
+            habitUiState = habitUiState,
+            onHabitValueChange = onHabitValueChange,
+            onSaveClick = onSaveClick,
+            onDelete = onDelete,
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -88,7 +108,7 @@ fun HabitEditScreen (
 }
 
 @Composable
-fun HabitEditBody (
+fun HabitEditSkeleton (
     habitUiState: HabitEditUiState,
     onHabitValueChange: (Habit) -> Unit,
     onSaveClick: () -> Unit,
@@ -238,16 +258,39 @@ private fun DeleteConfirmationDialog(
     )
 }
 
-@Preview(showBackground = true)
+
+@Preview(
+    showBackground = true,
+    name = "Habit-Edit-Screen-Light-Mode",
+    group = "HabitEditScreens"
+)
 @Composable
-fun HabitEditScreenPreview(){
-    HabituaTheme {
+fun HabitEditScreenPreviewLight(){
+    PreviewHabituaTheme(darkTheme = false){
         HabitEditBody(
-            habitUiState = HabitEditUiState(
-                    ),
+            habitUiState = HabitEditUiState(habit=Habit(name ="Race Walking", description = "Fear Not, I can catch him")),
             onHabitValueChange = {},
-            onDelete = {},
             onSaveClick = {},
+            onDelete = {},
+            navigateBack = {}
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Habit-Edit-Screen-Dark-Mode",
+    group = "HabitEditScreens"
+)
+@Composable
+fun HabitEditScreenPreviewDark(){
+    PreviewHabituaTheme(darkTheme = true){
+        HabitEditBody(
+            habitUiState = HabitEditUiState(habit=Habit(name ="Race Walking", description = "Fear Not, I can catch him")),
+            onHabitValueChange = {},
+            onSaveClick = {},
+            onDelete = {},
+            navigateBack = {}
         )
     }
 }

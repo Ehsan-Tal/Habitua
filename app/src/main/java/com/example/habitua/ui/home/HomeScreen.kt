@@ -64,15 +64,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
+import com.example.habitua.ui.habit.HabitEditBody
+import com.example.habitua.ui.habit.HabitEditUiState
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.LocalCustomColorsPalette
+import com.example.habitua.ui.theme.PreviewHabituaTheme
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -85,6 +90,17 @@ object HabitDestination : NavigationDestination {
 
 @Composable
 fun HabitScreen(
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    currentScreenName: String,
+    navigateToHabitEntry: () -> Unit,
+    navigateToHabitEdit: (Int) -> Unit,
+    navController: NavHostController
+){
+
+}
+
+@Composable
+fun HabitHomeBody(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     currentScreenName: String,
     navigateToHabitEntry: () -> Unit,
@@ -104,7 +120,7 @@ fun HabitScreen(
             .statusBarsPadding(),
     )
     { innerPadding ->
-        HabitBody(
+        HabitHomeSkeleton(
             habitList = homeUiState.habitList,
             currentScreenName = currentScreenName,
             contentPadding = innerPadding,
@@ -134,7 +150,7 @@ fun HabitScreen(
 
 
 @Composable
-private fun HabitBody(
+private fun HabitHomeSkeleton(
     habitList: List<Habit>,
 
     reviewConfirmationRequired: Boolean,
@@ -473,4 +489,40 @@ fun HabitIcon(
         painter = painterResource(id = R.drawable.tal_derpy),
 
         )
+}
+
+
+@Preview(
+    showBackground = true,
+    name = "Habit-Home-Screen-Light-Mode",
+    group = "HabitHomeScreens"
+)
+@Composable
+fun HabitHomeScreenPreviewLight(){
+    PreviewHabituaTheme(darkTheme = false){
+        HabitHomeBody(
+            currentScreenName = HabitDestination.route,
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+            navController = rememberNavController()
+
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Habit-Home-Screen-Dark-Mode",
+    group = "HabitHomeScreens"
+)
+@Composable
+fun HabitHomeScreenPreviewDark(){
+    PreviewHabituaTheme(darkTheme = true){
+        HabitHomeBody(
+            currentScreenName = HabitDestination.route,
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+            navController = rememberNavController()
+        )
+    }
 }

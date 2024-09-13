@@ -31,6 +31,7 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.theme.HabituaTheme
 import kotlinx.coroutines.launch
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.theme.PreviewHabituaTheme
 
 object HabitEntryDestination : NavigationDestination {
     override val route = "habit_entry"
@@ -38,24 +39,43 @@ object HabitEntryDestination : NavigationDestination {
 }
 
 //TODO: reduce the renderer's reliance on the view model
-/**
+
 @Composable
 fun HabitEntryPostview(
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+
+    val coroutineScope = rememberCoroutineScope()
+
     HabitEntryScreen(
+        name = viewModel.habitUiState.habitDetails.name,
+        description = viewModel.habitUiState.habitDetails.description,
+        isEntryValid = viewModel.habitUiState.isEntryValid,
+        onNameChange = viewModel::updateName,
+        onDescriptionChange = viewModel::updateDescription,
+        onSaveClick = {
+            coroutineScope.launch {
+                viewModel.saveHabit()
+                navigateBack()
+            }
+        },
+        navigateBack = navigateBack
 
     )
 }
-*/
+
 @Composable
 fun HabitEntryScreen(
+    name: String,
+    description: String,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onSaveClick: () -> Unit,
+    isEntryValid: Boolean,
     navigateBack: () -> Unit,
-    viewModel: HabitEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -66,15 +86,12 @@ fun HabitEntryScreen(
         }
     ) { innerPadding ->
         HabitEntryBody(
-            habitDetails = viewModel.habitUiState.habitDetails,
-            isEntryValid = viewModel.habitUiState.isEntryValid,
-            onHabitValueChange = viewModel::updateUiState,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.saveHabit()
-                    navigateBack()
-                }
-            },
+            name = name,
+            description = description,
+            onNameChange = onNameChange,
+            onDescriptionChange = onDescriptionChange,
+            onSaveClick = onSaveClick,
+            isEntryValid = isEntryValid,
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -89,9 +106,11 @@ fun HabitEntryScreen(
 
 @Composable
 fun HabitEntryBody(
-    habitDetails: HabitDetails,
+    name: String,
+    onNameChange: (String) -> Unit,
+    description: String,
+    onDescriptionChange: (String) -> Unit,
     isEntryValid: Boolean,
-    onHabitValueChange: (HabitDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -100,8 +119,12 @@ fun HabitEntryBody(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium))
     ) {
         HabitInputForm(
-            habitDetails = habitDetails,
-            onValueChange = onHabitValueChange,
+            name = name,
+            description = description,
+            onNameChange = onNameChange,
+            onDescriptionChange = onDescriptionChange,
+            onSaveClick = onSaveClick,
+            isEntryValid = isEntryValid,
             modifier = Modifier.fillMaxWidth()
         )
         Button(
@@ -117,9 +140,13 @@ fun HabitEntryBody(
 
 @Composable
 fun HabitInputForm(
-    habitDetails: HabitDetails,
+    name: String,
+    onNameChange: (String) -> Unit,
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    isEntryValid: Boolean,
+    onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onValueChange: (HabitDetails) -> Unit = {},
     enabled: Boolean = true
 ) {
     Column(
@@ -130,8 +157,8 @@ fun HabitInputForm(
         // we need some way for the img to be represented as valid buttons
         // that pass off their resId - how and how.
         OutlinedTextField(
-            value = habitDetails.name,
-            onValueChange = { onValueChange(habitDetails.copy(name = it)) },
+            value = name,
+            onValueChange = { onNameChange(it) },
             label = { Text(stringResource(R.string.habit_save_name)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -143,8 +170,8 @@ fun HabitInputForm(
             singleLine = true
         )
         OutlinedTextField(
-            value = habitDetails.description,
-            onValueChange = { onValueChange(habitDetails.copy(description = it)) },
+            value = description,
+            onValueChange = { onDescriptionChange(it) },
             label = { Text(stringResource(R.string.habit_save_description)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -227,15 +254,40 @@ fun HabitInputForm(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    name = "Habit-Entry-Screen-Light-Mode",
+    group = "HabitEntryScreens")
 @Composable
-private fun HabitEntryScreenPreview() {
-    HabituaTheme {
-        HabitEntryBody(
-            habitDetails = HabitDetails(),
-            isEntryValid = false,
-            onHabitValueChange = {},
-            onSaveClick = {}
+private fun HabitEntryScreenPreviewLight() {
+    PreviewHabituaTheme (darkTheme = false){
+        HabitEntryScreen(
+            name = "Funny",
+            description = "Bunny",
+            onNameChange = {},
+            onDescriptionChange = {},
+            onSaveClick = {},
+            navigateBack = {},
+            isEntryValid = true
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Habit-Entry-Screen-Dark-Mode",
+    group = "HabitEntryScreens")
+@Composable
+private fun HabitEntryScreenPreviewDark() {
+    PreviewHabituaTheme (darkTheme = true){
+        HabitEntryScreen(
+            name = "Funny",
+            description = "Bunny",
+            onNameChange = {},
+            onDescriptionChange = {},
+            onSaveClick = {},
+            navigateBack = {},
+            isEntryValid = true
         )
     }
 }

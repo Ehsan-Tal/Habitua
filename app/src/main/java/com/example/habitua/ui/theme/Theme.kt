@@ -165,3 +165,30 @@ fun HabituaTheme(
     }
 }
 
+// This is a simplified version for previews
+// no view model for the previews to be bothered with.
+@Composable
+fun PreviewHabituaTheme(
+    darkTheme: Boolean = false,
+    content: @Composable() () -> Unit
+){
+    val colorScheme = when {
+        darkTheme -> darkScheme
+        else -> lightScheme
+    }
+
+    // custom colors
+    val customColorsPalette =
+        if (darkTheme) DarkCustomColorsPalette else LightCustomColorsPalette
+
+    CompositionLocalProvider(
+        LocalCustomColorsPalette provides customColorsPalette
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            shapes = Shapes,
+            content = content
+        )
+    }
+}

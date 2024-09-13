@@ -13,6 +13,7 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.habit.HabitEditDestination
 import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitEntryDestination
+import com.example.habitua.ui.habit.HabitEntryPostview
 import com.example.habitua.ui.habit.HabitEntryScreen
 import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.home.HabitScreen
@@ -73,7 +74,7 @@ fun HabitNavHost(
          * The screen composable takes the navigate back and up as parameters
          */
         composable( route = HabitEntryDestination.route ) {
-            HabitEntryScreen(
+            HabitEntryPostview(
                 navigateBack = { navController.popBackStack() }
             )
         }
