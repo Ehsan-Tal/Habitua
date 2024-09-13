@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalFoundationApi::class)
+// apparently this allows the animation ?
 
 package com.example.habitua.ui.home
 
@@ -73,11 +74,14 @@ import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
+import com.example.habitua.ui.HabitNavButton
 import com.example.habitua.ui.habit.HabitEditBody
 import com.example.habitua.ui.habit.HabitEditUiState
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.theme.LocalCustomColorsPalette
 import com.example.habitua.ui.theme.PreviewHabituaTheme
+import com.example.habitua.ui.visual.VisualizationDestination
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -95,24 +99,63 @@ fun HabitScreen(
     navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
     navController: NavHostController
-){
+) {
+    val homeUiState by viewModel.homeUiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
+    var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+
+    HabitHomeBody(
+        navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
+        navigateToVisualizeDestination = { navController.navigate(VisualizationDestination.route)},
+        navigateToSettingDestination = { navController.navigate(SettingDestination.route)},
+
+        currentScreenName = currentScreenName,
+        navigateToHabitEdit = navigateToHabitEdit,
+        navigateToHabitEntry = navigateToHabitEntry,
+
+        habitList = homeUiState.habitList,
+        onClickHabitCard = { habit: Habit ->
+            coroutineScope.launch{ viewModel.toggleHabitActive(habit) }
+                           },
+
+        // review items
+        reviewConfirmationRequired = reviewConfirmationRequired,
+        onReviewAccept = {
+            coroutineScope.launch {
+                reviewConfirmationRequired = false
+                viewModel.reviewHabits()
+            }
+        },
+        onReviewDismiss = {
+            reviewConfirmationRequired = false
+        },
+        onReviewClick = {
+            reviewConfirmationRequired = true
+        },
+        userReviewedToday = homeUiState.userReviewedToday
+    )
 
 }
-
 @Composable
 fun HabitHomeBody(
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navigateToHabitDestination: () -> Unit,
+    navigateToVisualizeDestination: () -> Unit,
+    navigateToSettingDestination: () -> Unit,
+
     currentScreenName: String,
     navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
-    navController: NavHostController
-){
-    val homeUiState by viewModel.homeUiState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
 
-    //viewModel.dateToday
-    // we need this somewhere
+    habitList: List<Habit>,
+    onClickHabitCard: (Habit) -> Unit,
+
+    reviewConfirmationRequired: Boolean,
+    onReviewClick: () -> Unit,
+    onReviewAccept: () -> Unit,
+    onReviewDismiss: () -> Unit,
+    userReviewedToday: Boolean,
+){
 
     Scaffold(
         modifier = Modifier
@@ -121,29 +164,23 @@ fun HabitHomeBody(
     )
     { innerPadding ->
         HabitHomeSkeleton(
-            habitList = homeUiState.habitList,
+            habitList = habitList,
             currentScreenName = currentScreenName,
             contentPadding = innerPadding,
-            navController = navController,
-            viewModel = viewModel,
             onCreateButtonClick = navigateToHabitEntry,
             onMoreOptionsClick = navigateToHabitEdit,
+            onClickHabitCard = onClickHabitCard,
+
+            navigateToHabitDestination = navigateToHabitDestination,
+            navigateToVisualizeDestination = navigateToVisualizeDestination,
+            navigateToSettingDestination = navigateToSettingDestination,
 
             //review button related material
             reviewConfirmationRequired = reviewConfirmationRequired,
-            onReviewClick = {
-                reviewConfirmationRequired = true
-            },
-            onReviewAccept = {
-                coroutineScope.launch {
-                    reviewConfirmationRequired = false
-                    viewModel.reviewHabits()
-                }
-            },
-            onReviewDismiss = {
-                reviewConfirmationRequired = false
-            },
-            userReviewedToday = homeUiState.userReviewedToday,
+            onReviewClick = onReviewClick,
+            onReviewAccept = onReviewAccept,
+            onReviewDismiss = onReviewDismiss,
+            userReviewedToday = userReviewedToday,
         )
     }
 }
@@ -152,14 +189,18 @@ fun HabitHomeBody(
 @Composable
 private fun HabitHomeSkeleton(
     habitList: List<Habit>,
+    onClickHabitCard: (Habit) -> Unit,
 
     reviewConfirmationRequired: Boolean,
     userReviewedToday: Boolean,
 
+    navigateToHabitDestination: () -> Unit,
+    navigateToVisualizeDestination: () -> Unit,
+    navigateToSettingDestination: () -> Unit,
+
     currentScreenName: String,
     contentPadding: PaddingValues,
-    navController: NavHostController,
-    viewModel: HomeViewModel,
+
     onCreateButtonClick: () -> Unit,
     onMoreOptionsClick: (Int) -> Unit,
     onReviewClick: () -> Unit,
@@ -189,7 +230,7 @@ private fun HabitHomeSkeleton(
         ){
             HabitColumn(
                 habitList = habitList,
-                viewModel = viewModel,
+                onClickHabitCard = onClickHabitCard,
                 onMoreOptionsClick = onMoreOptionsClick,
 
                 userReviewedToday = userReviewedToday,
@@ -259,7 +300,9 @@ private fun HabitHomeSkeleton(
         }
 
         HabitNavBar(
-            navController = navController,
+            navigateToHabitDestination = navigateToHabitDestination,
+            navigateToVisualizeDestination = navigateToVisualizeDestination,
+            navigateToSettingDestination = navigateToSettingDestination,
             currentScreenName = currentScreenName
         )
     }
@@ -270,10 +313,10 @@ private fun HabitHomeSkeleton(
 private fun HabitColumn(
     habitList: List<Habit>,
     userReviewedToday: Boolean,
-    viewModel: HomeViewModel,
+
     onMoreOptionsClick: (Int) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-
+    onClickHabitCard: (Habit) -> Unit,
     ){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -294,7 +337,7 @@ private fun HabitColumn(
                 habitList = habitList,
                 contentPadding = contentPadding,
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding_large)),
-                viewModel = viewModel,
+                onClickHabitCard = onClickHabitCard,
                 onMoreOptionsClick = onMoreOptionsClick,
                 userReviewedToday = userReviewedToday,
             )
@@ -307,9 +350,9 @@ private fun HabitColumn(
 private fun HabitList(
     habitList: List<Habit>,
     contentPadding: PaddingValues,
-    viewModel: HomeViewModel,
     onMoreOptionsClick: (Int) -> Unit,
     userReviewedToday: Boolean,
+    onClickHabitCard: (Habit) -> Unit,
 
     modifier: Modifier = Modifier,
 ) {
@@ -326,7 +369,7 @@ private fun HabitList(
             ){
                 HabitCard(
                     habit = habit,
-                    viewModel = viewModel,
+                    onClickHabitCard = onClickHabitCard,
                     onMoreOptionsClick = { onMoreOptionsClick(habit.id) },
                     userReviewedToday = userReviewedToday,
                 )
@@ -341,8 +384,8 @@ fun HabitCard (
 //    onHabitIconChanged: (Int) -> Unit,
     userReviewedToday: Boolean,
     modifier: Modifier = Modifier,
+    onClickHabitCard: (Habit) -> Unit,
     onMoreOptionsClick: (Habit) -> Unit,
-    viewModel: HomeViewModel
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -396,9 +439,7 @@ fun HabitCard (
             .alpha(if (userReviewedToday) 0.5f else 1f)
             .clickable {
                 if (!userReviewedToday) {
-                    coroutineScope.launch {
-                        viewModel.toggleHabitActive(habit)
-                    }
+                        onClickHabitCard(habit)
                 }
             },
     ) {
@@ -494,35 +535,248 @@ fun HabitIcon(
 
 @Preview(
     showBackground = true,
-    name = "Habit-Home-Screen-Light-Mode",
-    group = "HabitHomeScreens"
+    name = "Light-no-Habits",
+    group = "Empty"
 )
 @Composable
-fun HabitHomeScreenPreviewLight(){
+fun LightEmptyPreview(){
     PreviewHabituaTheme(darkTheme = false){
         HabitHomeBody(
-            currentScreenName = HabitDestination.route,
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
             navigateToHabitEntry = {},
             navigateToHabitEdit = {},
-            navController = rememberNavController()
 
+            habitList = listOf(),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = false,
         )
     }
 }
 
 @Preview(
     showBackground = true,
-    name = "Habit-Home-Screen-Dark-Mode",
-    group = "HabitHomeScreens"
+    name = "Dark-no-Habits",
+    group = "Empty"
 )
 @Composable
-fun HabitHomeScreenPreviewDark(){
+fun DarkEmptyPreview(){
     PreviewHabituaTheme(darkTheme = true){
         HabitHomeBody(
-            currentScreenName = HabitDestination.route,
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
             navigateToHabitEntry = {},
             navigateToHabitEdit = {},
-            navController = rememberNavController()
+
+            habitList = listOf(),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = false,
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Light-Habits",
+    group = "HasHabits"
+)
+@Composable
+fun LightHabitsPreview(){
+    PreviewHabituaTheme(darkTheme = false){
+        HabitHomeBody(
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+
+            habitList = listOf(
+                Habit(
+                    id = 0,
+                    name = "Glove Chopping",
+                    description = "With a snippers"
+                ),
+                Habit(
+                    id = 1,
+                    name = "Pouring one Out",
+                    description = "sample text"
+
+                ),
+                Habit(
+                    id = 3,
+                    name = "Diisononyl phthalate",
+                    description = "get grapes",
+                    isActive = true,
+                ),
+            ),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = false,
+        )
+    }
+}
+
+//TODO: this should use Test Data because things will change soon(TM)
+@Preview(
+    showBackground = true,
+    name = "Dark-Habits",
+    group = "HasHabits"
+)
+@Composable
+fun DarkHabitsPreview(){
+    PreviewHabituaTheme(darkTheme = true){
+        HabitHomeBody(
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+
+            habitList = listOf(
+                Habit(
+                    id = 0,
+                    name = "Glove Chopping",
+                    description = "With a snippers"
+                ),
+                Habit(
+                    id = 1,
+                    name = "Pouring one Out",
+                    description = "sample text"
+
+                ),
+                Habit(
+                    id = 3,
+                    name = "Diisononyl phthalate",
+                    description = "get grapes",
+                    isActive = true,
+                ),
+            ),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = false,
+        )
+    }
+}
+
+// Reviewed Previews
+@Preview(
+    showBackground = true,
+    name = "Light-Habits-Reviewed",
+    group = "Reviewed"
+)
+@Composable
+fun LightHabitsReviewedPreview(){
+    PreviewHabituaTheme(darkTheme = false){
+        HabitHomeBody(
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+
+            habitList = listOf(
+                Habit(
+                    id = 0,
+                    name = "Glove Chopping",
+                    description = "With a snippers"
+                ),
+                Habit(
+                    id = 1,
+                    name = "Pouring one Out",
+                    description = "sample text"
+
+                ),
+                Habit(
+                    id = 3,
+                    name = "Diisononyl phthalate",
+                    description = "get grapes",
+                    isActive = true,
+                ),
+            ),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = true,
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Dark-Habits-Reviewed",
+    group = "Reviewed"
+)
+@Composable
+fun DarkHabitsReviewedPreview(){
+    PreviewHabituaTheme(darkTheme = true){
+        HabitHomeBody(
+            navigateToHabitDestination = {},
+            navigateToVisualizeDestination = {},
+            navigateToSettingDestination = {},
+
+            currentScreenName = stringResource(id = HabitDestination.navTitle),
+            navigateToHabitEntry = {},
+            navigateToHabitEdit = {},
+
+            habitList = listOf(
+                Habit(
+                    id = 0,
+                    name = "Glove Chopping",
+                    description = "With a snippers"
+                ),
+                Habit(
+                    id = 1,
+                    name = "Pouring one Out",
+                    description = "sample text"
+
+                ),
+                Habit(
+                    id = 3,
+                    name = "Diisononyl phthalate",
+                    description = "get grapes",
+                    isActive = true,
+                ),
+            ),
+            onClickHabitCard = {},
+
+            reviewConfirmationRequired = false,
+            onReviewClick = {},
+            onReviewAccept = {},
+            onReviewDismiss = {},
+            userReviewedToday = true,
         )
     }
 }

@@ -19,7 +19,9 @@ import com.example.habitua.ui.visual.VisualizationDestination
 
 @Composable
 fun HabitNavBar(
-    navController: NavHostController,
+    navigateToHabitDestination: () -> Unit,
+    navigateToVisualizeDestination: () -> Unit,
+    navigateToSettingDestination: () -> Unit,
     currentScreenName: String,
 ){
     Row (
@@ -30,21 +32,18 @@ fun HabitNavBar(
         HabitNavButton(
             text = stringResource(id = HabitDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = {
-                navController.navigate(HabitDestination.route)
-            })
+            onNextButtonClicked = navigateToHabitDestination
+        )
         HabitNavButton(
             text = stringResource(id = VisualizationDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = {
-                navController.navigate(VisualizationDestination.route)
-            })
+            onNextButtonClicked = navigateToVisualizeDestination
+        )
         HabitNavButton(
             text = stringResource(id = SettingDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = {
-                navController.navigate(SettingDestination.route)
-            })
+            onNextButtonClicked = navigateToSettingDestination
+        )
     }
 }
 

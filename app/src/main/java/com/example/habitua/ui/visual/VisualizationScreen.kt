@@ -40,7 +40,9 @@ import androidx.navigation.NavHostController
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
+import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.theme.HabituaTheme
 import com.example.habitua.ui.theme.LocalCustomColorsPalette
 
@@ -100,7 +102,9 @@ fun VisualizationScreen (
 
             }
             HabitNavBar(
-                navController = navController,
+                navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
+                navigateToVisualizeDestination = { navController.navigate(VisualizationDestination.route)},
+                navigateToSettingDestination = { navController.navigate(SettingDestination.route)},
                 currentScreenName = currentScreenName
             )
         }
