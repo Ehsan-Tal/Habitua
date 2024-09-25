@@ -100,7 +100,8 @@ fun HabitScreen(
     navigateToHabitEdit: (Int) -> Unit,
     navController: NavHostController
 ) {
-    val homeUiState by viewModel.homeUiState.collectAsState()
+    //val homeUiState by viewModel.homeUiState.collectAsState()
+    val homeUiState: HomeUiState = HomeUiState(listOf(Habit(1, "", name = "Josh", description = "johnson")))
     val coroutineScope = rememberCoroutineScope()
 
     var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
@@ -133,7 +134,7 @@ fun HabitScreen(
         onReviewClick = {
             reviewConfirmationRequired = true
         },
-        userReviewedToday = homeUiState.userReviewedToday
+        userReviewedToday = false
     )
 
 }
@@ -466,7 +467,7 @@ fun HabitCard (
                         .padding(dimensionResource(R.dimen.padding_small))
                         .weight(1f)
                 ) {
-                    HabitIcon(habit.imageResId)
+                    HabitIcon(habit.imageURI)
                 }
                 Column(
                     modifier = Modifier
@@ -504,7 +505,7 @@ fun HabitCard (
 
 @Composable
 fun HabitIcon(
-    @DrawableRes habitIcon: Int
+    imageURI: String
 ){
 
     /*

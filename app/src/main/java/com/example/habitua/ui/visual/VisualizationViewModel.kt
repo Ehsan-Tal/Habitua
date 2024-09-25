@@ -20,7 +20,7 @@ private const val TAG = "VisualizationViewModel"
 class VisualizationViewModel(
     private val appRepository: AppRepository
 ): ViewModel() {
-
+/*
     /**
      * The UI state for the visualization composable.
      * Performs operations on data as its collected
@@ -107,6 +107,8 @@ class VisualizationViewModel(
             rStringOff = R.string.visualization_pie_chart_Acquired_off
         )
     }
+    
+ */
 
 }
 

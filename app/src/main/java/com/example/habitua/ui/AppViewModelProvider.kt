@@ -20,8 +20,7 @@ object AppViewModelProvider {
         // initializer for home
         initializer {
             HomeViewModel(
-                habitApplication().container.appRepository,
-                habitApplication().container.userPreferencesRepository
+                habitApplication().container.appRepository
             )
         }
 
@@ -39,12 +38,15 @@ object AppViewModelProvider {
             )
         }
 
+
         // initializer for ui.visual
+        /*
         initializer {
             VisualizationViewModel(
                 habitApplication().container.appRepository
             )
         }
+         */
 
         // initializer for ui.settings
         initializer {

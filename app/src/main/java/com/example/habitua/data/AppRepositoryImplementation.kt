@@ -9,54 +9,61 @@ import kotlinx.coroutines.flow.Flow
  */
 class AppRepositoryImplementation(
     private val habitDao: HabitDao
-    ):  AppRepository {
+): AppRepository {
 
-    /**
-     * Returns a Flow of all the habits in the database by whether or not they have been acquired.
-     *
-     * @param hasBeenAcquired
-     * @return a Flow emitting a List of [Habit] objects that match the
-     * specified [hasBeenAcquired] status.
-     */
-    override fun getAllHabitsByAcquiredStream(hasBeenAcquired: Boolean): Flow<List<Habit>> =
-        habitDao.getAllHabitsByAcquired(hasBeenAcquired)
 
-    /**
-     * Returns a Flow of all the habits in the database.
-     *
-     * @return a Flow emitting a List of [Habit] objects.
-     */
-    override fun getAllHabitsStream(): Flow<List<Habit>> = habitDao.getAllHabits()
+    override suspend fun insertHabit(habit: Habit) = habitDao.insert(habit)
 
-    /**
-     * Returns a Flow of a single [Habit] object with the specified [habitId].
-     *
-     * @param habitId
-     * @return a Flow emitting a [Habit] object with the specified [habitId].
-     */
+    override suspend fun deleteHabit(habit: Habit) = habitDao.delete(habit)
+
+    override suspend fun updateHabit(habit: Habit) = habitDao.update(habit)
+
     override fun getHabitStream(habitId: Int): Flow<Habit?> =
         habitDao.getHabit(habitId)
 
-    /**
-     * Inserts a [Habit] object into the database.
-     *
-     * @param habit [Habit] object to be inserted.
-     */
-    override suspend fun insertHabit(habit: Habit) = habitDao.insert(habit)
+    override fun getAllHabitsStream(): Flow<List<Habit>> = habitDao.getAllHabits()
 
-    /**
-     * Deletes a [Habit] object from the database.
-     *
-     * @param habit [Habit] object to be deleted.
-     */
-    override suspend fun deleteHabit(habit: Habit) = habitDao.delete(habit)
+    override fun getAllHabitsAcquiredStream():
+            Flow<List<Habit>> = habitDao.getAllHabitsAcquired()
 
-    /**
-     * Updates a [Habit] object in the database.
-     *
-     * @param habit [Habit] object to be updated.x
-     *
-     */
-    override suspend fun updateHabit(habit: Habit) = habitDao.update(habit)
+    override fun getAllHabitsNotAcquiredStream():
+            Flow<List<Habit>> = habitDao.getAllHabitsNotAcquired()
+
+    override fun getAllHabitsStreakingStream():
+            Flow<List<Habit>> = habitDao.getAllHabitsStreaking()
+
+    override fun getAllHabitsNotStreakingStream():
+            Flow<List<Habit>> = habitDao.getAllHabitsNotStreaking()
+
+
+    override fun getAllHabitsTODOStream(dateToday: Long, dateYesterday: Long):
+            Flow<List<Habit>> = habitDao.getAllHabitsTODO(dateToday, dateYesterday)
+
+    override fun getAllHabitsAtRiskStream(dateYesterday: Long):
+            Flow<List<Habit>> = habitDao.getAllHabitsAtRisk(dateYesterday)
+
+    override suspend fun reviewHabits(dateToday: Long, dateYesterday: Long)
+            = habitDao.reviewHabits(dateToday, dateYesterday)
+
+
+    // principles
+    override suspend fun insertPrinciple(principle: Principle) = habitDao.insertPrinciple(principle)
+
+    override suspend fun insertPrincipleDate(principleDate: PrincipleDate) = habitDao.insertPrincipleDate(principleDate)
+
+    override suspend fun deletePrinciple(principle: Principle) = habitDao.deletePrinciple(principle)
+
+    override suspend fun deletePrincipleDate(principleDate: PrincipleDate) = habitDao.deletePrincipleDate(principleDate)
+
+    override fun getAllPrinciplesStream(): Flow<List<Principle>> = habitDao.getAllPrinciples()
+
+    override fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>> = habitDao.getAllPrinciplesDates()
+
+
+    override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>> = habitDao.getPrinciplesByDate(date)
+
+    override fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>> = habitDao.getPrinciplesByDateRange(dateStartInclusive, dateEndInclusive)
+
+    override suspend fun insertPrincipleDateEntry(principleId: Int, date: Long, value: Boolean) = habitDao.insertPrincipleDateEntry(principleId, date, value)
 
 }

@@ -20,7 +20,6 @@ import com.example.habitua.ui.home.HabitScreen
 import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.settings.SettingScreen
 import com.example.habitua.ui.visual.VisualizationDestination
-import com.example.habitua.ui.visual.VisualizationScreen
 
 /**
  * Main navigation graph for the app.
@@ -46,15 +45,9 @@ fun HabitNavHost(
 
         /**
          * The home screen
-         *
          * The screen takes in its name, nav controller, navigate to habit entry, and navigate to habit edit
          */
-        composable(
-            route = HabitDestination.route,
-
-        ) {
-
-
+        composable( route = HabitDestination.route ) {
             HabitScreen(
                 currentScreenName = stringResource(id = HabitDestination.navTitle),
 
@@ -70,7 +63,6 @@ fun HabitNavHost(
 
         /**
          * The habit entry screen
-         *
          * The screen composable takes the navigate back and up as parameters
          */
         composable( route = HabitEntryDestination.route ) {
@@ -104,12 +96,15 @@ fun HabitNavHost(
          * Takes the name of the current screen as a parameter
          * Takes the name of navigation controller as a parameter
          */
+        /*
         composable(route = VisualizationDestination.route) {
             VisualizationScreen(
                 currentScreenName = stringResource(id = VisualizationDestination.navTitle),
                 navController = navController
             )
         }
+
+         */
 
         /**
          * The setting screen

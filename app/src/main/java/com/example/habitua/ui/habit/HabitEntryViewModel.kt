@@ -7,11 +7,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
+import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * View Model to keep a reference to the app repository and an up-to-date list of all habits.
@@ -111,23 +115,24 @@ fun Habit.toHabitDetails(): HabitDetails = HabitDetails(
  */
 fun Habit.formattedOriginDate(): String {
 
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val currentStreakOriginDate = LocalDate.parse(currentStreakOrigin, formatter)
-
     val newFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
-    val formattedDate = currentStreakOriginDate.format(newFormatter)
+
+    val formattedDate = currentStreakOrigin?.let {
+        newFormatter.format(Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()))
+    } ?: ""
 
     return formattedDate
 }
 
 fun Habit.streakLength(): Int {
 
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val currentStreakOriginDate = LocalDate.parse(currentStreakOrigin, formatter)
 
-    val today = LocalDate.now()
-    val period = ChronoUnit.DAYS.between(currentStreakOriginDate, today)
-    Log.d(TAG, period.toString())
+    val period = currentStreakOrigin?.let { origin ->
+        val difference = Instant.now().toEpochMilli() - origin
+        TimeUnit.DAYS.convert(difference, TimeUnit.MILLISECONDS)
+    } ?: 0
+    // a let block is weird, the last line determines the value of what it was assigned to.
+    val today = Instant.now()
 
     return period.toInt()
 }
