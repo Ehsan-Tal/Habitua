@@ -8,6 +8,8 @@ interface AppRepository {
 
     suspend fun deleteHabit(habit: Habit)
 
+    suspend fun deleteAllHabits(): Void
+
     suspend fun updateHabit(habit: Habit)
 
     fun getHabitStream(habitId: Int): Flow<Habit?>

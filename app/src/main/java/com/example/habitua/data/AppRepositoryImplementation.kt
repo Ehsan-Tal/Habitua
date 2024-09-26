@@ -16,6 +16,8 @@ class AppRepositoryImplementation(
 
     override suspend fun deleteHabit(habit: Habit) = habitDao.delete(habit)
 
+    override suspend fun deleteAllHabits(): Void = habitDao.deleteAllHabits()
+
     override suspend fun updateHabit(habit: Habit) = habitDao.update(habit)
 
     override fun getHabitStream(habitId: Int): Flow<Habit?> =

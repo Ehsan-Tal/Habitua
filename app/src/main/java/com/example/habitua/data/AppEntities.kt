@@ -29,7 +29,6 @@ import kotlin.text.format
  * @property daysUntilAcquisition  calculated days until habit is acquired
  */
 
-//TODO - date convert
 @Entity(tableName = "habits")
 data class Habit (
     @PrimaryKey(autoGenerate = true)

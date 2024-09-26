@@ -48,6 +48,7 @@ class HabitEntryViewModel(
     }
 
     fun updateName(newName:String ) {
+        Log.d(TAG, "updateName: $newName")
         habitUiState.habitDetails = habitUiState.habitDetails.copy(name = newName)
     }
 
@@ -98,7 +99,7 @@ fun HabitDetails.toHabit(): Habit = Habit(
     name = name,
     description = description,
 )
-/*
+
 fun Habit.toHabitEntryUiState(isEntryValid: Boolean = false): HabitUiState = HabitUiState(
     habitDetails = this.toHabitDetails(),
     isEntryValid = isEntryValid
@@ -108,7 +109,7 @@ fun Habit.toHabitDetails(): HabitDetails = HabitDetails(
     name = name,
     description = description,
 )
-*/
+
 
 /**
  * Formats the date for display

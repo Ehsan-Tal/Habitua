@@ -3,7 +3,6 @@
 
 package com.example.habitua.ui.home
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
@@ -35,7 +34,11 @@ import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +46,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,21 +73,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
-import com.example.habitua.ui.HabitNavButton
-import com.example.habitua.ui.habit.HabitEditBody
-import com.example.habitua.ui.habit.HabitEditUiState
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.settings.SettingDestination
-import com.example.habitua.ui.theme.LocalCustomColorsPalette
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 import com.example.habitua.ui.visual.VisualizationDestination
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 
 object HabitDestination : NavigationDestination {
@@ -100,11 +98,12 @@ fun HabitScreen(
     navigateToHabitEdit: (Int) -> Unit,
     navController: NavHostController
 ) {
-    //val homeUiState by viewModel.homeUiState.collectAsState()
-    val homeUiState: HomeUiState = HomeUiState(listOf(Habit(1, "", name = "Josh", description = "johnson")))
+    val homeUiState by viewModel.homeUiState.collectAsState()
+    //val homeUiState: HomeUiState = HomeUiState(listOf(Habit(1, "", name = "Josh", description = "johnson")))
     val coroutineScope = rememberCoroutineScope()
 
     var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+    var dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
 
     HabitHomeBody(
         navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
@@ -134,7 +133,13 @@ fun HabitScreen(
         onReviewClick = {
             reviewConfirmationRequired = true
         },
-        userReviewedToday = false
+        userReviewedToday = false,
+
+        dataSource = dataSource,
+        onOptionSelected = { newDataSource ->
+            dataSource = newDataSource
+            viewModel.setDataSource(newDataSource)
+        }
     )
 
 }
@@ -156,6 +161,9 @@ fun HabitHomeBody(
     onReviewAccept: () -> Unit,
     onReviewDismiss: () -> Unit,
     userReviewedToday: Boolean,
+
+    dataSource: HomeViewModel.DataSource,
+    onOptionSelected: (HomeViewModel.DataSource) -> Unit
 ){
 
     Scaffold(
@@ -176,6 +184,9 @@ fun HabitHomeBody(
             navigateToVisualizeDestination = navigateToVisualizeDestination,
             navigateToSettingDestination = navigateToSettingDestination,
 
+            dataSource = dataSource,
+            onOptionSelected = onOptionSelected,
+
             //review button related material
             reviewConfirmationRequired = reviewConfirmationRequired,
             onReviewClick = onReviewClick,
@@ -186,7 +197,7 @@ fun HabitHomeBody(
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HabitHomeSkeleton(
     habitList: List<Habit>,
@@ -207,7 +218,12 @@ private fun HabitHomeSkeleton(
     onReviewClick: () -> Unit,
     onReviewAccept: () -> Unit,
     onReviewDismiss: () -> Unit,
+
+    dataSource: HomeViewModel.DataSource,
+    onOptionSelected: (HomeViewModel.DataSource) -> Unit
 ){
+    var expanded by remember { mutableStateOf(false) }
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -229,6 +245,37 @@ private fun HabitHomeSkeleton(
                 .weight(8f)
                 .padding(dimensionResource(R.dimen.padding_small))
         ){
+
+            var dataSourceOptionText by remember { mutableStateOf(HomeViewModel.DataSource.TODO.name) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = dataSource.name,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)},
+                    modifier = Modifier.menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    HomeViewModel.DataSource.entries.forEach { dataSourceOption ->
+                        DropdownMenuItem(
+                            text = { Text(dataSourceOption.name) },
+                            onClick = {
+                                dataSourceOptionText = dataSourceOption.name
+                                onOptionSelected(dataSourceOption)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+
+            }
+
             HabitColumn(
                 habitList = habitList,
                 onClickHabitCard = onClickHabitCard,
@@ -542,6 +589,7 @@ fun HabitIcon(
 @Composable
 fun LightEmptyPreview(){
     PreviewHabituaTheme(darkTheme = false){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -559,6 +607,9 @@ fun LightEmptyPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = false,
+
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }
@@ -571,6 +622,7 @@ fun LightEmptyPreview(){
 @Composable
 fun DarkEmptyPreview(){
     PreviewHabituaTheme(darkTheme = true){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -588,6 +640,8 @@ fun DarkEmptyPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = false,
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }
@@ -600,6 +654,7 @@ fun DarkEmptyPreview(){
 @Composable
 fun LightHabitsPreview(){
     PreviewHabituaTheme(darkTheme = false){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -635,6 +690,8 @@ fun LightHabitsPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = false,
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }
@@ -648,6 +705,7 @@ fun LightHabitsPreview(){
 @Composable
 fun DarkHabitsPreview(){
     PreviewHabituaTheme(darkTheme = true){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -683,6 +741,9 @@ fun DarkHabitsPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = false,
+
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }
@@ -696,6 +757,7 @@ fun DarkHabitsPreview(){
 @Composable
 fun LightHabitsReviewedPreview(){
     PreviewHabituaTheme(darkTheme = false){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -731,6 +793,9 @@ fun LightHabitsReviewedPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = true,
+
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }
@@ -743,6 +808,7 @@ fun LightHabitsReviewedPreview(){
 @Composable
 fun DarkHabitsReviewedPreview(){
     PreviewHabituaTheme(darkTheme = true){
+        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
         HabitHomeBody(
             navigateToHabitDestination = {},
             navigateToVisualizeDestination = {},
@@ -778,6 +844,9 @@ fun DarkHabitsReviewedPreview(){
             onReviewAccept = {},
             onReviewDismiss = {},
             userReviewedToday = true,
+
+            dataSource = dataSource,
+            onOptionSelected = {}
         )
     }
 }

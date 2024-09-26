@@ -109,12 +109,14 @@ interface HabitDao {
     @Query("SELECT * from habits WHERE id = :habitId")
     fun getHabit(habitId: Int): Flow<Habit>
 
+    @Query("DELETE FROM habits")
+    suspend fun deleteAllHabits(): Void
+
     //Flow as return returns notifications whenever data source changes.
     //Meaning you only need to explicitly get it once (with Room).
     // also, since suspend ensures it runs on a different thread
     // we do not need suspend as Room performs this in co-routine scope already -
     // due to the Flow return.
-
 
     // Review Logic
     @Query(
@@ -195,11 +197,16 @@ interface HabitDao {
     @Insert
     suspend fun insertPrincipleDate(principleDate: PrincipleDate)
 
+    //TODO RE-ADD THE FOREIGN KEY CASCADING
     @Delete
     suspend fun deletePrinciple(principle: Principle)
 
     @Delete
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)
+
+    @Query("DELETE FROM principles")
+    suspend fun deleteAllPrinciples()
+
 
     @Query("SELECT * FROM principles")
     fun getAllPrinciples(): Flow<List<Principle>>
