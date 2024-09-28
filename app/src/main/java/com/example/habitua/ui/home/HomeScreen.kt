@@ -3,6 +3,7 @@
 
 package com.example.habitua.ui.home
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -115,6 +117,7 @@ fun HabitScreen(
         navigateToHabitEntry = navigateToHabitEntry,
 
         habitList = homeUiState.habitList,
+        countList = homeUiState.countList,
         onClickHabitCard = { habit: Habit ->
             coroutineScope.launch{ viewModel.toggleHabitActive(habit) }
                            },
@@ -163,7 +166,8 @@ fun HabitHomeBody(
     userReviewedToday: Boolean,
 
     dataSource: HomeViewModel.DataSource,
-    onOptionSelected: (HomeViewModel.DataSource) -> Unit
+    onOptionSelected: (HomeViewModel.DataSource) -> Unit,
+    countList: Map<HomeViewModel.DataSource, Int>
 ){
 
     Scaffold(
@@ -174,6 +178,7 @@ fun HabitHomeBody(
     { innerPadding ->
         HabitHomeSkeleton(
             habitList = habitList,
+            countList = countList,
             currentScreenName = currentScreenName,
             contentPadding = innerPadding,
             onCreateButtonClick = navigateToHabitEntry,
@@ -220,7 +225,8 @@ private fun HabitHomeSkeleton(
     onReviewDismiss: () -> Unit,
 
     dataSource: HomeViewModel.DataSource,
-    onOptionSelected: (HomeViewModel.DataSource) -> Unit
+    onOptionSelected: (HomeViewModel.DataSource) -> Unit,
+    countList: Map<HomeViewModel.DataSource, Int>
 ){
     var expanded by remember { mutableStateOf(false) }
 
@@ -246,6 +252,7 @@ private fun HabitHomeSkeleton(
                 .padding(dimensionResource(R.dimen.padding_small))
         ){
 
+            // START OF DROPDOWN MENU
             var dataSourceOptionText by remember { mutableStateOf(HomeViewModel.DataSource.TODO.name) }
             ExposedDropdownMenuBox(
                 expanded = expanded,
@@ -264,7 +271,12 @@ private fun HabitHomeSkeleton(
                 ) {
                     HomeViewModel.DataSource.entries.forEach { dataSourceOption ->
                         DropdownMenuItem(
-                            text = { Text(dataSourceOption.name) },
+                            text = {
+                                Row {
+                                Text(text = countList[dataSourceOption].toString())
+                                Text(dataSourceOption.name)
+                                   }
+                                },
                             onClick = {
                                 dataSourceOptionText = dataSourceOption.name
                                 onOptionSelected(dataSourceOption)
@@ -273,8 +285,9 @@ private fun HabitHomeSkeleton(
                         )
                     }
                 }
-
             }
+            // END OF DROPDOWN MENU
+
 
             HabitColumn(
                 habitList = habitList,
@@ -394,6 +407,7 @@ private fun HabitColumn(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HabitList(
     habitList: List<Habit>,
@@ -609,7 +623,8 @@ fun LightEmptyPreview(){
             userReviewedToday = false,
 
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }
@@ -641,7 +656,8 @@ fun DarkEmptyPreview(){
             onReviewDismiss = {},
             userReviewedToday = false,
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }
@@ -691,7 +707,8 @@ fun LightHabitsPreview(){
             onReviewDismiss = {},
             userReviewedToday = false,
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }
@@ -743,7 +760,8 @@ fun DarkHabitsPreview(){
             userReviewedToday = false,
 
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }
@@ -795,7 +813,8 @@ fun LightHabitsReviewedPreview(){
             userReviewedToday = true,
 
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }
@@ -846,7 +865,8 @@ fun DarkHabitsReviewedPreview(){
             userReviewedToday = true,
 
             dataSource = dataSource,
-            onOptionSelected = {}
+            onOptionSelected = {},
+            countList = emptyMap()
         )
     }
 }

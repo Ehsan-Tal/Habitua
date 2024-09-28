@@ -10,6 +10,8 @@ interface AppRepository {
 
     suspend fun deleteAllHabits(): Void
 
+    suspend fun createAllHabits(habitList: List<Habit>): Void
+
     suspend fun updateHabit(habit: Habit)
 
     fun getHabitStream(habitId: Int): Flow<Habit?>
@@ -27,6 +29,21 @@ interface AppRepository {
     fun getAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<List<Habit>>
 
     fun getAllHabitsAtRiskStream(dateYesterday: Long): Flow<List<Habit>>
+
+    fun countAllHabitsStream(): Int
+
+    fun countAllHabitsAcquiredStream(): Int
+
+    fun countAllHabitsNotAcquiredStream(): Int
+
+    fun countAllHabitsStreakingStream(): Int
+
+    fun countAllHabitsNotStreakingStream(): Int
+
+    fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Int
+
+    fun countAllHabitsAtRiskStream(dateYesterday: Long): Int
+
 
     suspend fun reviewHabits(dateToday: Long, dateYesterday: Long)
 

@@ -18,6 +18,11 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.habitua.R
+import com.example.habitua.data.AppRepository
+import com.example.habitua.data.Habit
+import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.time.ZoneId
 
 const val TAG = "SettingViewModel"
 
@@ -27,11 +32,15 @@ const val TAG = "SettingViewModel"
  * @param userPreferencesRepository - used to save and retrieve user preferences
  */
 class SettingViewModel(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appRepository: AppRepository
 ): ViewModel() {
 
     private val _hasNotificationPermission = MutableStateFlow(true)
     val hasNotificationPermission: StateFlow<Boolean> = _hasNotificationPermission
+
+    private val _canCreateTestData = MutableStateFlow(true)
+    val canCreateTestData: StateFlow<Boolean> = _canCreateTestData
 
     /**
      * UI state exposed to the UI
@@ -53,6 +62,62 @@ class SettingViewModel(
     fun selectThemeMode(isDarkMode: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.saveThemePreference(isDarkMode)
+        }
+    }
+    init {
+        viewModelScope.launch {
+            _canCreateTestData.value = appRepository.getAllHabitsStream().first().isEmpty()
+        }
+    }
+
+    fun createTestData(){
+        //TODO: add this to a test data set
+        val today = LocalDate.now()
+        val dayBeforeYesterday = today.minusDays(2)
+        val yesterday = today.minusDays(1)
+        val tomorrow = today.plusDays(1)
+        val sixtySixDaysAgo = today.minusDays(66)
+
+        val habitList = listOf(
+            Habit(
+                name = "TODO 1", description = "inactive, not acquired, and not progressing"
+            ),
+            Habit(
+                name = "TODO 2", description = "could be acquired",
+                currentStreakOrigin = sixtySixDaysAgo.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            ),
+            Habit(
+                name = "Streak 1", description = "",
+                currentStreakOrigin = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            ),
+            Habit(
+                name = "At Risk 1", description = "",
+                currentStreakOrigin = dayBeforeYesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                nextReviewedDate = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            ),
+            Habit(
+                name = "Streak 2", description = "",
+                currentStreakOrigin = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                nextReviewedDate = tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            ),
+            Habit(
+                name = "Acquired 1", description = "",
+                dateAcquired = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            ),
+        )
+        Log.d(TAG, "createTestData: $habitList")
+        viewModelScope.launch {
+            appRepository.createAllHabits(habitList)
+            _canCreateTestData.value = true
+        }
+    }
+
+    fun deleteAllHabits() {
+        viewModelScope.launch {
+            appRepository.deleteAllHabits()
+            _canCreateTestData.value = false
         }
     }
 

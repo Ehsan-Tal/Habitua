@@ -58,6 +58,17 @@ object SettingDestination: NavigationDestination {
 }
 
 // we need a button to initiate the toggling
+@Composable
+fun SettingScreenWrapperCHANGESOON (
+    currentScreenName: String,
+    navController: NavHostController,
+    //onShareButtonClicked: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    uiState: SettingUiState = viewModel.uiState.collectAsState().value,
+) {
+
+}
 
 @Composable
 fun SettingScreen (
@@ -108,7 +119,10 @@ fun SettingScreen (
                 ){
                     val context = LocalContext.current
                     var showDialog by remember { mutableStateOf(false) }
+
                     val hasNotificationPermission by viewModel.hasNotificationPermission
+                        .collectAsState()
+                    val canCreateTestData by viewModel.canCreateTestData
                         .collectAsState()
 
                     val rowModifier = Modifier
@@ -235,22 +249,44 @@ fun SettingScreen (
                             )
                         }
                     }
-                }
 
-                    // About Section
-                    Column(
+
+                        // creating test data
+                OutlinedCard(
+                    colors = CardDefaults.outlinedCardColors(
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                    modifier = rowModifier
+                        .clickable {
+                            if (canCreateTestData) {
+                                viewModel.createTestData()
+                            } else {
+                                viewModel.deleteAllHabits()
+                            }
+                            // if(count)
+                        },
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(dimensionResource(id = R.dimen.padding_large))
-                    ){
+                            .padding(dimensionResource(id = R.dimen.padding_small))
+                            .fillMaxWidth()
+                    ) {
                         Text(
-                            text = stringResource(R.string.about_habitua_title),
-                            style = MaterialTheme.typography.displayMedium
-                        )
-
-                        Text(
-                            text = stringResource(R.string.about_section_paragraph).trimIndent()
+                            modifier = Modifier
+                                .padding(dimensionResource(id = R.dimen.padding_large)),
+                            text = if (canCreateTestData)
+                                "Create Test Data"
+                            else
+                                "Delete Test Data",
                         )
                     }
+                }
+
+            }
                 }
             }
 

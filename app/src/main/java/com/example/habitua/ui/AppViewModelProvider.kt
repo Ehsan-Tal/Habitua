@@ -51,7 +51,8 @@ object AppViewModelProvider {
         // initializer for ui.settings
         initializer {
             SettingViewModel(
-                habitApplication().container.userPreferencesRepository
+                habitApplication().container.userPreferencesRepository,
+                habitApplication().container.appRepository
             )
         }
 

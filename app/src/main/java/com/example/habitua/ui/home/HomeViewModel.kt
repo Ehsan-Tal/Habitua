@@ -1,30 +1,17 @@
 package com.example.habitua.ui.home
 
-import android.icu.util.Calendar
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import com.example.habitua.data.AppRepository
 import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import com.example.habitua.data.Habit
-import com.example.habitua.data.UserPreferencesRepository
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Date
-import java.util.Locale
 
 private const val TAG = "HomeViewModel"
 
@@ -60,9 +47,6 @@ class HomeViewModel(
  */
 
     // oh hello !!!
-    //TODO: Use these for the filters !
-    //TODO: Default is getAllHabitsTODOStream
-    // Remember to view the counts of these lists and send that to the screen.
 
     /*
     private val _homeUiState = MutableStateFlow(HomeUiState())
@@ -75,7 +59,6 @@ class HomeViewModel(
     }}
 */
 
-
     //TODO: Change the review button to gray out if no nextRequiredDate habits = today/tomorrow
 
     // we set a private and public var - the mutable stateflow connects with the repo
@@ -83,20 +66,26 @@ class HomeViewModel(
     // the repository is then used to collect value into the mutable
 
     enum class DataSource {
-        TODO, AT_RISK, ACQUIRED, NOT_ACQUIRED, STREAKING, NOT_STREAKING
+        ALL, TODO, AT_RISK, ACQUIRED, NOT_ACQUIRED, STREAKING, NOT_STREAKING
     }
-
 
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
 
-    private var habitsJob: Job? = null
+    private var habitList: List<Habit> = listOf()
+    private var countList: Map<DataSource, Int> = emptyMap()
 
+
+    // DELETE LATER -
+    // There was an issue with this function because it did not modify the values of the mutable stateflow
+    //  and I think all it did was construct a new HomeUiState() item or maybe it privately failed
+    // either way I fixed it by turning vals into vars, etc.
 
     private fun updateDataSource(datasource: DataSource) {
-        habitsJob?.cancel()
-        habitsJob = viewModelScope.launch {
+
+        viewModelScope.launch {
             when (datasource) {
+                DataSource.ALL -> appRepository.getAllHabitsStream()
                 DataSource.TODO -> appRepository.getAllHabitsTODOStream(
                     dateTodayMilli, dateYesterdayMilli
                 )
@@ -108,17 +97,33 @@ class HomeViewModel(
                 DataSource.STREAKING -> appRepository.getAllHabitsStreakingStream()
                 DataSource.NOT_STREAKING -> appRepository.getAllHabitsNotStreakingStream()
             }.collect { habits ->
-                _homeUiState.value = HomeUiState(habits)
+                _homeUiState.value.habitList = habits
             }
+
+            _homeUiState.value.countList = mapOf(
+                DataSource.ALL to appRepository.countAllHabitsStream(),
+                DataSource.ACQUIRED to appRepository.countAllHabitsAcquiredStream(),
+                DataSource.STREAKING to appRepository.countAllHabitsStreakingStream(),
+                DataSource.NOT_ACQUIRED to appRepository.countAllHabitsNotAcquiredStream(),
+                DataSource.NOT_STREAKING to appRepository.countAllHabitsNotStreakingStream(),
+                DataSource.TODO to appRepository.countAllHabitsTODOStream(dateTodayMilli, dateYesterdayMilli),
+                DataSource.AT_RISK to appRepository.countAllHabitsAtRiskStream(dateYesterdayMilli)
+            )
+            Log.d(TAG, "countList: $countList")
+            Log.d(TAG, "habitList: $habitList")
+
         }
+        Log.d(TAG, "countList: $countList")
+        Log.d(TAG, "habitList: $habitList")
+
     }
 
-    //TODO - we need a count function
-
     fun setDataSource(dataSource: DataSource) {
+        Log.d(TAG, "setDataSource: $dataSource")
         updateDataSource(dataSource)
     }
     init {
+        Log.d(TAG, "init: ")
         updateDataSource(DataSource.TODO)
     }
 
@@ -157,5 +162,6 @@ class HomeViewModel(
 
 
 data class HomeUiState(
-    val habitList: List<Habit> = listOf(),
+    var habitList: List<Habit> = listOf(),
+    var countList: Map<HomeViewModel.DataSource, Int> = emptyMap()
 )

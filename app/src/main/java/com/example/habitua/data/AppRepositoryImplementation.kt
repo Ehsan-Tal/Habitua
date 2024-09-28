@@ -20,6 +20,8 @@ class AppRepositoryImplementation(
 
     override suspend fun updateHabit(habit: Habit) = habitDao.update(habit)
 
+    override suspend fun createAllHabits(habitList: List<Habit>) = habitDao.createTestHabits(habitList)
+
     override fun getHabitStream(habitId: Int): Flow<Habit?> =
         habitDao.getHabit(habitId)
 
@@ -37,7 +39,6 @@ class AppRepositoryImplementation(
     override fun getAllHabitsNotStreakingStream():
             Flow<List<Habit>> = habitDao.getAllHabitsNotStreaking()
 
-
     override fun getAllHabitsTODOStream(dateToday: Long, dateYesterday: Long):
             Flow<List<Habit>> = habitDao.getAllHabitsTODO(dateToday, dateYesterday)
 
@@ -46,6 +47,22 @@ class AppRepositoryImplementation(
 
     override suspend fun reviewHabits(dateToday: Long, dateYesterday: Long)
             = habitDao.reviewHabits(dateToday, dateYesterday)
+
+
+    override fun countAllHabitsStream(): Int = habitDao.countAllHabits()
+
+    override fun countAllHabitsAcquiredStream(): Int = habitDao.countAllHabitsAcquired()
+
+    override fun countAllHabitsNotAcquiredStream(): Int = habitDao.countAllHabitsNotAcquired()
+
+    override fun countAllHabitsStreakingStream(): Int = habitDao.countAllHabitsStreaking()
+
+    override fun countAllHabitsNotStreakingStream(): Int = habitDao.countAllHabitsNotStreaking()
+
+    override fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Int = habitDao.countAllHabitsTODO(dateToday, dateYesterday)
+
+    override fun countAllHabitsAtRiskStream(dateYesterday: Long): Int = habitDao.countAllHabitsAtRisk(dateYesterday)
+
 
 
     // principles

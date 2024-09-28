@@ -26,7 +26,6 @@ interface HabitDao {
     @Delete
     suspend fun delete(habit: Habit)
 
-
     @Update
     suspend fun update(habit: Habit) // <- update habits, reference ?
 
@@ -88,8 +87,67 @@ interface HabitDao {
         """)
     fun getAllHabitsAtRisk(dateYesterday: Long): Flow<List<Habit>>
 
+    // COUNT of get functions
 
-       // TODO: this needs a history
+    // NEW
+    @Query("""
+        SELECT COUNT(*)    
+        FROM habits
+        WHERE dateAcquired IS NOT NULL
+        """)
+    fun countAllHabitsAcquired(): Int
+
+    // NEW
+    @Query("""
+        SELECT COUNT(*)    
+        FROM habits
+        WHERE dateAcquired IS NULL
+        """)
+    fun countAllHabitsNotAcquired(): Int
+
+
+    // NEW
+    @Query("""
+        SELECT COUNT(*)    
+        FROM habits
+        WHERE dateAcquired IS NULL
+        AND  currentStreakOrigin IS NOT NULL
+        """)
+    fun countAllHabitsStreaking(): Int
+
+    // NEW
+    @Query("""
+        SELECT COUNT(*)    
+        FROM habits
+        WHERE dateAcquired IS NULL
+        AND currentStreakOrigin IS NULL
+        """)
+    fun countAllHabitsNotStreaking(): Int
+
+    // NEW
+    @Query("""
+        SELECT COUNT(*)
+        FROM habits
+        WHERE dateAcquired IS NULL
+        AND currentStreakOrigin IS NOT NULL
+        AND (
+            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateToday / 1000, 'unixepoch') OR 
+            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch')
+        )
+        """)
+    fun countAllHabitsTODO(dateToday: Long, dateYesterday: Long): Int
+
+    // NEW
+    @Query("""
+        SELECT COUNT(*)        
+        FROM habits
+        WHERE dateAcquired IS NULL
+        AND currentStreakOrigin IS NOT NULL
+        AND DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch')
+        """)
+    fun countAllHabitsAtRisk(dateYesterday: Long): Int
+
+    // TODO: this needs a history
     //    @Query("SELECT * from habits WHERE dateAcquired IS NULL AND currentStreakOrigin IS NOT NULL AND curr")
     //    fun getAllHabitsStreakingFromDateRange(dateToday:String, dateThen: String): Flow<List<Habit>>
 
@@ -101,6 +159,9 @@ interface HabitDao {
     @Query ("SELECT * from habits")
     fun getAllHabits(): Flow<List<Habit>>
 
+    @Query ("SELECT COUNT(*) from habits")
+    fun countAllHabits(): Int
+
     /**
      * Returns a Flow of a single [Habit] object with the specified [habitId].
      * @param habitId Integer
@@ -111,6 +172,9 @@ interface HabitDao {
 
     @Query("DELETE FROM habits")
     suspend fun deleteAllHabits(): Void
+
+    @Insert
+    suspend fun createTestHabits(habitList: List<Habit>): Void
 
     //Flow as return returns notifications whenever data source changes.
     //Meaning you only need to explicitly get it once (with Room).
@@ -124,9 +188,10 @@ interface HabitDao {
          UPDATE habits 		
          SET isActive = 0,
             currentStreakOrigin = :date,
-            nextReviewedDate = :date 
+            nextReviewedDate = :date,
+            daysUntilAcquisition = :medianAcquisitionDays
          WHERE 
-            DATE(daysUntilAcquisition  / 1000, 'unixepoch') = DATE(:medianAcquisitionDays / 1000, 'unixepoch')  IS NULL AND 
+            dateAcquired IS NULL AND
             currentStreakOrigin IS NULL AND 
             isActive = 1 
          """
@@ -143,31 +208,58 @@ interface HabitDao {
      */
     @Query(
         """
-            UPDATE habits 
-            SET isActive = 0, 
-                nextReviewedDate = nextReviewedDate + frequency * 24 * 60 * 60 * 1000
-            WHERE dateAcquired IS NULL AND 
-                currentStreakOrigin IS NOT NULL AND 
-                isActive = 1 AND 
-                ( 
-            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateToday / 1000, 'unixepoch') OR 
-            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch') 
-                )
-            """
+        UPDATE 
+            habits 
+        SET 
+            isActive = 0, 
+            nextReviewedDate = nextReviewedDate + frequency * 24 * 60 * 60 * 1000
+        WHERE 
+            dateAcquired IS NULL AND 
+            currentStreakOrigin IS NOT NULL AND 
+            isActive = 1 AND 
+            ( 
+                DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateToday / 1000, 'unixepoch') OR 
+                DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch') 
+            )
+        """
     )
     fun streakSatisfied(dateToday: Long, dateYesterday: Long)
 
     @Query(
         """
-		UPDATE habits 
-		SET isActive = 0, currentStreakOrigin = NULL, nextReviewedDate = NULL, daysUntilAcquisition = NUll 
-		WHERE dateAcquired is NULL AND 
+		UPDATE 
+            habits 
+		SET 
+            isActive = 0, 
+            currentStreakOrigin = NULL, 
+            nextReviewedDate = NULL, 
+            daysUntilAcquisition = NUll 
+		WHERE 
+            dateAcquired is NULL AND 
             currentStreakOrigin IS NOT NULL AND 
             DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:date / 1000, 'unixepoch') AND 
             isActive = 0
     	"""
     )
     fun breakStreaks(date: Long)
+
+    @Query(
+        """
+        UPDATE 
+            habits
+        SET 
+            dateAcquired = :date, 
+            isActive = 0, 
+            currentStreakOrigin = NULL,  
+            nextReviewedDate = NULL,  
+            daysUntilAcquisition = NULL
+        WHERE 
+            currentStreakOrigin IS NOT NULL AND
+            isActive = 1 AND
+            DATE(daysUntilAcquisition / 1000, 'unixepoch') >= DATE(:date / 1000, 'unixepoch')
+        """
+    )
+    fun checkAcquired(date: Long)
 
     @Transaction
     fun reviewHabits(dateToday: Long, dateYesterday: Long) {
@@ -182,6 +274,7 @@ interface HabitDao {
         // so instead, just ask the user every Saturday if they acquired the habit
         // also offer them the option to manually mark it in the edit screen
 
+        checkAcquired(dateToday)
         startStreaks(dateToday, acquiredDateInMilli)
         streakSatisfied(dateToday, dateYesterday)
         breakStreaks(dateToday)
