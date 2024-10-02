@@ -286,7 +286,41 @@ fun SettingScreen (
                     }
                 }
 
-            }
+                    // download your data
+                        OutlinedCard(
+                            colors = CardDefaults.outlinedCardColors(
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            modifier = rowModifier
+                                .clickable {
+                                    if (!canCreateTestData) {
+                                        viewModel.downloadData()
+                                    }
+                                    // if(count)
+                                },
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_small))
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(dimensionResource(id = R.dimen.padding_large)),
+                                    text = if (canCreateTestData)
+                                        "No Data to Download"
+                                    else
+                                        "Download your data",
+                                )
+                            }
+                        }
+
+
+                    }
                 }
             }
 

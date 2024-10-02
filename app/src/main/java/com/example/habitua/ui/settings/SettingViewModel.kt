@@ -21,6 +21,7 @@ import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
 import kotlinx.coroutines.flow.first
+import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -80,15 +81,15 @@ class SettingViewModel(
 
         val habitList = listOf(
             Habit(
-                name = "TODO 1", description = "inactive, not acquired, and not progressing"
+                name = "All 1", description = "inactive, not acquired, and not progressing"
             ),
             Habit(
-                name = "TODO 2", description = "could be acquired",
+                name = "TODO 1", description = "could be acquired",
                 currentStreakOrigin = sixtySixDaysAgo.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
                 nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             ),
             Habit(
-                name = "Streak 1", description = "",
+                name = "TODO 2", description = "",
                 currentStreakOrigin = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
                 nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             ),
@@ -98,7 +99,7 @@ class SettingViewModel(
                 nextReviewedDate = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             ),
             Habit(
-                name = "Streak 2", description = "",
+                name = "TODO 3", description = "",
                 currentStreakOrigin = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
                 nextReviewedDate = tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             ),
@@ -119,6 +120,35 @@ class SettingViewModel(
             appRepository.deleteAllHabits()
             _canCreateTestData.value = false
         }
+    }
+
+    fun downloadData(){
+        // requires permissions
+        // handle errors too
+        // launch a background thread for this`
+
+        // how to download data ?
+        // get the habit list, convert into a string
+        // create a file
+        // write data to the file
+        // create a download request
+        // enqueue the download
+/*
+        viewModelScope.launch {
+            val data = appRepository.getAllHabitsStream()
+            val csvData = data.joinToString("\n") { entity ->
+                "${entity.id},${entity.name},${entity.value}"
+            }
+            val file = File(context.getExternalFilesDir(null), "data.csv")
+            file.writeText(csvData)
+            val request = androidx.media3.exoplayer.offline.DownloadManager.Request(Uri.fromFile(file))
+                .setTitle("My Data")
+                .setDescription("Downloading data from Room")
+                .setNotificationVisibility(androidx.media3.exoplayer.offline.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            downloadManager.enqueue(request)
+        }
+
+ */
     }
 
     //fun createHabitsString(){}

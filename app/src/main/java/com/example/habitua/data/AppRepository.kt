@@ -22,27 +22,23 @@ interface AppRepository {
 
     fun getAllHabitsNotAcquiredStream(): Flow<List<Habit>>
 
-    fun getAllHabitsStreakingStream(): Flow<List<Habit>>
-
     fun getAllHabitsNotStreakingStream(): Flow<List<Habit>>
 
     fun getAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<List<Habit>>
 
     fun getAllHabitsAtRiskStream(dateYesterday: Long): Flow<List<Habit>>
 
-    fun countAllHabitsStream(): Int
+    fun countAllHabitsStream(): Flow<Int>
 
-    fun countAllHabitsAcquiredStream(): Int
+    fun countAllHabitsAcquiredStream(): Flow<Int>
 
-    fun countAllHabitsNotAcquiredStream(): Int
+    fun countAllHabitsNotAcquiredStream(): Flow<Int>
 
-    fun countAllHabitsStreakingStream(): Int
+    fun countAllHabitsNotStreakingStream(): Flow<Int>
 
-    fun countAllHabitsNotStreakingStream(): Int
+    fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<Int>
 
-    fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Int
-
-    fun countAllHabitsAtRiskStream(dateYesterday: Long): Int
+    fun countAllHabitsAtRiskStream(dateYesterday: Long): Flow<Int>
 
 
     suspend fun reviewHabits(dateToday: Long, dateYesterday: Long)

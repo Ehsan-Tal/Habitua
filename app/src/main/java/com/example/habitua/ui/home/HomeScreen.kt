@@ -3,6 +3,7 @@
 
 package com.example.habitua.ui.home
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -17,15 +18,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +41,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -61,9 +68,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
@@ -73,8 +80,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
@@ -101,11 +110,13 @@ fun HabitScreen(
     navController: NavHostController
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
-    //val homeUiState: HomeUiState = HomeUiState(listOf(Habit(1, "", name = "Josh", description = "johnson")))
     val coroutineScope = rememberCoroutineScope()
 
     var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
     var dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
+    var expandedIconMenu by remember { mutableStateOf(false) }
+
+    Log.d("HabitScreen", "$homeUiState")
 
     HabitHomeBody(
         navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
@@ -118,9 +129,24 @@ fun HabitScreen(
 
         habitList = homeUiState.habitList,
         countList = homeUiState.countList,
+        stringMap = homeUiState.nameMaps,
+        iconList = homeUiState.iconList,
+
         onClickHabitCard = { habit: Habit ->
             coroutineScope.launch{ viewModel.toggleHabitActive(habit) }
-                           },
+       },
+        onIconClick = {
+            expandedIconMenu = true
+        },
+        onIconDismiss = {
+            expandedIconMenu = false
+        },
+        onSelectImage = { habit:Habit, img: Int ->
+            coroutineScope.launch {
+                viewModel.onSelectImage(habit, img)
+            }
+        },
+        iconMenuExpanded = expandedIconMenu,
 
         // review items
         reviewConfirmationRequired = reviewConfirmationRequired,
@@ -144,8 +170,9 @@ fun HabitScreen(
             viewModel.setDataSource(newDataSource)
         }
     )
-
 }
+
+
 @Composable
 fun HabitHomeBody(
     navigateToHabitDestination: () -> Unit,
@@ -159,6 +186,12 @@ fun HabitHomeBody(
     habitList: List<Habit>,
     onClickHabitCard: (Habit) -> Unit,
 
+    iconList: List<Painting>,
+    onSelectImage: (Habit, Int) -> Unit,
+    onIconClick: () -> Unit,
+    onIconDismiss: () -> Unit,
+    iconMenuExpanded: Boolean,
+
     reviewConfirmationRequired: Boolean,
     onReviewClick: () -> Unit,
     onReviewAccept: () -> Unit,
@@ -167,7 +200,8 @@ fun HabitHomeBody(
 
     dataSource: HomeViewModel.DataSource,
     onOptionSelected: (HomeViewModel.DataSource) -> Unit,
-    countList: Map<HomeViewModel.DataSource, Int>
+    countList: Map<HomeViewModel.DataSource, Int>,
+    stringMap: Map<HomeViewModel.DataSource, String>,
 ){
 
     Scaffold(
@@ -176,30 +210,40 @@ fun HabitHomeBody(
             .statusBarsPadding(),
     )
     { innerPadding ->
-        HabitHomeSkeleton(
-            habitList = habitList,
-            countList = countList,
-            currentScreenName = currentScreenName,
-            contentPadding = innerPadding,
-            onCreateButtonClick = navigateToHabitEntry,
-            onMoreOptionsClick = navigateToHabitEdit,
-            onClickHabitCard = onClickHabitCard,
 
-            navigateToHabitDestination = navigateToHabitDestination,
-            navigateToVisualizeDestination = navigateToVisualizeDestination,
-            navigateToSettingDestination = navigateToSettingDestination,
+            HabitHomeSkeleton(
+                habitList = habitList,
+                countList = countList,
+                nameMaps = stringMap,
 
-            dataSource = dataSource,
-            onOptionSelected = onOptionSelected,
+                iconList = iconList,
+                onSelectImage = onSelectImage,
+                onIconClick = onIconClick,
+                onIconDismiss = onIconDismiss,
+                iconMenuExpanded = iconMenuExpanded,
 
-            //review button related material
-            reviewConfirmationRequired = reviewConfirmationRequired,
-            onReviewClick = onReviewClick,
-            onReviewAccept = onReviewAccept,
-            onReviewDismiss = onReviewDismiss,
-            userReviewedToday = userReviewedToday,
-        )
-    }
+                currentScreenName = currentScreenName,
+                contentPadding = innerPadding,
+                onCreateButtonClick = navigateToHabitEntry,
+                onMoreOptionsClick = navigateToHabitEdit,
+                onClickHabitCard = onClickHabitCard,
+
+                navigateToHabitDestination = navigateToHabitDestination,
+                navigateToVisualizeDestination = navigateToVisualizeDestination,
+                navigateToSettingDestination = navigateToSettingDestination,
+
+                dataSource = dataSource,
+                onOptionSelected = onOptionSelected,
+
+                //review button related material
+                reviewConfirmationRequired = reviewConfirmationRequired,
+                onReviewClick = onReviewClick,
+                onReviewAccept = onReviewAccept,
+                onReviewDismiss = onReviewDismiss,
+                userReviewedToday = userReviewedToday,
+            )
+
+     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -226,7 +270,15 @@ private fun HabitHomeSkeleton(
 
     dataSource: HomeViewModel.DataSource,
     onOptionSelected: (HomeViewModel.DataSource) -> Unit,
-    countList: Map<HomeViewModel.DataSource, Int>
+
+    countList: Map<HomeViewModel.DataSource, Int>,
+    nameMaps: Map<HomeViewModel.DataSource, String>,
+
+    iconList: List<Painting>,
+    onSelectImage: (Habit, Int) -> Unit,
+    iconMenuExpanded: Boolean,
+    onIconClick: () -> Unit,
+    onIconDismiss: () -> Unit,
 ){
     var expanded by remember { mutableStateOf(false) }
 
@@ -274,7 +326,7 @@ private fun HabitHomeSkeleton(
                             text = {
                                 Row {
                                 Text(text = countList[dataSourceOption].toString())
-                                Text(dataSourceOption.name)
+                                Text(text = nameMaps[dataSourceOption].toString())
                                    }
                                 },
                             onClick = {
@@ -296,10 +348,16 @@ private fun HabitHomeSkeleton(
 
                 userReviewedToday = userReviewedToday,
 
+                iconList = iconList,
+                onSelectImage = onSelectImage,
+                iconMenuExpanded = iconMenuExpanded,
+                onIconClick = onIconClick,
+                onIconDismiss = onIconDismiss
                 )
         }
 
-        // habit buttons
+
+        // buttons for adding and reviewing
         Row (
             modifier = Modifier
                 .padding(dimensionResource(id = R.dimen.padding_medium))
@@ -325,6 +383,8 @@ private fun HabitHomeSkeleton(
             }
 
 
+
+            // Review button portion
             ElevatedButton(
                 onClick = onReviewClick,
                 enabled = !userReviewedToday && habitList.isNotEmpty(),
@@ -378,6 +438,12 @@ private fun HabitColumn(
     onMoreOptionsClick: (Int) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onClickHabitCard: (Habit) -> Unit,
+
+    iconList: List<Painting>,
+    onSelectImage: (Habit, Int) -> Unit,
+    iconMenuExpanded: Boolean,
+    onIconClick: () -> Unit,
+    onIconDismiss: () -> Unit
     ){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -401,6 +467,12 @@ private fun HabitColumn(
                 onClickHabitCard = onClickHabitCard,
                 onMoreOptionsClick = onMoreOptionsClick,
                 userReviewedToday = userReviewedToday,
+
+                iconList = iconList,
+                onSelectImage = onSelectImage,
+                iconMenuExpanded = iconMenuExpanded,
+                onIconClick = onIconClick,
+                onIconDismiss = onIconDismiss
             )
         }
 
@@ -416,12 +488,20 @@ private fun HabitList(
     userReviewedToday: Boolean,
     onClickHabitCard: (Habit) -> Unit,
 
-    modifier: Modifier = Modifier,
+    iconList: List<Painting>,
+    onSelectImage: (Habit, Int) -> Unit,
+    iconMenuExpanded: Boolean,
+    onIconClick: () -> Unit,
+    onIconDismiss: () -> Unit,
+
+    modifier: Modifier = Modifier
 ) {
+
     LazyColumn (
         modifier = modifier,
         contentPadding = contentPadding
     ) {
+
         items(habitList, key = { habit -> habit.id }) { habit ->
             Row (
                 modifier = Modifier
@@ -434,6 +514,14 @@ private fun HabitList(
                     onClickHabitCard = onClickHabitCard,
                     onMoreOptionsClick = { onMoreOptionsClick(habit.id) },
                     userReviewedToday = userReviewedToday,
+                    onIconClick = onIconClick
+                )
+                ImageMenu(
+                    onSelectImage = onSelectImage,
+                    listOfImages = iconList,
+                    habit = habit,
+                    iconMenuExpanded = iconMenuExpanded,
+                    onIconDismiss = onIconDismiss
                 )
             }
         }
@@ -448,9 +536,10 @@ fun HabitCard (
     modifier: Modifier = Modifier,
     onClickHabitCard: (Habit) -> Unit,
     onMoreOptionsClick: (Habit) -> Unit,
+
+    onIconClick: () -> Unit
 ) {
 
-    val coroutineScope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
 
     val foregroundColor by animateColorAsState(
@@ -501,7 +590,7 @@ fun HabitCard (
             .alpha(if (userReviewedToday) 0.5f else 1f)
             .clickable {
                 if (!userReviewedToday) {
-                        onClickHabitCard(habit)
+                    onClickHabitCard(habit)
                 }
             },
     ) {
@@ -520,16 +609,20 @@ fun HabitCard (
             Row (
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(
-                    onClick = {},
-                    //TODO:  change this to an img button !
+                //TODO: have something that connects the content description with the image, pls.
+                    HabitIcon(
+                        drawableRes = habit.imageResId,
+                        contentDescription = "",
+                        onIconClick = onIconClick,
+                        modifier = Modifier
+                            .weight(1f)
+                        )
+                    /*
+                    HabitIcon(
+                        imageURI = habit.imageURI,
+                        iconMenuExpanded = iconMenuExpanded
+                    ) */
 
-                    modifier = Modifier
-                        .padding(dimensionResource(R.dimen.padding_small))
-                        .weight(1f)
-                ) {
-                    HabitIcon(habit.imageURI)
-                }
                 Column(
                     modifier = Modifier
                         .padding(dimensionResource(R.dimen.padding_medium))
@@ -566,35 +659,127 @@ fun HabitCard (
 
 @Composable
 fun HabitIcon(
-    imageURI: String
+    drawableRes: Int,
+    contentDescription: String,
+    onIconClick: () -> Unit,
+    modifier: Modifier
 ){
-
-    /*
-    val painter = remember(habitIcon) {
-        try {
-            painterResource(id = habitIcon)
-        } catch(e: Exception) {
-            Log.w("HabitIcon", "Invalid imageResId: $habitIcon", e)
-            painterResource(id = R.drawable.tal_derpy)
-        }
-    }
-    */
     Image(
-        modifier = Modifier
+        painter = painterResource(id =  drawableRes),
+        contentDescription = contentDescription,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .padding(dimensionResource(R.dimen.padding_small))
             .size(dimensionResource(R.dimen.image_size))
             .clip(RoundedCornerShape(100))
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-            .shadow(elevation = 6.dp),
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.tertiary,
+                shape = CircleShape
+            )
+            .shadow(elevation = 6.dp)
+            .clickable { onIconClick() },
+    )
 
-        contentScale = ContentScale.Crop,
-        contentDescription = null,
-        //painter = painterResource(habitIcon),
-        painter = painterResource(id = R.drawable.tal_derpy),
+}
 
+@Composable
+fun ImageMenu(
+    onSelectImage: (Habit, Int) -> Unit,
+    listOfImages: List<Painting>,
+    habit: Habit,
+    iconMenuExpanded: Boolean,
+    onIconDismiss: () -> Unit,
+) {
+    if (iconMenuExpanded) {
+        Dialog( onDismissRequest = {onIconDismiss()}) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.image_menu_dialog_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_large))
+                )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+            ) {
+                //This loads slower, is coil worth it for my purposes ?
+                items(listOfImages) { painting ->
+                    val imgUri = with(androidx.compose.ui.platform.LocalContext.current) {
+                        Uri.parse("android.resource://$packageName/${painting.imageUri}")
+                    }
+
+                    val painter = rememberAsyncImagePainter(
+                        model = imgUri,
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
+                            .padding(dimensionResource(R.dimen.padding_small))
+                            .clickable { onSelectImage(habit, painting.imageUri) }
+                    ) {
+                        Image(
+                            painter = painter,
+                            contentDescription = painting.contentDescription,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(dimensionResource(R.dimen.padding_small))
+                                .size(dimensionResource(R.dimen.image_size))
+                                .clip(RoundedCornerShape(100))
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    shape = CircleShape
+                                )
+                                .shadow(elevation = 6.dp)
+                        )
+                    }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "image-news",
+    group = "components"
+)
+@Composable
+fun ImageGallery(){
+    PreviewHabituaTheme(darkTheme = false){
+        ImageMenu(
+            onSelectImage = {habit, i -> } ,
+            listOfImages = listOf(
+                Painting(R.drawable.ic_launcher_foreground, "Content Description"),
+
+                Painting(R.drawable.ic_launcher_background, "Content Description"),
+
+                Painting(R.drawable.ic_launcher_foreground, "Content Description"),
+                Painting(R.drawable.ic_launcher_background, "Content Description"),
+
+                Painting(R.drawable.ic_launcher_background, "Content Description"),
+
+                Painting(R.drawable.ic_launcher_foreground, "Content Description")
+            ),
+            Habit(name = "name", description = ""),
+            iconMenuExpanded = false,
+            onIconDismiss = {},
         )
+    }
 }
 
 
+/*
 @Preview(
     showBackground = true,
     name = "Light-no-Habits",
@@ -624,7 +809,10 @@ fun LightEmptyPreview(){
 
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
@@ -657,7 +845,9 @@ fun DarkEmptyPreview(){
             userReviewedToday = false,
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
@@ -708,10 +898,13 @@ fun LightHabitsPreview(){
             userReviewedToday = false,
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
+//TODO: Consolidate previews to reduce inconvenice of change
 
 //TODO: this should use Test Data because things will change soon(TM)
 @Preview(
@@ -761,7 +954,9 @@ fun DarkHabitsPreview(){
 
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
@@ -814,7 +1009,9 @@ fun LightHabitsReviewedPreview(){
 
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
@@ -866,7 +1063,12 @@ fun DarkHabitsReviewedPreview(){
 
             dataSource = dataSource,
             onOptionSelected = {},
-            countList = emptyMap()
+            countList = emptyMap(),
+            stringMap = emptyMap(),
+            iconList = listOf()
         )
     }
 }
+
+
+ */

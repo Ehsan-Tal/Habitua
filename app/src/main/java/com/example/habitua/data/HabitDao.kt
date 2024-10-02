@@ -45,16 +45,6 @@ interface HabitDao {
         """)
     fun getAllHabitsNotAcquired(): Flow<List<Habit>>
 
-
-    // NEW
-    @Query("""
-        SELECT *
-        FROM habits
-        WHERE dateAcquired IS NULL
-        AND  currentStreakOrigin IS NOT NULL
-        """)
-    fun getAllHabitsStreaking(): Flow<List<Habit>>
-
     // NEW
     @Query("""
         SELECT *
@@ -91,61 +81,51 @@ interface HabitDao {
 
     // NEW
     @Query("""
-        SELECT COUNT(*)    
+        SELECT COUNT(id)    
         FROM habits
         WHERE dateAcquired IS NOT NULL
         """)
-    fun countAllHabitsAcquired(): Int
+    fun countAllHabitsAcquired(): Flow<Int>
 
     // NEW
     @Query("""
-        SELECT COUNT(*)    
+        SELECT COUNT(id)    
         FROM habits
         WHERE dateAcquired IS NULL
         """)
-    fun countAllHabitsNotAcquired(): Int
-
-
-    // NEW
-    @Query("""
-        SELECT COUNT(*)    
-        FROM habits
-        WHERE dateAcquired IS NULL
-        AND  currentStreakOrigin IS NOT NULL
-        """)
-    fun countAllHabitsStreaking(): Int
+    fun countAllHabitsNotAcquired(): Flow<Int>
 
     // NEW
     @Query("""
-        SELECT COUNT(*)    
+        SELECT COUNT(id)    
         FROM habits
         WHERE dateAcquired IS NULL
         AND currentStreakOrigin IS NULL
         """)
-    fun countAllHabitsNotStreaking(): Int
+    fun countAllHabitsNotStreaking(): Flow<Int>
 
     // NEW
     @Query("""
-        SELECT COUNT(*)
+        SELECT COUNT(id)
         FROM habits
         WHERE dateAcquired IS NULL
         AND currentStreakOrigin IS NOT NULL
         AND (
-            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateToday / 1000, 'unixepoch') OR 
-            DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch')
+            DATE(nextReviewedDate / 1000, 'unixepoch') = DATE(:dateToday / 1000, 'unixepoch') OR 
+            DATE(nextReviewedDate / 1000, 'unixepoch') = DATE(:dateYesterday / 1000, 'unixepoch')
         )
         """)
-    fun countAllHabitsTODO(dateToday: Long, dateYesterday: Long): Int
+    fun countAllHabitsTODO(dateToday: Long, dateYesterday: Long): Flow<Int>
 
     // NEW
     @Query("""
-        SELECT COUNT(*)        
+        SELECT COUNT(id)        
         FROM habits
         WHERE dateAcquired IS NULL
         AND currentStreakOrigin IS NOT NULL
-        AND DATE(nextReviewedDate / 1000, 'unixepoch') != DATE(:dateYesterday / 1000, 'unixepoch')
+        AND DATE(nextReviewedDate / 1000, 'unixepoch') = DATE(:dateYesterday / 1000, 'unixepoch')
         """)
-    fun countAllHabitsAtRisk(dateYesterday: Long): Int
+    fun countAllHabitsAtRisk(dateYesterday: Long): Flow<Int>
 
     // TODO: this needs a history
     //    @Query("SELECT * from habits WHERE dateAcquired IS NULL AND currentStreakOrigin IS NOT NULL AND curr")
@@ -159,8 +139,8 @@ interface HabitDao {
     @Query ("SELECT * from habits")
     fun getAllHabits(): Flow<List<Habit>>
 
-    @Query ("SELECT COUNT(*) from habits")
-    fun countAllHabits(): Int
+    @Query ("SELECT COUNT(id) from habits")
+    fun countAllHabits(): Flow<Int>
 
     /**
      * Returns a Flow of a single [Habit] object with the specified [habitId].

@@ -33,7 +33,7 @@ import kotlin.text.format
 data class Habit (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    var imageURI: String = "",
+    @DrawableRes val imageResId : Int = R.drawable.tal_derpy,
     var name: String,
     var description: String,
     var complexity: Complexity = Complexity.SIMPLE,

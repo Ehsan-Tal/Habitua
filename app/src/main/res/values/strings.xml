@@ -81,6 +81,7 @@
     <string name="streak_length_multiple_days_count">That was %1$s days ago</string>
     <string name="streak_length_single_day_count">That was yesterday, believe it or not</string>
     <string name="streak_length_zero_day_count">That was today, believe it or not</string>
+    <string name="image_menu_dialog_title">Select an Image</string>
     <!--
         <string name=""></string>
         <string name="content_description_"></string>
