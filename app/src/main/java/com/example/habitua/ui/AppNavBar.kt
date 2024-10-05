@@ -28,7 +28,6 @@ fun HabitNavBar(
     Row (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(dimensionResource(R.dimen.padding_small))
     ) {
         HabitNavButton(
             text = stringResource(id = HabitDestination.navTitle),

@@ -89,6 +89,8 @@
     <string name="principle_list_empty">"...nothing yet ! "</string>
     <string name="content_description_FAB_principle_create">Add a principle</string>
     <string name="principle_button_create">Add a principle</string>
+    <string name="rebaseToToday">To Today</string>
+    <string name="content_description_rebaseToToday">rebase principle sheet\'s date to today</string>
 
     <!--
         <string name=""></string>

@@ -100,7 +100,6 @@ fun HabitNavHost(
         composable(route = PrincipleDestination.route) {
             PrincipleScreen(
                 currentScreenName = stringResource(id = PrincipleDestination.navTitle),
-                navigateToPrincipleEntry = {},
                 navigateToHabit = { navController.navigate(HabitDestination.route)},
                 navigateToPrinciple = { navController.navigate(PrincipleDestination.route)},
                 navigateToVisualize = { navController.navigate(VisualizationDestination.route)},

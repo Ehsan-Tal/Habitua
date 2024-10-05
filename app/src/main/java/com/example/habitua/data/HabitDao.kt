@@ -298,7 +298,25 @@ interface HabitDao {
         
     """)
     fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>>
+    //TODO: modify this to SELECT from principle dates and LEFT JOIN the names
 
+    @Query("""
+        SELECT
+            principles.principleId,
+            principles.name,
+            principles.description,
+            COALESCE(principles_dates.date, :date) AS date,
+            principles_dates.value
+        FROM 
+            principles_dates
+        INNER JOIN 
+            principles
+        ON 
+            principles.principleId = principles_dates.principleId
+        WHERE
+            DATE(principles_dates.date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch')
+    """)
+    fun getPrinciplesDetails(date: Long): Flow<List<PrincipleDetails>>
 
     @Query ("DELETE FROM principles")
     suspend fun deleteAllPrinciples()
@@ -306,8 +324,9 @@ interface HabitDao {
     @Query("""
         UPDATE principles_dates 
         SET value = :value 
-        WHERE principleId = :principleId
-        AND DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch') 
+        WHERE 
+            principleId = :principleId
+            AND DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch') 
     """)
     suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
 

@@ -9,16 +9,23 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -57,7 +64,6 @@ fun PrincipleScreen(
     viewModel: PrincipleViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     currentScreenName: String,
-    navigateToPrincipleEntry: () -> Unit,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
     navigateToVisualize: () -> Unit,
@@ -74,13 +80,10 @@ fun PrincipleScreen(
         navigateToPrinciple = navigateToPrinciple,
         navigateToVisualize = navigateToVisualize,
         navigateToSetting = navigateToSetting,
-        navigateToPrincipleEntry = navigateToPrincipleEntry,
 
         // dates
-        dateBefore = principleUiState.dateBeforeString,
         dateBase = principleUiState.dateBaseString,
-        dateAfter = principleUiState.dateAfterString,
-        
+
         onDateSwipe = {},
         updateToToday = { viewModel.updateToToday() },
         updateToTomorrow = { viewModel.updateToTomorrow() },
@@ -103,6 +106,8 @@ fun PrincipleScreen(
         principleListToday = principleUiState.principleListToday,
         onMoreOptionsClickPrinciple = {},
 
+        // Action Bar items
+        addPrinciple = { viewModel.addPrinciple() },
     )
 }
 
@@ -111,16 +116,13 @@ fun PrincipleScreen(
 fun PrincipleBody(
     // navigation
     currentScreenName: String,
-    navigateToPrincipleEntry: () -> Unit,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
     navigateToVisualize: () -> Unit,
     navigateToSetting: () -> Unit,
 
     // dates
-    dateBefore: String,
     dateBase: String,
-    dateAfter: String,
     onDateSwipe: (Long) -> Unit,
 
     updateToToday: () -> Unit,
@@ -136,6 +138,9 @@ fun PrincipleBody(
     onClickPrinciple: (PrincipleDetails) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
     onMoreOptionsClickPrinciple: (PrincipleDetails) -> Unit,
+
+    // action bar
+    addPrinciple: () -> Unit
 ){
     Scaffold(
         modifier = Modifier
@@ -155,57 +160,66 @@ fun PrincipleBody(
              * Title and Nav bar should not have padding beyond the scaffold
              */
             val paddedModifier = Modifier
+                .fillMaxSize()
                 .padding(dimensionResource(id = R.dimen.padding_large))
                 .border(1.dp, MaterialTheme.colorScheme.tertiary, RectangleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
 
-            // title bar
-            AppTitleBar(
-                title = stringResource(id = PrincipleDestination.title)
-            )
 
-            // principle filter list
-            PrincipleFilterBar(
-                modifier = paddedModifier,
+            Column( modifier = Modifier.weight(1f) ){
+                // title bar
+                AppTitleBar( title = stringResource(id = PrincipleDestination.title) )
+            }
+            Column( modifier = Modifier.weight(8f)) {
+                Column (modifier = Modifier.weight(1f)) {
+                    // principle filter list
+                    PrincipleFilterBar(
+                        modifier = paddedModifier,
 
-                dateBase = dateBase,
-                dateBefore = dateBefore,
-                dateAfter = dateAfter,
-                isEqualToToday = isEqualToToday,
-                isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
+                        dateBase = dateBase,
+                        isEqualToToday = isEqualToToday,
+                        isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
 
-                onDateSwipe = onDateSwipe,
-                updateToTomorrow = updateToTomorrow,
-                updateToYesterday = updateToYesterday
-            )
+                        onDateSwipe = onDateSwipe,
+                        updateToTomorrow = updateToTomorrow,
+                        updateToYesterday = updateToYesterday
+                    )
+                }
+                Column( modifier = Modifier.weight(4f) ){
+                    // principle list bar
+                    PrincipleListBar(
+                        modifier = paddedModifier,
 
-            // principle list bar
-            PrincipleListBar(
-                modifier = paddedModifier,
+                        onClickPrinciple = onClickPrinciple,
+                        onHoldPrinciple = onHoldPrinciple,
+                        onMoreOptionsClickPrinciple = onMoreOptionsClickPrinciple,
+                        principleListToday = principleListToday,
 
-                onClickPrinciple = onClickPrinciple,
-                onHoldPrinciple = onHoldPrinciple,
-                onMoreOptionsClickPrinciple = onMoreOptionsClickPrinciple,
-                principleListToday = principleListToday,
+                        isBeforeYesterday = isBeforeYesterday,
+                    )
+                }
+                Column ( modifier = Modifier.weight(1f) ) {
+                    // action bar
+                    PrincipleActionBar(
+                        modifier = paddedModifier,
 
-                isBeforeYesterday = isBeforeYesterday,
-            )
+                        addPrinciple = addPrinciple,
+                        setOfferRebase = !isEqualToToday,
+                        rebaseToToday = updateToToday
+                    )
+                }
 
-            // action bar
-            PrincipleActionBar(
-                navigateToPrincipleEntry = navigateToPrincipleEntry,
-                setOfferRebase = !isEqualToToday,
-                rebaseToToday = updateToToday
-            )
-
-            // navigation bar
-            HabitNavBar(
-                navigateToHabit = navigateToHabit,
-                navigateToPrinciple = navigateToPrinciple,
-                navigateToVisualize = navigateToVisualize,
-                navigateToSetting = navigateToSetting,
-                currentScreenName = currentScreenName
-            )
+            }
+            Column ( modifier = Modifier.weight(1f) ) {
+                // navigation bar
+                HabitNavBar(
+                    navigateToHabit = navigateToHabit,
+                    navigateToPrinciple = navigateToPrinciple,
+                    navigateToVisualize = navigateToVisualize,
+                    navigateToSetting = navigateToSetting,
+                    currentScreenName = currentScreenName
+                )
+            }
         }
     }
 }
@@ -219,8 +233,6 @@ fun PrincipleFilterBar(
     modifier: Modifier = Modifier,
 
     dateBase: String,
-    dateBefore: String,
-    dateAfter: String,
 
     isEqualToToday: Boolean,
     isEqualToWeekBeforeToday: Boolean,
@@ -230,34 +242,39 @@ fun PrincipleFilterBar(
     updateToYesterday: () -> Unit,
 ){
     Column(
-        modifier = modifier
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Row(){
-            if (!isEqualToWeekBeforeToday) {
-                Text(text = dateBefore)
-            }
-            Text(text = dateBase)
-
-            // we also want to perhaps expand it as far as possible
-
-            // either this, or we color it differently
-            if (!isEqualToToday){
-                Text(text = dateAfter)
-            }
-        }
-        Row(){
-
-            Button(
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+        ){
+            IconButton(
                 enabled = !isEqualToWeekBeforeToday,
                 onClick = updateToYesterday,
+                modifier = Modifier.weight(1f)
             ) {
-                Text("Change to Yesterday")
+                Icon(
+                    imageVector = Icons.Filled.KeyboardDoubleArrowLeft,
+                    contentDescription = "Yesterday"
+                )
             }
-            Button(
+            Text(
+                modifier = Modifier.weight(2f),
+                textAlign = TextAlign.Center,
+                text = dateBase,
+                style = MaterialTheme.typography.displayMedium
+            )
+            IconButton(
                 enabled = !isEqualToToday,
                 onClick = updateToTomorrow,
+                modifier = Modifier.weight(1f)
             ) {
-                Text("Change to Tomorrow")
+                Icon(
+                    imageVector = Icons.Filled.KeyboardDoubleArrowRight,
+                    contentDescription = "Tomorrow"
+                )
             }
         }
     }
@@ -307,7 +324,8 @@ fun PrincipleListBar(
                         PrincipleDetailsCard(
                             principleDetail = principleDetail,
                             onMoreClick = onMoreOptionsClickPrinciple,
-                            onClickPrinciple = onClickPrinciple,
+                            onClickPrinciple = { value ->
+                                onClickPrinciple(principleDetail.copy(value = value))},
                             isBeforeYesterday = isBeforeYesterday,
                         )
                     }
@@ -323,19 +341,21 @@ fun PrincipleListBar(
  */
 @Composable
 fun PrincipleActionBar(
-    navigateToPrincipleEntry: () -> Unit,
+    modifier: Modifier = Modifier,
 
     setOfferRebase: Boolean,
     rebaseToToday: () -> Unit,
+
+    addPrinciple: () -> Unit,
 ){
     Row(
-        modifier = Modifier
+        modifier = modifier
             .padding(dimensionResource(id = R.dimen.padding_medium))
     ) {
 
         // Create button portion
         ElevatedButton(
-            onClick = navigateToPrincipleEntry,
+            onClick = addPrinciple,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.secondary
@@ -355,15 +375,28 @@ fun PrincipleActionBar(
             )
         }
 
+
         //rebase to today button
-        if (setOfferRebase){
-            TextButton(
-                onClick = rebaseToToday,
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small))
-            ) {
-                Text(text = "To Today")
-            }
+        ElevatedButton(
+            enabled = setOfferRebase,
+            onClick = rebaseToToday,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.secondary
+            ),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary),
+            modifier = Modifier
+                .padding(dimensionResource(id = R.dimen.padding_small)),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.CalendarToday,
+                tint = MaterialTheme.colorScheme.tertiary,
+                contentDescription = stringResource(R.string.content_description_rebaseToToday)
+            )
+            Text(
+                text = stringResource(id = R.string.rebaseToToday),
+                style = MaterialTheme.typography.displaySmall
+            )
         }
     }
 }
@@ -377,20 +410,42 @@ fun PrincipleDetailsCard(
     principleDetail: PrincipleDetails,
 
     onMoreClick: (PrincipleDetails) -> Unit,
-    onClickPrinciple: (PrincipleDetails) -> Unit,
+    onClickPrinciple: (Boolean) -> Unit,
 
     isBeforeYesterday: Boolean
 ){
     // should be the coloured portion
     // onMoreClick allows you to change the name of it
 
-    OutlinedCard(
-
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .height(60.dp),
     ){
-        Text(principleDetail.name)
-        Text(principleDetail.description)
-        Text(principleDetail.date.toString())
-        Text(isBeforeYesterday.toString())
+        OutlinedCard(
+            modifier = Modifier
+                .weight(2f)
+                .padding(dimensionResource(id = R.dimen.padding_small))
+                .fillMaxSize(),
+        ){
+            Text(
+                text = principleDetail.name,
+                style = MaterialTheme.typography.displaySmall
+            )
+ //           Text(principleDetail.description)
+        }
+
+        Checkbox(
+            modifier = Modifier
+                .weight(1f)
+                .padding(dimensionResource(id = R.dimen.padding_small))
+                .fillMaxSize(),
+            checked = principleDetail.value,
+            onCheckedChange = onClickPrinciple,
+            enabled = !isBeforeYesterday
+        )
+
     }
+    //TODO: we need to change the checkbox to have different visuals
+    //TODO:
     //principleDetail.description should be a hover or equivalent.
 }

@@ -1,8 +1,11 @@
 package com.example.habitua.ui.principles
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.data.AppRepository
+import com.example.habitua.data.Principle
 import com.example.habitua.data.PrincipleDetails
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,8 +33,10 @@ class PrincipleViewModel(
         principleJob?.cancel()
 
         principleJob = viewModelScope.launch {
-            appRepository.getPrinciplesAndPrincipleDates(principleUiState.value.dateBase.toEpochMilli()).collect { principleDetails ->
-                _principleUiState.value = _principleUiState.value.copy(principleListToday = principleDetails)
+            appRepository.getPrinciplesAndPrincipleDates(
+                principleUiState.value.dateBase.toEpochMilli()
+            ).collect {
+                _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
             }
         }
     }
@@ -61,6 +66,19 @@ class PrincipleViewModel(
 
     }
  */
+    fun addPrinciple() {
+
+        val defaultPrinciple = Principle(
+            name = "Added principle",
+            description = "Added on ${_principleUiState.value.convertInstantToString(principleUiState.value.dateToday)}}",
+        )
+
+        viewModelScope.launch {
+            appRepository.insertPrinciple(defaultPrinciple)
+        }
+        collectPrinciples()
+    }
+
     private fun collectPrincipleAfterUpdates(){
         if (_principleUiState.value.isBaseEqualToday()) {
             collectPrinciples()
@@ -82,9 +100,8 @@ class PrincipleViewModel(
     }
 
     suspend fun togglePrinciple(principleDetails: PrincipleDetails) {
-        // we ought to change both th
         appRepository.updatePrincipleDate(
-            principleDetails.date, principleDetails.principleId, !principleDetails.value
+            principleDetails.date, principleDetails.principleId, principleDetails.value
         )
     }
 }
@@ -116,16 +133,20 @@ data class PrincipleUiState(
         get() = DateTimeFormatter.ofPattern(dateFormat)
             .withZone(ZoneId.systemDefault())
             .format(dateBase)
-
     val dateBeforeString: String
         get() = DateTimeFormatter.ofPattern(dateFormat)
             .withZone(ZoneId.systemDefault())
             .format(dateBefore)
-
     val dateAfterString: String
         get() = DateTimeFormatter.ofPattern(dateFormat)
             .withZone(ZoneId.systemDefault())
             .format(dateAfter)
+
+    fun convertInstantToString(instant: Instant): String {
+        return DateTimeFormatter.ofPattern(dateFormat)
+            .withZone(ZoneId.systemDefault())
+            .format(instant)
+    }
 
     fun addDay() {
         if (isBefore(dateBase, dateToday)){
@@ -139,8 +160,6 @@ data class PrincipleUiState(
     }
     fun rebaseToToday(){
         dateBase = dateToday
-        // just remember that these change the dates, but we still need to update the flow
-        // from the other place.
     }
 
     private fun isBefore(first: Instant, second: Instant): Boolean {
@@ -155,6 +174,10 @@ data class PrincipleUiState(
     fun isBaseEqualToday(): Boolean {
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
         .isEqual(dateToday.atZone(ZoneId.systemDefault()).toLocalDate())
+    }
+    fun isBaseEqualYesterday(): Boolean {
+        return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
+            .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
     }
     fun isBaseBeforeYesterday(): Boolean {
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()

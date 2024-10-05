@@ -33,13 +33,10 @@ class AppRepositoryImplementation(
 
     override fun getAllHabitsAcquiredStream():
             Flow<List<Habit>> = habitDao.getAllHabitsAcquired()
-
     override fun getAllHabitsNotAcquiredStream():
             Flow<List<Habit>> = habitDao.getAllHabitsNotAcquired()
-
     override fun getAllHabitsNotStreakingStream():
             Flow<List<Habit>> = habitDao.getAllHabitsNotStreaking()
-
     override fun getAllHabitsTODOStream(dateToday: Long, dateYesterday: Long):
             Flow<List<Habit>> = habitDao.getAllHabitsTODO(dateToday, dateYesterday)
 
@@ -50,17 +47,18 @@ class AppRepositoryImplementation(
             = habitDao.reviewHabits(dateToday, dateYesterday)
 
 
-    override fun countAllHabitsStream(): Flow<Int> = habitDao.countAllHabits()
-
-    override fun countAllHabitsAcquiredStream(): Flow<Int> = habitDao.countAllHabitsAcquired()
-
-    override fun countAllHabitsNotAcquiredStream(): Flow<Int> = habitDao.countAllHabitsNotAcquired()
-
-    override fun countAllHabitsNotStreakingStream(): Flow<Int> = habitDao.countAllHabitsNotStreaking()
-
-    override fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<Int> = habitDao.countAllHabitsTODO(dateToday, dateYesterday)
-
-    override fun countAllHabitsAtRiskStream(dateYesterday: Long): Flow<Int> = habitDao.countAllHabitsAtRisk(dateYesterday)
+    override fun countAllHabitsStream(): Flow<Int>
+    = habitDao.countAllHabits()
+    override fun countAllHabitsAcquiredStream(): Flow<Int>
+    = habitDao.countAllHabitsAcquired()
+    override fun countAllHabitsNotAcquiredStream(): Flow<Int>
+    = habitDao.countAllHabitsNotAcquired()
+    override fun countAllHabitsNotStreakingStream(): Flow<Int>
+    = habitDao.countAllHabitsNotStreaking()
+    override fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<Int>
+    = habitDao.countAllHabitsTODO(dateToday, dateYesterday)
+    override fun countAllHabitsAtRiskStream(dateYesterday: Long): Flow<Int>
+    = habitDao.countAllHabitsAtRisk(dateYesterday)
 
 
 
@@ -88,13 +86,11 @@ class AppRepositoryImplementation(
      * we need to leave combined principles at the end as that functions as a return statement
      */
     override suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>> =
-        habitDao.getPrinciplesAndPrincipleDates(date).map { combinedPrinciples ->
-            val existingPrincipleIds = combinedPrinciples.map { it.principleId }
-
+        habitDao.getPrinciplesDetails(date).map { combinedPrinciples ->
             val principles = habitDao.getAllPrinciples().first()
 
             val missingPrincipleIds = principles
-                .filterNot { existingPrincipleIds.contains(it.principleId) }
+                .filterNot { combinedPrinciples.map { principleDate -> principleDate.principleId }.contains(it.principleId) }
                 .map {
                     PrincipleDate(
                         principleId = it.principleId,
@@ -105,37 +101,58 @@ class AppRepositoryImplementation(
             missingPrincipleIds.forEach {habitDao.insertPrincipleDate(it) }
 
             combinedPrinciples
-        }
+    }
+
+    /*
+        habitDao.getPrinciplesAndPrincipleDates(date).map { combinedPrinciples ->
+
+            val principles = habitDao.getAllPrinciples().first()
+
+            val principleDates = habitDao.getPrinciplesDatesByDate(date).first()
+
+            val missingPrincipleIds = principles
+                .filterNot { principleDates.map { principleDate -> principleDate.principleId }.contains(it.principleId) }
+                .map {
+                    PrincipleDate(
+                        principleId = it.principleId,
+                        date = date,
+                        value = false
+                    )
+                }
+            missingPrincipleIds.forEach {habitDao.insertPrincipleDate(it) }
+
+            combinedPrinciples
+    }
+
+     */
 
     override suspend fun getPrinciplesAndPrincipleDatesWithoutCreating(date: Long): Flow<List<PrincipleDetails>> =
-        habitDao.getPrinciplesAndPrincipleDates(date)
+        habitDao.getPrinciplesDetails(date)
 
     override suspend fun createTestPrinciples(principleList: List<Principle>): Void
     = habitDao.createTestPrinciples(principleList)
-
-
     override suspend fun deleteAllPrinciples() = habitDao.deleteAllPrinciples()
 
-    override suspend fun insertPrinciple(principle: Principle) = habitDao.insertPrinciple(principle)
+    override suspend fun insertPrinciple(principle: Principle)
+    = habitDao.insertPrinciple(principle)
+    override suspend fun deletePrinciple(principle: Principle)
+    = habitDao.deletePrinciple(principle)
 
-    override suspend fun deletePrinciple(principle: Principle) = habitDao.deletePrinciple(principle)
 
-    override suspend fun deletePrincipleDate(principleDate: PrincipleDate)
-    = habitDao.deletePrincipleDate(principleDate)
-
-    override fun getAllPrinciplesStream(): Flow<List<Principle>> = habitDao.getAllPrinciples()
-
-    override fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>> = habitDao.getAllPrinciplesDates()
+    override fun getAllPrinciplesStream(): Flow<List<Principle>>
+    = habitDao.getAllPrinciples()
+    override fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>>
+    = habitDao.getAllPrinciplesDates()
 
     override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>>
     = habitDao.getPrinciplesDatesByDate(date)
-
     override fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
     = habitDao.getPrinciplesByDateRange(dateStartInclusive, dateEndInclusive)
 
     override suspend fun insertPrincipleDate(principleDate: PrincipleDate)
     = habitDao.insertPrincipleDate(principleDate)
-
     override suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
     = habitDao.updatePrincipleDate(date, principleId, value)
+    override suspend fun deletePrincipleDate(principleDate: PrincipleDate)
+    = habitDao.deletePrincipleDate(principleDate)
 }
