@@ -17,9 +17,12 @@ import com.example.habitua.ui.habit.HabitEntryPostview
 import com.example.habitua.ui.habit.HabitEntryScreen
 import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.home.HabitScreen
+import com.example.habitua.ui.principles.PrincipleDestination
+import com.example.habitua.ui.principles.PrincipleScreen
 import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.settings.SettingScreen
 import com.example.habitua.ui.visual.VisualizationDestination
+import com.example.habitua.ui.visual.VisualizationScreen
 
 /**
  * Main navigation graph for the app.
@@ -39,7 +42,7 @@ fun HabitNavHost(
      */
     NavHost(
         navController = navController,
-        startDestination = HabitDestination.route, //HabitDestination.route,
+        startDestination = PrincipleDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
 
@@ -57,7 +60,10 @@ fun HabitNavHost(
                 navigateToHabitEdit = {
                     navController.navigate("${HabitEditDestination.route}/${it}")
                 },
-                navController = navController,
+                navigateToHabit = { navController.navigate(HabitDestination.route)},
+                navigateToPrinciple = { navController.navigate(PrincipleDestination.route)},
+                navigateToVisualize = { navController.navigate(VisualizationDestination.route)},
+                navigateToSetting = { navController.navigate(SettingDestination.route)},
                 )
         }
 
@@ -90,21 +96,34 @@ fun HabitNavHost(
             )
         }
 
+
+        composable(route = PrincipleDestination.route) {
+            PrincipleScreen(
+                currentScreenName = stringResource(id = PrincipleDestination.navTitle),
+                navigateToPrincipleEntry = {},
+                navigateToHabit = { navController.navigate(HabitDestination.route)},
+                navigateToPrinciple = { navController.navigate(PrincipleDestination.route)},
+                navigateToVisualize = { navController.navigate(VisualizationDestination.route)},
+                navigateToSetting = { navController.navigate(SettingDestination.route)},
+            )
+        }
+
+
         /**
          * The data visualization screen
          *
          * Takes the name of the current screen as a parameter
          * Takes the name of navigation controller as a parameter
          */
-        /*
         composable(route = VisualizationDestination.route) {
             VisualizationScreen(
                 currentScreenName = stringResource(id = VisualizationDestination.navTitle),
-                navController = navController
+                navigateToHabit = { navController.navigate(HabitDestination.route)},
+                navigateToPrinciple = { navController.navigate(PrincipleDestination.route)},
+                navigateToVisualize = { navController.navigate(VisualizationDestination.route)},
+                navigateToSetting = { navController.navigate(SettingDestination.route)},
             )
         }
-
-         */
 
         /**
          * The setting screen
@@ -115,7 +134,10 @@ fun HabitNavHost(
         composable(route = SettingDestination.route) {
             SettingScreen(
                 currentScreenName = stringResource(id = SettingDestination.navTitle),
-                navController = navController
+                navigateToHabit = { navController.navigate(HabitDestination.route)},
+                navigateToPrinciple = { navController.navigate(PrincipleDestination.route)},
+                navigateToVisualize = { navController.navigate(VisualizationDestination.route)},
+                navigateToSetting = { navController.navigate(SettingDestination.route)},
             )
         }
     }

@@ -42,6 +42,7 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.home.HabitDestination
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.principles.PrincipleDestination
 import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.theme.HabituaTheme
 import com.example.habitua.ui.theme.LocalCustomColorsPalette
@@ -50,6 +51,28 @@ object VisualizationDestination: NavigationDestination {
     override val route = "visualization"
     override val title = R.string.visualization_title
     val navTitle = R.string.visualization_nav_title
+}
+
+@Composable
+fun VisualizationScreen(
+    currentScreenName: String,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: VisualizationViewModel = viewModel(factory = AppViewModelProvider.Factory),
+){
+    Text(text = "Visualization")
+
+    HabitNavBar(
+        navigateToHabit = navigateToHabit,
+        navigateToPrinciple = navigateToPrinciple,
+        navigateToVisualize = navigateToVisualize,
+        navigateToSetting = navigateToSetting,
+        currentScreenName = currentScreenName
+    )
+
 }
 
 /*

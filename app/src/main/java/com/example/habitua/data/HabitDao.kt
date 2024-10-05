@@ -4,6 +4,7 @@ import android.icu.util.Calendar
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Delete
+import androidx.room.OnConflictStrategy
 import androidx.room.Update
 import androidx.room.Query
 import androidx.room.Transaction
@@ -263,34 +264,71 @@ interface HabitDao {
 
 
     // principles
-
     @Insert
     suspend fun insertPrinciple(principle: Principle)
 
-    @Insert
-    suspend fun insertPrincipleDate(principleDate: PrincipleDate)
+    @Update
+    suspend fun updatePrinciple(principle: Principle)
 
-    //TODO RE-ADD THE FOREIGN KEY CASCADING
     @Delete
     suspend fun deletePrinciple(principle: Principle)
+
+    @Insert
+    suspend fun createTestPrinciples(principleList: List<Principle>): Void
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertPrincipleDate(principleDate: PrincipleDate)
+
+    /**
+     * The left join allows us to append our first table results with records of the second table
+     * that have a relationship with the first
+     * We decide so with both the principleId and that the date values equal by date terms
+     */
+    @Query("""
+       SELECT
+        principles.principleId,
+        principles.name,
+        principles.description,
+        COALESCE(principles_dates.date, :date) AS date,
+        principles_dates.value
+        FROM principles
+        LEFT JOIN principles_dates 
+        ON principles.principleId = principles_dates.principleId
+        AND DATE(principles_dates.date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch')
+        
+    """)
+    fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>>
+
+
+    @Query ("DELETE FROM principles")
+    suspend fun deleteAllPrinciples()
+
+    @Query("""
+        UPDATE principles_dates 
+        SET value = :value 
+        WHERE principleId = :principleId
+        AND DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch') 
+    """)
+    suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
 
     @Delete
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)
 
-    @Query("DELETE FROM principles")
-    suspend fun deleteAllPrinciples()
+    @Query ("DELETE FROM principles_dates")
+    suspend fun deleteAllPrincipleDates()
 
 
-    @Query("SELECT * FROM principles")
+    @Query ("SELECT * FROM principles")
     fun getAllPrinciples(): Flow<List<Principle>>
 
-    @Query("SELECT * FROM principles_dates")
+    @Query ("SELECT * FROM principles_dates")
     fun getAllPrinciplesDates(): Flow<List<PrincipleDate>>
 
-    @Query("SELECT * FROM principles_dates WHERE DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch')")
-    fun getPrinciplesByDate(date: Long): Flow<List<PrincipleDate>>
+    @Query ("SELECT * FROM principles_dates " +
+            "WHERE DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch')")
+    fun getPrinciplesDatesByDate(date: Long): Flow<List<PrincipleDate>>
 
-    @Query("""
+    @Query ("""
         SELECT * 
         FROM principles_dates 
         WHERE DATE(date / 1000, 'unixepoch')
@@ -299,14 +337,5 @@ interface HabitDao {
             DATE(:dateEndInclusive / 1000, 'unixepoch') 
         """)
     fun getPrinciplesByDateRange(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
-
-    @Query("""
-        INSERT INTO principles_dates 
-            (principleId, date, value) 
-        VALUES (:principleId, :date, :value)
-        """)
-    suspend fun insertPrincipleDateEntry(principleId: Int, date: Long, value: Boolean)
-
-
 
 }

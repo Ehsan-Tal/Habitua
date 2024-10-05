@@ -45,6 +45,14 @@ interface AppRepository {
 
 
     // principles
+    suspend fun createTestPrinciples(principleList: List<Principle>): Void
+
+    suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>>
+
+    suspend fun getPrinciplesAndPrincipleDatesWithoutCreating(date: Long): Flow<List<PrincipleDetails>>
+
+    suspend fun deleteAllPrinciples()
+
     fun getAllPrinciplesStream(): Flow<List<Principle>>
 
     fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>>
@@ -61,6 +69,6 @@ interface AppRepository {
 
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)
 
-    suspend fun insertPrincipleDateEntry(principleId: Int, date: Long, value: Boolean)
+    suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
 
 }

@@ -10,18 +10,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 import com.example.habitua.R
 import com.example.habitua.ui.home.HabitDestination
+import com.example.habitua.ui.principles.PrincipleDestination
 import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.visual.VisualizationDestination
 
 
 @Composable
 fun HabitNavBar(
-    navigateToHabitDestination: () -> Unit,
-    navigateToVisualizeDestination: () -> Unit,
-    navigateToSettingDestination: () -> Unit,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
     currentScreenName: String,
 ){
     Row (
@@ -32,17 +33,22 @@ fun HabitNavBar(
         HabitNavButton(
             text = stringResource(id = HabitDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = navigateToHabitDestination
+            onNextButtonClicked = navigateToHabit
+        )
+        HabitNavButton(
+            text = stringResource(id = PrincipleDestination.navTitle),
+            currentScreenName = currentScreenName,
+            onNextButtonClicked = navigateToPrinciple
         )
         HabitNavButton(
             text = stringResource(id = VisualizationDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = navigateToVisualizeDestination
+            onNextButtonClicked = navigateToVisualize
         )
         HabitNavButton(
             text = stringResource(id = SettingDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = navigateToSettingDestination
+            onNextButtonClicked = navigateToSetting
         )
     }
 }

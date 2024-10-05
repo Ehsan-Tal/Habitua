@@ -10,6 +10,7 @@ import com.example.habitua.HabitApplication
 import com.example.habitua.ui.habit.HabitEditViewModel
 import com.example.habitua.ui.home.HomeViewModel
 import com.example.habitua.ui.habit.HabitEntryViewModel
+import com.example.habitua.ui.principles.PrincipleViewModel
 import com.example.habitua.ui.settings.SettingViewModel
 import com.example.habitua.ui.visual.VisualizationViewModel
 
@@ -38,15 +39,19 @@ object AppViewModelProvider {
             )
         }
 
+        // initializer for ui.package
+        initializer {
+            PrincipleViewModel(
+                habitApplication().container.appRepository
+            )
+        }
 
         // initializer for ui.visual
-        /*
         initializer {
             VisualizationViewModel(
                 habitApplication().container.appRepository
             )
         }
-         */
 
         // initializer for ui.settings
         initializer {

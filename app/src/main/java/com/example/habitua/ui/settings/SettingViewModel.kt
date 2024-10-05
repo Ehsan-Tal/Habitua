@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
+import com.example.habitua.data.Principle
 import kotlinx.coroutines.flow.first
 import java.io.File
 import java.time.LocalDate
@@ -108,17 +109,31 @@ class SettingViewModel(
                 dateAcquired = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             ),
         )
-        Log.d(TAG, "createTestData: $habitList")
+        val principleList = listOf(
+            Principle(name = "Principle 1", description = "descriptions"),
+            Principle(name = "Principle 3", description = "descriptions"),
+            Principle(name = "Principle 4", description = "descriptions"),
+        )
+
         viewModelScope.launch {
             appRepository.createAllHabits(habitList)
             _canCreateTestData.value = true
         }
+
+        viewModelScope.launch {
+            appRepository.createTestPrinciples(principleList)
+        }
+
     }
 
     fun deleteAllHabits() {
         viewModelScope.launch {
             appRepository.deleteAllHabits()
             _canCreateTestData.value = false
+        }
+
+        viewModelScope.launch {
+            appRepository.deleteAllPrinciples()
         }
     }
 

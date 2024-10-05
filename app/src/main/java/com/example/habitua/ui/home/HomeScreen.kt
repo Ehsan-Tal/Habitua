@@ -107,7 +107,10 @@ fun HabitScreen(
     currentScreenName: String,
     navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
-    navController: NavHostController
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -116,16 +119,14 @@ fun HabitScreen(
     var dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
     var expandedIconMenu by remember { mutableStateOf(false) }
 
-    Log.d("HabitScreen", "$homeUiState")
-
     HabitHomeBody(
-        navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
-        navigateToVisualizeDestination = { navController.navigate(VisualizationDestination.route)},
-        navigateToSettingDestination = { navController.navigate(SettingDestination.route)},
-
         currentScreenName = currentScreenName,
         navigateToHabitEdit = navigateToHabitEdit,
         navigateToHabitEntry = navigateToHabitEntry,
+        navigateToHabit = navigateToHabit,
+        navigateToPrinciple = navigateToPrinciple,
+        navigateToVisualize = navigateToVisualize,
+        navigateToSetting = navigateToSetting,
 
         habitList = homeUiState.habitList,
         countList = homeUiState.countList,
@@ -175,13 +176,13 @@ fun HabitScreen(
 
 @Composable
 fun HabitHomeBody(
-    navigateToHabitDestination: () -> Unit,
-    navigateToVisualizeDestination: () -> Unit,
-    navigateToSettingDestination: () -> Unit,
-
     currentScreenName: String,
     navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
 
     habitList: List<Habit>,
     onClickHabitCard: (Habit) -> Unit,
@@ -210,40 +211,39 @@ fun HabitHomeBody(
             .statusBarsPadding(),
     )
     { innerPadding ->
+        HabitHomeSkeleton(
+            habitList = habitList,
+            countList = countList,
+            nameMaps = stringMap,
 
-            HabitHomeSkeleton(
-                habitList = habitList,
-                countList = countList,
-                nameMaps = stringMap,
+            iconList = iconList,
+            onSelectImage = onSelectImage,
+            onIconClick = onIconClick,
+            onIconDismiss = onIconDismiss,
+            iconMenuExpanded = iconMenuExpanded,
 
-                iconList = iconList,
-                onSelectImage = onSelectImage,
-                onIconClick = onIconClick,
-                onIconDismiss = onIconDismiss,
-                iconMenuExpanded = iconMenuExpanded,
+            currentScreenName = currentScreenName,
+            contentPadding = innerPadding,
+            onCreateButtonClick = navigateToHabitEntry,
+            onMoreOptionsClick = navigateToHabitEdit,
+            onClickHabitCard = onClickHabitCard,
 
-                currentScreenName = currentScreenName,
-                contentPadding = innerPadding,
-                onCreateButtonClick = navigateToHabitEntry,
-                onMoreOptionsClick = navigateToHabitEdit,
-                onClickHabitCard = onClickHabitCard,
+            navigateToHabit = navigateToHabit,
+            navigateToPrinciple = navigateToPrinciple,
+            navigateToVisualize = navigateToVisualize,
+            navigateToSetting = navigateToSetting,
 
-                navigateToHabitDestination = navigateToHabitDestination,
-                navigateToVisualizeDestination = navigateToVisualizeDestination,
-                navigateToSettingDestination = navigateToSettingDestination,
+            dataSource = dataSource,
+            onOptionSelected = onOptionSelected,
 
-                dataSource = dataSource,
-                onOptionSelected = onOptionSelected,
-
-                //review button related material
-                reviewConfirmationRequired = reviewConfirmationRequired,
-                onReviewClick = onReviewClick,
-                onReviewAccept = onReviewAccept,
-                onReviewDismiss = onReviewDismiss,
-                userReviewedToday = userReviewedToday,
-            )
-
-     }
+            //review button related material
+            reviewConfirmationRequired = reviewConfirmationRequired,
+            onReviewClick = onReviewClick,
+            onReviewAccept = onReviewAccept,
+            onReviewDismiss = onReviewDismiss,
+            userReviewedToday = userReviewedToday,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -255,11 +255,13 @@ private fun HabitHomeSkeleton(
     reviewConfirmationRequired: Boolean,
     userReviewedToday: Boolean,
 
-    navigateToHabitDestination: () -> Unit,
-    navigateToVisualizeDestination: () -> Unit,
-    navigateToSettingDestination: () -> Unit,
 
     currentScreenName: String,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
+
     contentPadding: PaddingValues,
 
     onCreateButtonClick: () -> Unit,
@@ -421,9 +423,10 @@ private fun HabitHomeSkeleton(
         }
 
         HabitNavBar(
-            navigateToHabitDestination = navigateToHabitDestination,
-            navigateToVisualizeDestination = navigateToVisualizeDestination,
-            navigateToSettingDestination = navigateToSettingDestination,
+            navigateToHabit = navigateToHabit,
+            navigateToPrinciple = navigateToPrinciple,
+            navigateToVisualize = navigateToVisualize,
+            navigateToSetting = navigateToSetting,
             currentScreenName = currentScreenName
         )
     }

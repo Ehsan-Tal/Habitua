@@ -1,6 +1,10 @@
 package com.example.habitua.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.map
 
 /**
  * Implementation of [AppRepository] interface - provides habit data to the app
@@ -61,23 +65,77 @@ class AppRepositoryImplementation(
 
 
     // principles
-    override suspend fun insertPrinciple(principle: Principle) = habitDao.insertPrinciple(principle)
+    /**
+     * Collects principles and existing principle dates of :date
+     * Creates principle date records by :date for all missing principles of that date
+     *
+     * We want to create a record for each principle at :date in the principles_date entity
+     *
+     * We first collect the result of a LEFT JOIN between principles and principles_dates
+     * Then, we map and assign the variable as a combinedPrinciple
+     *
+     * then we collect the existing principleId's from combinedPrinciples
+     *
+     * then we gather all existent principles. As of now, I do not know what first() does,
+     * but it seems to fix a few bugs.
+     *
+     * We then filter out from that all principleIds that were acquired from the successful
+     * LEFT JOIN query
+     *
+     * For those that aren't, the next step maps them and creates a PrincipleDate object that
+     * is then used in a forEach loop with a simple insert query.
+     *
+     * we need to leave combined principles at the end as that functions as a return statement
+     */
+    override suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>> =
+        habitDao.getPrinciplesAndPrincipleDates(date).map { combinedPrinciples ->
+            val existingPrincipleIds = combinedPrinciples.map { it.principleId }
 
-    override suspend fun insertPrincipleDate(principleDate: PrincipleDate) = habitDao.insertPrincipleDate(principleDate)
+            val principles = habitDao.getAllPrinciples().first()
+
+            val missingPrincipleIds = principles
+                .filterNot { existingPrincipleIds.contains(it.principleId) }
+                .map {
+                    PrincipleDate(
+                        principleId = it.principleId,
+                        date = date,
+                        value = false
+                    )
+                }
+            missingPrincipleIds.forEach {habitDao.insertPrincipleDate(it) }
+
+            combinedPrinciples
+        }
+
+    override suspend fun getPrinciplesAndPrincipleDatesWithoutCreating(date: Long): Flow<List<PrincipleDetails>> =
+        habitDao.getPrinciplesAndPrincipleDates(date)
+
+    override suspend fun createTestPrinciples(principleList: List<Principle>): Void
+    = habitDao.createTestPrinciples(principleList)
+
+
+    override suspend fun deleteAllPrinciples() = habitDao.deleteAllPrinciples()
+
+    override suspend fun insertPrinciple(principle: Principle) = habitDao.insertPrinciple(principle)
 
     override suspend fun deletePrinciple(principle: Principle) = habitDao.deletePrinciple(principle)
 
-    override suspend fun deletePrincipleDate(principleDate: PrincipleDate) = habitDao.deletePrincipleDate(principleDate)
+    override suspend fun deletePrincipleDate(principleDate: PrincipleDate)
+    = habitDao.deletePrincipleDate(principleDate)
 
     override fun getAllPrinciplesStream(): Flow<List<Principle>> = habitDao.getAllPrinciples()
 
     override fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>> = habitDao.getAllPrinciplesDates()
 
+    override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>>
+    = habitDao.getPrinciplesDatesByDate(date)
 
-    override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>> = habitDao.getPrinciplesByDate(date)
+    override fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
+    = habitDao.getPrinciplesByDateRange(dateStartInclusive, dateEndInclusive)
 
-    override fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>> = habitDao.getPrinciplesByDateRange(dateStartInclusive, dateEndInclusive)
+    override suspend fun insertPrincipleDate(principleDate: PrincipleDate)
+    = habitDao.insertPrincipleDate(principleDate)
 
-    override suspend fun insertPrincipleDateEntry(principleId: Int, date: Long, value: Boolean) = habitDao.insertPrincipleDateEntry(principleId, date, value)
-
+    override suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
+    = habitDao.updatePrincipleDate(date, principleId, value)
 }

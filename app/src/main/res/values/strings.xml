@@ -82,6 +82,14 @@
     <string name="streak_length_single_day_count">That was yesterday, believe it or not</string>
     <string name="streak_length_zero_day_count">That was today, believe it or not</string>
     <string name="image_menu_dialog_title">Select an Image</string>
+
+    <string name="principle_title">Your Principles</string>
+    <string name="principle_nav_title">Principles</string>
+    <string name="review_dialog_principle_title">Review Principle Record</string>
+    <string name="principle_list_empty">"...nothing yet ! "</string>
+    <string name="content_description_FAB_principle_create">Add a principle</string>
+    <string name="principle_button_create">Add a principle</string>
+
     <!--
         <string name=""></string>
         <string name="content_description_"></string>

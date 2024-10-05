@@ -61,7 +61,10 @@ object SettingDestination: NavigationDestination {
 @Composable
 fun SettingScreenWrapperCHANGESOON (
     currentScreenName: String,
-    navController: NavHostController,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -73,7 +76,10 @@ fun SettingScreenWrapperCHANGESOON (
 @Composable
 fun SettingScreen (
     currentScreenName: String,
-    navController: NavHostController,
+    navigateToHabit: () -> Unit,
+    navigateToPrinciple: () -> Unit,
+    navigateToVisualize: () -> Unit,
+    navigateToSetting: () -> Unit,
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -325,9 +331,10 @@ fun SettingScreen (
             }
 
             HabitNavBar(
-                navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
-                navigateToVisualizeDestination = { navController.navigate(VisualizationDestination.route)},
-                navigateToSettingDestination = { navController.navigate(SettingDestination.route)},
+                navigateToHabit = navigateToHabit,
+                navigateToPrinciple = navigateToPrinciple,
+                navigateToVisualize = navigateToVisualize,
+                navigateToSetting = navigateToSetting,
                 currentScreenName = currentScreenName
             )
         }
