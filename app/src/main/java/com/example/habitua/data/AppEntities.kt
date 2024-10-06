@@ -66,3 +66,11 @@ data class PrincipleDetails (
     val date: Long,
     val value: Boolean
 )
+
+fun PrincipleDetails.toPrinciple(): Principle {
+    return Principle(
+        principleId = principleId,
+        name = name,
+        description = description
+    )
+}

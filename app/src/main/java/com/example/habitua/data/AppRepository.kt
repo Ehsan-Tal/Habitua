@@ -42,6 +42,7 @@ interface AppRepository {
     fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
 
     suspend fun insertPrinciple(principle: Principle)
+    suspend fun updatePrinciple(principle: Principle)
     suspend fun deletePrinciple(principle: Principle)
 
     suspend fun insertPrincipleDate(principleDate: PrincipleDate)

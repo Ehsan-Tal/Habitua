@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
 import com.example.habitua.data.PrincipleDetails
+import com.example.habitua.data.toPrinciple
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.random.Random
 
 private val TAG = "PrincipleViewModel"
 
@@ -26,11 +29,22 @@ class PrincipleViewModel(
     private val _principleUiState = MutableStateFlow(PrincipleUiState())
     val principleUiState: StateFlow<PrincipleUiState> = _principleUiState.asStateFlow()
 
+    val backgroundDrawables = listOf(
+        R.drawable.baseline_circle_24,
+        R.drawable.baseline_elderly_24,
+        R.drawable.baseline_hexagon_24,
+        R.drawable.baseline_electric_bolt_24
+    )
+
+    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
     // create a function that collects all principles of today and yesterday and tomorrow.
     private var principleJob: Job? = null
 
     private fun collectPrinciples() {
         principleJob?.cancel()
+
+        backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
         principleJob = viewModelScope.launch {
             appRepository.getPrinciplesAndPrincipleDates(
@@ -44,6 +58,8 @@ class PrincipleViewModel(
     private fun collectPrinciplesWithoutCreating(){
         principleJob?.cancel()
 
+        backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
         principleJob = viewModelScope.launch {
             appRepository.getPrinciplesAndPrincipleDatesWithoutCreating(
                 principleUiState.value.dateBase.toEpochMilli()
@@ -54,6 +70,7 @@ class PrincipleViewModel(
     }
 
     init {
+
         collectPrinciples()
     }
 
@@ -68,6 +85,8 @@ class PrincipleViewModel(
  */
     fun addPrinciple() {
 
+        //TODO: Add a date created to Principles
+        // also, a "group" with the default being "Manual"
         val defaultPrinciple = Principle(
             name = "Added principle",
             description = "Added on ${_principleUiState.value.convertInstantToString(principleUiState.value.dateToday)}}",
@@ -104,6 +123,45 @@ class PrincipleViewModel(
             principleDetails.date, principleDetails.principleId, principleDetails.value
         )
     }
+
+
+    // editing the principle
+    private fun validatePrincipleInput(): Boolean {
+        return with(principleUiState.value.editablePrincipleDetails) {
+            name.isNotBlank() && description.isNotBlank()
+        }
+    }
+
+    //TODO: THIS HAS MAJOR SETBACKS TO EFFICIENT CHANGE MANAGEMENT
+    // but I"m sleepy, so wee.
+    // and then again, so is it with most edit forms.
+    // I feel like we can get away with just modifying it with PrincipleDetails
+    fun setEditablePrincipleDetails(principleDetail: PrincipleDetails){
+        Log.d(TAG, "Editable principle details set to $principleDetail")
+        _principleUiState.value.editablePrincipleDetails = principleDetail
+    }
+    fun editMenuUpdatePrincipleInUiState(principleDetail: PrincipleDetails){
+        _principleUiState.value.editablePrincipleDetails = principleDetail
+    }
+    /**
+     * sent a copy of the updated principle details, which would used to update the principle.
+     * Or takes a
+     */
+    fun editMenuApplyChangesToPrinciple(){
+        if (validatePrincipleInput()){
+            val principle = principleUiState.value.editablePrincipleDetails.toPrinciple()
+            viewModelScope.launch {
+                appRepository.updatePrinciple(principle)
+            }
+        }
+    }
+    fun editMenuDeletePrinciple(){
+        val principle = principleUiState.value.editablePrincipleDetails.toPrinciple()
+        viewModelScope.launch {
+            appRepository.deletePrinciple(principle)
+        }
+    }
+
 }
 
 /**
@@ -115,6 +173,14 @@ class PrincipleViewModel(
  *
  */
 data class PrincipleUiState(
+    var editablePrincipleDetails: PrincipleDetails = PrincipleDetails(
+        principleId = 0,
+        name = "",
+        description = "",
+        date = Instant.now().toEpochMilli(),
+        value = false,
+    ),
+
     var dateFormat: String = "dd-MM",
 
     val dateToday: Instant = Instant.now(),

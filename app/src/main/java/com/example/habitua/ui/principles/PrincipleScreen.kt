@@ -6,13 +6,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -27,21 +31,38 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.PrincipleDetails
@@ -50,6 +71,7 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.HabitNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 object PrincipleDestination: NavigationDestination {
@@ -73,6 +95,8 @@ fun PrincipleScreen(
     val principleUiState by viewModel.principleUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
+    var expandEditMenu by remember { mutableStateOf(false) }
+
     PrincipleBody(
         // navigation
         currentScreenName = currentScreenName,
@@ -80,6 +104,10 @@ fun PrincipleScreen(
         navigateToPrinciple = navigateToPrinciple,
         navigateToVisualize = navigateToVisualize,
         navigateToSetting = navigateToSetting,
+
+        // background patterns
+        backgroundPatternList = viewModel.backgroundDrawables,
+        backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
         // dates
         dateBase = principleUiState.dateBaseString,
@@ -104,10 +132,32 @@ fun PrincipleScreen(
             //TODO: change sorting order
         },
         principleListToday = principleUiState.principleListToday,
-        onMoreOptionsClickPrinciple = {},
 
         // Action Bar items
         addPrinciple = { viewModel.addPrinciple() },
+
+        // edit dialog items
+        expandEditMenu = expandEditMenu,
+        editMenuPrincipleDetails = principleUiState.editablePrincipleDetails,
+        onEditMenuDismiss = { expandEditMenu = false },
+        onEditMenuExpand = { principleDetails: PrincipleDetails ->
+            viewModel.setEditablePrincipleDetails(principleDetails)
+            expandEditMenu = true
+       },
+        editMenuUpdatePrincipleInUiState = { principleDetail: PrincipleDetails ->
+            viewModel.editMenuUpdatePrincipleInUiState(principleDetail)
+        },
+        editMenuApplyChangesToPrinciple = { viewModel.editMenuApplyChangesToPrinciple() },
+        editMenuDeletePrinciple = {
+            expandEditMenu = false
+            viewModel.editMenuDeletePrinciple()
+        },
+        // delete confirmation
+        //TODO: figure out how if we can have two dialogs
+        // or how we could have a delete button - e.g.,
+        // a button that asks, do you want to delete this, and then it's
+        // set to readonly and a new one appears to the right of it
+        // and that one actually deletes it.
     )
 }
 
@@ -120,6 +170,19 @@ fun PrincipleBody(
     navigateToPrinciple: () -> Unit,
     navigateToVisualize: () -> Unit,
     navigateToSetting: () -> Unit,
+
+    // background drawables
+    backgroundPatternList: List<Int>,
+    backgroundAccessorIndex: Int,
+
+    // edit menus
+    expandEditMenu: Boolean,
+    editMenuPrincipleDetails: PrincipleDetails,
+    onEditMenuDismiss: () -> Unit,
+    onEditMenuExpand: (PrincipleDetails) -> Unit,
+    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
+    editMenuApplyChangesToPrinciple: () -> Unit,
+    editMenuDeletePrinciple: () -> Unit,
 
     // dates
     dateBase: String,
@@ -137,7 +200,6 @@ fun PrincipleBody(
     principleListToday: List<PrincipleDetails>,
     onClickPrinciple: (PrincipleDetails) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
-    onMoreOptionsClickPrinciple: (PrincipleDetails) -> Unit,
 
     // action bar
     addPrinciple: () -> Unit
@@ -165,6 +227,8 @@ fun PrincipleBody(
                 .border(1.dp, MaterialTheme.colorScheme.tertiary, RectangleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
 
+            var editMenuDeleteConfirmation by remember { mutableStateOf(false) }
+
 
             Column( modifier = Modifier.weight(1f) ){
                 // title bar
@@ -190,12 +254,27 @@ fun PrincipleBody(
                     PrincipleListBar(
                         modifier = paddedModifier,
 
+                        // background drawables
+                        backgroundPatternList = backgroundPatternList,
+                        backgroundAccessorIndex = backgroundAccessorIndex,
+
                         onClickPrinciple = onClickPrinciple,
                         onHoldPrinciple = onHoldPrinciple,
-                        onMoreOptionsClickPrinciple = onMoreOptionsClickPrinciple,
                         principleListToday = principleListToday,
 
                         isBeforeYesterday = isBeforeYesterday,
+
+                        // edit menus
+                        expandEditMenu = expandEditMenu,
+                        onEditMenuDismiss = onEditMenuDismiss,
+                        onEditMenuExpand = onEditMenuExpand,
+                        editMenuPrincipleDetails = editMenuPrincipleDetails,
+                        editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
+                        editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
+                        editMenuDeletePrinciple = editMenuDeletePrinciple,
+                        editMenuDeleteConfirmation = editMenuDeleteConfirmation,
+                        editMenuDeleteToExpand = { editMenuDeleteConfirmation = true}
+
                     )
                 }
                 Column ( modifier = Modifier.weight(1f) ) {
@@ -288,18 +367,72 @@ fun PrincipleFilterBar(
 fun PrincipleListBar(
     modifier: Modifier = Modifier,
 
-    onMoreOptionsClickPrinciple: (PrincipleDetails) -> Unit,
-    onClickPrinciple: (PrincipleDetails) -> Unit,
-    onHoldPrinciple: (PrincipleDetails) -> Unit,
+    // background drawables
+    backgroundPatternList: List<Int>,
+    backgroundAccessorIndex: Int,
 
     isBeforeYesterday: Boolean,
 
     principleListToday: List<PrincipleDetails>,
+
+    onClickPrinciple: (PrincipleDetails) -> Unit,
+    onHoldPrinciple: (PrincipleDetails) -> Unit,
+
+    // edit menus
+    expandEditMenu: Boolean,
+    onEditMenuDismiss: () -> Unit,
+    onEditMenuExpand: (PrincipleDetails) -> Unit,
+    editMenuPrincipleDetails: PrincipleDetails,
+    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
+    editMenuApplyChangesToPrinciple: () -> Unit,
+    editMenuDeletePrinciple: () -> Unit,
+    editMenuDeleteConfirmation: Boolean,
+    editMenuDeleteToExpand: () -> Unit,
 ){
+    val patternPainter = painterResource(id = backgroundPatternList[backgroundAccessorIndex])
+
+    //TODO: Maybe lower the opacity
+    //TODO: increase the amount of vectors
+    //TODO: reduce the size - increase the padding
+    //TODO: color them differently according to Material theme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .drawBehind {
+            val patternWidth = patternPainter.intrinsicSize.width
+            val patternHeight = patternPainter.intrinsicSize.height
+
+            val repetitionsX = (size.width / patternWidth).toInt() + 1
+            val repetitionsY = (size.height / patternHeight).toInt() + 1
+
+            for (i in 0..repetitionsX) {
+                for (j in 0..repetitionsY) {
+                    translate(i * patternWidth, j * patternHeight) {
+                        // Draw the vector drawable
+                        with(patternPainter) {
+                            draw(size = Size(patternWidth, patternHeight))
+                        }
+                    }
+                }
+            }
+        },
     ){
+
+        PrincipleDetailEditMenuDialog(
+            expandEditMenu = expandEditMenu,
+            onEditMenuDismiss = onEditMenuDismiss,
+            editMenuPrincipleDetails = editMenuPrincipleDetails,
+
+            editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
+            editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
+            editMenuDeletePrinciple = editMenuDeletePrinciple,
+
+            editMenuDeleteConfirmation = editMenuDeleteConfirmation,
+            editMenuDeleteToExpand = editMenuDeleteToExpand,
+
+            isBeforeYesterday = isBeforeYesterday,
+        )
+
         if (principleListToday.isEmpty()){
             Text(
                 text = stringResource(id = R.string.principle_list_empty),
@@ -308,7 +441,8 @@ fun PrincipleListBar(
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_medium))
             )
-        } else {
+        }
+        else {
             LazyColumn(
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_large))
@@ -323,9 +457,11 @@ fun PrincipleListBar(
                     ) {
                         PrincipleDetailsCard(
                             principleDetail = principleDetail,
-                            onMoreClick = onMoreOptionsClickPrinciple,
+
+                            onEditMenuExpand = { onEditMenuExpand(principleDetail) },
                             onClickPrinciple = { value ->
                                 onClickPrinciple(principleDetail.copy(value = value))},
+
                             isBeforeYesterday = isBeforeYesterday,
                         )
                     }
@@ -409,7 +545,7 @@ fun PrincipleActionBar(
 fun PrincipleDetailsCard(
     principleDetail: PrincipleDetails,
 
-    onMoreClick: (PrincipleDetails) -> Unit,
+    onEditMenuExpand: () -> Unit,
     onClickPrinciple: (Boolean) -> Unit,
 
     isBeforeYesterday: Boolean
@@ -418,14 +554,16 @@ fun PrincipleDetailsCard(
     // onMoreClick allows you to change the name of it
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(60.dp),
     ){
         OutlinedCard(
             modifier = Modifier
                 .weight(2f)
                 .padding(dimensionResource(id = R.dimen.padding_small))
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable { onEditMenuExpand() }
         ){
             Text(
                 text = principleDetail.name,
@@ -448,4 +586,202 @@ fun PrincipleDetailsCard(
     //TODO: we need to change the checkbox to have different visuals
     //TODO:
     //principleDetail.description should be a hover or equivalent.
+}
+
+@Composable
+fun PrincipleDetailEditMenuDialog(
+    expandEditMenu: Boolean,
+    onEditMenuDismiss: () -> Unit,
+
+    isBeforeYesterday: Boolean,
+    editMenuPrincipleDetails: PrincipleDetails,
+
+    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
+    editMenuApplyChangesToPrinciple: () -> Unit,
+    editMenuDeletePrinciple: () -> Unit,
+
+    editMenuDeleteConfirmation: Boolean,
+    editMenuDeleteToExpand: () -> Unit,
+){
+    if (expandEditMenu) {
+        Dialog(
+            onDismissRequest = onEditMenuDismiss,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            PrincipleDetailEditMenuDialogContent(
+                editMenuPrincipleDetails = editMenuPrincipleDetails,
+                editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
+                editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
+                editMenuDeletePrinciple = editMenuDeletePrinciple,
+                editMenuDeleteConfirmation = editMenuDeleteConfirmation,
+                editMenuDeleteToExpand = editMenuDeleteToExpand,
+
+                isBeforeYesterday = isBeforeYesterday,
+            )
+        }
+    }
+}
+
+@Composable
+fun PrincipleDetailEditMenuDialogContent(
+    editMenuPrincipleDetails: PrincipleDetails,
+    isBeforeYesterday: Boolean,
+    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
+    editMenuApplyChangesToPrinciple: () -> Unit,
+    editMenuDeletePrinciple: () -> Unit,
+
+    editMenuDeleteConfirmation: Boolean,
+    editMenuDeleteToExpand: () -> Unit,
+){
+    Column {
+        // title
+        Text(
+            text = "Editing principle"
+        )
+
+        Button(
+            onClick = editMenuApplyChangesToPrinciple
+        ) {
+            Text(
+                text = "Apply changes"
+            )
+        }
+        //TODO: set this read only if there were no changes made
+
+        // name
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(id = R.string.form_required_name)) },
+            value = editMenuPrincipleDetails.name,
+            onValueChange = {
+                editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(name = it))
+            },
+            singleLine = true
+        )
+
+        // description
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(id = R.string.form_required_description)) },
+            value = editMenuPrincipleDetails.description,
+            onValueChange = {
+                editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(description = it))
+            },
+            singleLine = true
+        )
+
+        // value
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "Checked",
+                style = MaterialTheme.typography.displaySmall
+            )
+
+            OutlinedButton(
+                onClick = {
+                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(value =
+                    !editMenuPrincipleDetails.value ))
+                },
+            ) {
+                if (editMenuPrincipleDetails.value) {
+                    Text(
+                        text = "Yes"
+                    )
+                } else {
+                    Text(
+                        text = "No"
+                    )
+                }
+            }
+
+        }
+
+
+        // group
+        /*
+        Text(
+            text = "${editMenuPrincipleDetails.group}"
+        )
+        //TODO: add group as a property and allow some editing maybe
+         */
+
+        // date created
+        /*
+        Text(
+            text = longToStringFormat_ddMMYYYY(editMenuPrincipleDetails.dateCreated)
+        )
+        //TODO: Make a function and pass it down for the dating
+        //TODO: make a property for that
+         */
+
+
+        // delete expand and actual delete
+        Button(
+            onClick = editMenuDeleteToExpand
+        ){
+            Text(
+                text = "Delete principle"
+            )
+        }
+        if ( editMenuDeleteConfirmation ) {
+            Button(
+                onClick = editMenuDeletePrinciple
+            ){
+                Text(
+                    text = "Confirm deletion"
+                )
+            }
+        }
+
+    }
+}
+
+
+@Preview(
+    showBackground = true,
+)
+@Composable
+fun BackgroundPattern() {
+
+    val backgroundDrawables = listOf(
+        R.drawable.baseline_circle_24,
+        R.drawable.baseline_elderly_24,
+        R.drawable.baseline_hexagon_24,
+        R.drawable.baseline_electric_bolt_24
+    )
+
+    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
+    val patternPainter = painterResource(id = backgroundDrawables[backgroundAccessorIndex])
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .drawBehind {
+                val patternWidth = patternPainter.intrinsicSize.width
+                val patternHeight = patternPainter.intrinsicSize.height
+
+                val repetitionsX = (size.width / patternWidth).toInt() + 1
+                val repetitionsY = (size.height / patternHeight).toInt() + 1
+
+                for (i in 0..repetitionsX) {
+                    for (j in 0..repetitionsY) {
+                        translate(i * patternWidth, j * patternHeight) {
+                            // Draw the vector drawable
+                            with(patternPainter) {
+                                draw(size = Size(patternWidth, patternHeight))
+                            }
+                        }
+                    }
+                }
+            }
+            .blur(6.dp)
+        ,
+        contentAlignment = Alignment.Center
+    ) {
+        // This Box will be behind other content
+    }
 }

@@ -135,6 +135,8 @@ class AppRepositoryImplementation(
 
     override suspend fun insertPrinciple(principle: Principle)
     = habitDao.insertPrinciple(principle)
+    override suspend fun updatePrinciple(principle: Principle)
+    = habitDao.updatePrinciple(principle)
     override suspend fun deletePrinciple(principle: Principle)
     = habitDao.deletePrinciple(principle)
 
