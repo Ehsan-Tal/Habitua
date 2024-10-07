@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,7 +34,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,13 +45,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.withSave
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,12 +59,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.alpha
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.HabitNavBar
+import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -88,10 +85,10 @@ fun PrincipleScreen(
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
+){
 
-    ){
     val principleUiState by viewModel.principleUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -102,8 +99,8 @@ fun PrincipleScreen(
         currentScreenName = currentScreenName,
         navigateToHabit = navigateToHabit,
         navigateToPrinciple = navigateToPrinciple,
-        navigateToVisualize = navigateToVisualize,
-        navigateToSetting = navigateToSetting,
+        navigateToIssue = navigateToIssue,
+        navigateToYou = navigateToYou,
 
         // background patterns
         backgroundPatternList = viewModel.backgroundDrawables,
@@ -168,8 +165,8 @@ fun PrincipleBody(
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
 
     // background drawables
     backgroundPatternList: List<Int>,
@@ -291,12 +288,12 @@ fun PrincipleBody(
             }
             Column ( modifier = Modifier.weight(1f) ) {
                 // navigation bar
-                HabitNavBar(
+                AppNavBar(
+                    currentScreenName = currentScreenName,
                     navigateToHabit = navigateToHabit,
                     navigateToPrinciple = navigateToPrinciple,
-                    navigateToVisualize = navigateToVisualize,
-                    navigateToSetting = navigateToSetting,
-                    currentScreenName = currentScreenName
+                    navigateToIssue = navigateToIssue,
+                    navigateToYou = navigateToYou
                 )
             }
         }
@@ -390,32 +387,43 @@ fun PrincipleListBar(
     editMenuDeleteToExpand: () -> Unit,
 ){
     val patternPainter = painterResource(id = backgroundPatternList[backgroundAccessorIndex])
-
-    //TODO: Maybe lower the opacity
-    //TODO: increase the amount of vectors
-    //TODO: reduce the size - increase the padding
-    //TODO: color them differently according to Material theme
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .drawBehind {
-            val patternWidth = patternPainter.intrinsicSize.width
-            val patternHeight = patternPainter.intrinsicSize.height
 
-            val repetitionsX = (size.width / patternWidth).toInt() + 1
-            val repetitionsY = (size.height / patternHeight).toInt() + 1
+                val patternWidth = patternPainter.intrinsicSize.width
+                val patternHeight = patternPainter.intrinsicSize.height
 
-            for (i in 0..repetitionsX) {
-                for (j in 0..repetitionsY) {
-                    translate(i * patternWidth, j * patternHeight) {
-                        // Draw the vector drawable
-                        with(patternPainter) {
-                            draw(size = Size(patternWidth, patternHeight))
+                clipRect (
+                    left = 0f,
+                    top = 0f,
+                    right = size.width,
+                    bottom = size.height - patternHeight / 2
+                ){
+                    val repetitionsX = (size.width / patternWidth).toInt() + 1
+                    val repetitionsY = (size.height / patternHeight).toInt() + 1
+
+                    for (i in 0..repetitionsX) {
+                        for (j in 0..repetitionsY) {
+                            val translateX = if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
+
+                            translate(translateX - patternWidth, j * patternHeight * 2 + patternHeight ) {
+                                with(patternPainter) {
+                                    draw(
+                                        size = Size(patternWidth, patternHeight),
+                                        alpha = 0.5f,
+                                        colorFilter = ColorFilter.tint(color)
+
+                                    )
+                                }
+                            }
+
                         }
                     }
                 }
             }
-        },
     ){
 
         PrincipleDetailEditMenuDialog(
@@ -434,13 +442,24 @@ fun PrincipleListBar(
         )
 
         if (principleListToday.isEmpty()){
-            Text(
-                text = stringResource(id = R.string.principle_list_empty),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_medium))
-            )
+            if (Random.nextBoolean()) {
+                Text(
+                    text = stringResource(id = R.string.principle_list_empty),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.displayMedium,
+                    modifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.padding_medium))
+                )
+
+            } else {
+                Text(
+                    text = stringResource(id = R.string.principle_list_empty_variant_2),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.displayMedium,
+                    modifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.padding_medium))
+                )
+            }
         }
         else {
             LazyColumn(
@@ -448,7 +467,6 @@ fun PrincipleListBar(
                     .padding(dimensionResource(id = R.dimen.padding_large))
             ){
                 items(principleListToday, key = { principleDetail -> principleDetail.principleId }) { principleDetail ->
-
                     Row(
                         modifier = Modifier
                             .padding(dimensionResource(id = R.dimen.padding_medium))
@@ -755,30 +773,44 @@ fun BackgroundPattern() {
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
     val patternPainter = painterResource(id = backgroundDrawables[backgroundAccessorIndex])
+    val color = MaterialTheme.colorScheme.tertiary
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
             .drawBehind {
+
                 val patternWidth = patternPainter.intrinsicSize.width
                 val patternHeight = patternPainter.intrinsicSize.height
 
-                val repetitionsX = (size.width / patternWidth).toInt() + 1
-                val repetitionsY = (size.height / patternHeight).toInt() + 1
+                clipRect (
+                    left = 0f,
+                    top = 0f,
+                    right = size.width,
+                    bottom = size.height - patternHeight / 2
+                ){
+                    val repetitionsX = (size.width / patternWidth).toInt() + 1
+                    val repetitionsY = (size.height / patternHeight).toInt() + 1
 
-                for (i in 0..repetitionsX) {
-                    for (j in 0..repetitionsY) {
-                        translate(i * patternWidth, j * patternHeight) {
-                            // Draw the vector drawable
-                            with(patternPainter) {
-                                draw(size = Size(patternWidth, patternHeight))
+                    for (i in 0..repetitionsX) {
+                        for (j in 0..repetitionsY) {
+                            val translateX = if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
+
+                            translate(translateX - patternWidth, j * patternHeight * 2 + patternHeight ) {
+                                with(patternPainter) {
+                                    draw(
+                                        size = Size(patternWidth, patternHeight),
+                                        alpha = 0.5f,
+                                        colorFilter = ColorFilter.tint(color)
+
+                                    )
+                                }
                             }
+
                         }
                     }
                 }
             }
-            .blur(6.dp)
         ,
         contentAlignment = Alignment.Center
     ) {

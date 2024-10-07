@@ -23,6 +23,7 @@ import com.example.habitua.data.Habit
 import com.example.habitua.data.Principle
 import kotlinx.coroutines.flow.first
 import java.io.File
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -80,39 +81,47 @@ class SettingViewModel(
         val tomorrow = today.plusDays(1)
         val sixtySixDaysAgo = today.minusDays(66)
 
+        val now = Instant.now().toEpochMilli()
+
         val habitList = listOf(
             Habit(
-                name = "All 1", description = "inactive, not acquired, and not progressing"
+                name = "All 1", description = "inactive, not acquired, and not progressing",
+                dateCreated = now
             ),
             Habit(
                 name = "TODO 1", description = "could be acquired",
                 currentStreakOrigin = sixtySixDaysAgo.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                dateCreated = now
             ),
             Habit(
                 name = "TODO 2", description = "",
                 currentStreakOrigin = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                nextReviewedDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                dateCreated = now
             ),
             Habit(
                 name = "At Risk 1", description = "",
                 currentStreakOrigin = dayBeforeYesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                nextReviewedDate = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                nextReviewedDate = yesterday.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                dateCreated = now
             ),
             Habit(
                 name = "TODO 3", description = "",
                 currentStreakOrigin = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                nextReviewedDate = tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                nextReviewedDate = tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                dateCreated = now
             ),
             Habit(
                 name = "Acquired 1", description = "",
-                dateAcquired = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                dateAcquired = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                dateCreated = now
             ),
         )
         val principleList = listOf(
-            Principle(name = "Principle 1", description = "descriptions"),
-            Principle(name = "Principle 3", description = "descriptions"),
-            Principle(name = "Principle 4", description = "descriptions"),
+            Principle(name = "Honesty", description = "descriptions", dateCreated = now),
+            Principle(name = "Industry", description = "descriptions", dateCreated = now),
+            Principle(name = "Responsibility", description = "descriptions", dateCreated = now),
         )
 
         viewModelScope.launch {

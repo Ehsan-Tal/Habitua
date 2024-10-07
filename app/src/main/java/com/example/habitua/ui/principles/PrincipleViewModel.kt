@@ -1,9 +1,7 @@
 package com.example.habitua.ui.principles
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
@@ -20,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
-private val TAG = "PrincipleViewModel"
+private const val  TAG = "PrincipleViewModel"
 
 class PrincipleViewModel(
    private val appRepository: AppRepository
@@ -55,6 +53,19 @@ class PrincipleViewModel(
         }
     }
 
+    /*
+                    if (it.isNotEmpty()) {
+                    _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
+
+                } else {
+                    _principleUiState.value = _principleUiState.value.copy(
+                        principleListToday = listOf(P)
+                    )
+                }
+       // this shouldn't result in any updates as it's a temp one.
+    * */
+    //TODO: Add a temporary principleDetail here in case principleListToday is empty
+
     private fun collectPrinciplesWithoutCreating(){
         principleJob?.cancel()
 
@@ -67,6 +78,7 @@ class PrincipleViewModel(
                 _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
             }
         }
+
     }
 
     init {
@@ -90,6 +102,7 @@ class PrincipleViewModel(
         val defaultPrinciple = Principle(
             name = "Added principle",
             description = "Added on ${_principleUiState.value.convertInstantToString(principleUiState.value.dateToday)}}",
+            dateCreated = principleUiState.value.dateToday.toEpochMilli()
         )
 
         viewModelScope.launch {
@@ -99,7 +112,7 @@ class PrincipleViewModel(
     }
 
     private fun collectPrincipleAfterUpdates(){
-        if (_principleUiState.value.isBaseEqualToday()) {
+        if (_principleUiState.value.isBaseEqualToday() || _principleUiState.value.isBaseEqualYesterday()) {
             collectPrinciples()
         } else {
             collectPrinciplesWithoutCreating()
@@ -119,9 +132,15 @@ class PrincipleViewModel(
     }
 
     suspend fun togglePrinciple(principleDetails: PrincipleDetails) {
-        appRepository.updatePrincipleDate(
+       appRepository.updatePrincipleDate(
             principleDetails.date, principleDetails.principleId, principleDetails.value
         )
+
+        if (principleDetails.value && principleDetails.dateFirstActive == null){
+            appRepository.updatePrincipleOrigin(
+                principleDetails.date, principleDetails.principleId
+            )
+        }
     }
 
 
@@ -137,7 +156,6 @@ class PrincipleViewModel(
     // and then again, so is it with most edit forms.
     // I feel like we can get away with just modifying it with PrincipleDetails
     fun setEditablePrincipleDetails(principleDetail: PrincipleDetails){
-        Log.d(TAG, "Editable principle details set to $principleDetail")
         _principleUiState.value.editablePrincipleDetails = principleDetail
     }
     fun editMenuUpdatePrincipleInUiState(principleDetail: PrincipleDetails){
@@ -177,11 +195,13 @@ data class PrincipleUiState(
         principleId = 0,
         name = "",
         description = "",
-        date = Instant.now().toEpochMilli(),
+        date = 0,
+        dateCreated = 0,
+        dateFirstActive = null,
         value = false,
     ),
 
-    var dateFormat: String = "dd-MM",
+    var dateFormat: String = "EEEE, dd-MM",
 
     val dateToday: Instant = Instant.now(),
     val dateYesterday: Instant = dateToday.minus(1, ChronoUnit.DAYS),
@@ -189,6 +209,7 @@ data class PrincipleUiState(
 
     var dateBase: Instant = Instant.now(),
     var principleListToday: List<PrincipleDetails> = listOf(),
+    val isPrincipleListTodayEmpty: Boolean = principleListToday.isEmpty()
 ) {
     private val dateBefore: Instant
         get() = dateBase.minus(1, ChronoUnit.DAYS)

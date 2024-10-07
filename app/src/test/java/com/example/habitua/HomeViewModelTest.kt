@@ -1,22 +1,17 @@
 package com.example.habitua
 
-import android.util.Log
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
 import com.example.habitua.data.UserPreferencesRepository
-import com.example.habitua.ui.home.HomeViewModel
+import com.example.habitua.ui.habit.HomeViewModel
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.mock
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

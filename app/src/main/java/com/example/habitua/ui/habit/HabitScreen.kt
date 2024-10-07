@@ -1,10 +1,9 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 // apparently this allows the animation ?
 
-package com.example.habitua.ui.home
+package com.example.habitua.ui.habit
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -82,16 +80,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.HabitNavBar
+import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
-import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
-import com.example.habitua.ui.visual.VisualizationDestination
 import kotlinx.coroutines.launch
 
 
@@ -104,13 +99,13 @@ object HabitDestination : NavigationDestination {
 @Composable
 fun HabitScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
     currentScreenName: String,
-    navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -122,11 +117,10 @@ fun HabitScreen(
     HabitHomeBody(
         currentScreenName = currentScreenName,
         navigateToHabitEdit = navigateToHabitEdit,
-        navigateToHabitEntry = navigateToHabitEntry,
         navigateToHabit = navigateToHabit,
         navigateToPrinciple = navigateToPrinciple,
-        navigateToVisualize = navigateToVisualize,
-        navigateToSetting = navigateToSetting,
+        navigateToIssue = navigateToIssue,
+        navigateToYou = navigateToYou,
 
         habitList = homeUiState.habitList,
         countList = homeUiState.countList,
@@ -177,12 +171,11 @@ fun HabitScreen(
 @Composable
 fun HabitHomeBody(
     currentScreenName: String,
-    navigateToHabitEntry: () -> Unit,
     navigateToHabitEdit: (Int) -> Unit,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
 
     habitList: List<Habit>,
     onClickHabitCard: (Habit) -> Unit,
@@ -223,15 +216,15 @@ fun HabitHomeBody(
             iconMenuExpanded = iconMenuExpanded,
 
             currentScreenName = currentScreenName,
-            contentPadding = innerPadding,
-            onCreateButtonClick = navigateToHabitEntry,
-            onMoreOptionsClick = navigateToHabitEdit,
-            onClickHabitCard = onClickHabitCard,
-
             navigateToHabit = navigateToHabit,
             navigateToPrinciple = navigateToPrinciple,
-            navigateToVisualize = navigateToVisualize,
-            navigateToSetting = navigateToSetting,
+            navigateToIssue = navigateToIssue,
+            navigateToYou = navigateToYou,
+
+            contentPadding = innerPadding,
+            onCreateButtonClick = {},
+            onMoreOptionsClick = navigateToHabitEdit,
+            onClickHabitCard = onClickHabitCard,
 
             dataSource = dataSource,
             onOptionSelected = onOptionSelected,
@@ -259,8 +252,8 @@ private fun HabitHomeSkeleton(
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
 
     contentPadding: PaddingValues,
 
@@ -422,12 +415,12 @@ private fun HabitHomeSkeleton(
             }
         }
 
-        HabitNavBar(
+        AppNavBar(
+            currentScreenName = currentScreenName,
             navigateToHabit = navigateToHabit,
             navigateToPrinciple = navigateToPrinciple,
-            navigateToVisualize = navigateToVisualize,
-            navigateToSetting = navigateToSetting,
-            currentScreenName = currentScreenName
+            navigateToIssue = navigateToIssue,
+            navigateToYou = navigateToYou
         )
     }
 }

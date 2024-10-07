@@ -14,7 +14,7 @@ import androidx.room.RoomDatabase
  * Currently `.fallbackToDestructiveMigration()` is used as I'd rather not handle
  * migration
  */
-@Database(entities = [Habit::class, Principle::class, PrincipleDate::class], version =5, exportSchema = false)
+@Database(entities = [Habit::class, Principle::class, PrincipleDate::class], version = 6, exportSchema = false)
 abstract class HabitDatabase: RoomDatabase() {
 
     abstract fun habitDao(): HabitDao

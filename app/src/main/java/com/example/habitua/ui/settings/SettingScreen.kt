@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,14 +41,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.HabitNavBar
-import com.example.habitua.ui.home.HabitDestination
+import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
-import com.example.habitua.ui.visual.VisualizationDestination
 
 object SettingDestination: NavigationDestination {
     override val route = "settings"
@@ -63,10 +59,11 @@ fun SettingScreenWrapperCHANGESOON (
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
+
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
     uiState: SettingUiState = viewModel.uiState.collectAsState().value,
 ) {
@@ -78,8 +75,9 @@ fun SettingScreen (
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
     navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -257,7 +255,7 @@ fun SettingScreen (
                     }
 
 
-                        // creating test data
+                // creating test data
                 OutlinedCard(
                     colors = CardDefaults.outlinedCardColors(
                         contentColor = MaterialTheme.colorScheme.primary,
@@ -325,17 +323,45 @@ fun SettingScreen (
                             }
                         }
 
+                        OutlinedCard(
+                            colors = CardDefaults.outlinedCardColors(
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            modifier = rowModifier
+                                .clickable {
+                                    navigateToVisualize()
+                                },
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.padding_small))
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(dimensionResource(id = R.dimen.padding_large)),
+                                    text = "Data Screen"
+                                )
+                            }
+                        }
+
 
                     }
                 }
+
             }
 
-            HabitNavBar(
+
+            AppNavBar(
+                currentScreenName = currentScreenName,
                 navigateToHabit = navigateToHabit,
                 navigateToPrinciple = navigateToPrinciple,
-                navigateToVisualize = navigateToVisualize,
-                navigateToSetting = navigateToSetting,
-                currentScreenName = currentScreenName
+                navigateToIssue = navigateToIssue,
+                navigateToYou = navigateToYou
             )
         }
     }

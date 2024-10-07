@@ -322,13 +322,25 @@ interface HabitDao {
     suspend fun deleteAllPrinciples()
 
     @Query("""
-        UPDATE principles_dates 
-        SET value = :value 
+        UPDATE 
+            principles_dates 
+        SET 
+            value = :value 
         WHERE 
             principleId = :principleId
             AND DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch') 
     """)
     suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
+
+    @Query("""
+        UPDATE 
+            principles
+        SET 
+            dateFirstActive = :date
+        WHERE 
+            principleId = :principleId
+    """)
+    suspend fun updatePrincipleOrigin(date: Long, principleId: Int)
 
     @Delete
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)

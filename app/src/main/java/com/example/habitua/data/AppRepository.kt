@@ -44,6 +44,7 @@ interface AppRepository {
     suspend fun insertPrinciple(principle: Principle)
     suspend fun updatePrinciple(principle: Principle)
     suspend fun deletePrinciple(principle: Principle)
+    suspend fun updatePrincipleOrigin(date: Long, principleId: Int)
 
     suspend fun insertPrincipleDate(principleDate: PrincipleDate)
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)

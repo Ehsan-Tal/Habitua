@@ -1,77 +1,38 @@
 package com.example.habitua.ui.visual
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.HabitNavBar
-import com.example.habitua.ui.home.HabitDestination
+import com.example.habitua.ui.AppNavBar
+import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.navigation.NavigationDestination
-import com.example.habitua.ui.principles.PrincipleDestination
-import com.example.habitua.ui.settings.SettingDestination
-import com.example.habitua.ui.theme.HabituaTheme
-import com.example.habitua.ui.theme.LocalCustomColorsPalette
 
 object VisualizationDestination: NavigationDestination {
     override val route = "visualization"
     override val title = R.string.visualization_title
-    val navTitle = R.string.visualization_nav_title
 }
 
 @Composable
 fun VisualizationScreen(
-    currentScreenName: String,
-    navigateToHabit: () -> Unit,
-    navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: VisualizationViewModel = viewModel(factory = AppViewModelProvider.Factory),
-){
-    Text(text = "Visualization")
 
-    HabitNavBar(
-        navigateToHabit = navigateToHabit,
-        navigateToPrinciple = navigateToPrinciple,
-        navigateToVisualize = navigateToVisualize,
-        navigateToSetting = navigateToSetting,
-        currentScreenName = currentScreenName
+    navigateBack: () -> Unit,
+){
+    AppTitleBar(
+        title = stringResource(id = VisualizationDestination.title)
     )
+
+    Button(
+        onClick = navigateBack
+    ) {
+        Text("go back")
+    }
 
 }
 
@@ -126,7 +87,7 @@ Scaffold(
             }
 
         }
-        HabitNavBar(
+        AppNavBar(
             navigateToHabitDestination = { navController.navigate(HabitDestination.route)},
             navigateToVisualizeDestination = { navController.navigate(VisualizationDestination.route)},
             navigateToSettingDestination = { navController.navigate(SettingDestination.route)},

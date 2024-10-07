@@ -11,49 +11,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.example.habitua.R
-import com.example.habitua.ui.home.HabitDestination
+import com.example.habitua.ui.habit.HabitDestination
+import com.example.habitua.ui.issues.IssueDestination
 import com.example.habitua.ui.principles.PrincipleDestination
 import com.example.habitua.ui.settings.SettingDestination
-import com.example.habitua.ui.visual.VisualizationDestination
 
 
 @Composable
-fun HabitNavBar(
+fun AppNavBar(
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
-    navigateToVisualize: () -> Unit,
-    navigateToSetting: () -> Unit,
+    navigateToIssue: () -> Unit,
+    navigateToYou: () -> Unit,
     currentScreenName: String,
 ){
     Row (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
     ) {
-        HabitNavButton(
+        AppNavButton(
             text = stringResource(id = HabitDestination.navTitle),
             currentScreenName = currentScreenName,
             onNextButtonClicked = navigateToHabit
         )
-        HabitNavButton(
+        AppNavButton(
             text = stringResource(id = PrincipleDestination.navTitle),
             currentScreenName = currentScreenName,
             onNextButtonClicked = navigateToPrinciple
         )
-        HabitNavButton(
-            text = stringResource(id = VisualizationDestination.navTitle),
+        AppNavButton(
+            text = stringResource(id = IssueDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = navigateToVisualize
+            onNextButtonClicked = navigateToIssue
         )
-        HabitNavButton(
+        AppNavButton(
             text = stringResource(id = SettingDestination.navTitle),
             currentScreenName = currentScreenName,
-            onNextButtonClicked = navigateToSetting
+            onNextButtonClicked = navigateToYou
         )
     }
 }
 
 @Composable
-fun HabitNavButton(
+fun AppNavButton(
     text: String,
     currentScreenName: String,
     onNextButtonClicked: () -> Unit

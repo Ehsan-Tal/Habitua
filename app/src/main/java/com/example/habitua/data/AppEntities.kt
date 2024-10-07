@@ -12,6 +12,7 @@ data class Habit (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @DrawableRes val imageResId : Int = R.drawable.tal_derpy,
+    val dateCreated: Long = 0,
     var name: String,
     var description: String,
     var complexity: Complexity = Complexity.SIMPLE,
@@ -36,6 +37,8 @@ SIMPLE, MEDIUM, COMPLEX
 data class Principle (
     @PrimaryKey(autoGenerate = true)
     val principleId: Int = 0,
+    val dateCreated: Long = 0,
+    var dateFirstActive: Long? = null,
     var name: String,
     var description: String
 )
@@ -64,6 +67,8 @@ data class PrincipleDetails (
     val name: String,
     val description: String,
     val date: Long,
+    val dateCreated: Long = 0,
+    var dateFirstActive: Long? = null,
     val value: Boolean
 )
 
@@ -71,6 +76,7 @@ fun PrincipleDetails.toPrinciple(): Principle {
     return Principle(
         principleId = principleId,
         name = name,
-        description = description
+        description = description,
+        dateFirstActive = dateFirstActive
     )
 }

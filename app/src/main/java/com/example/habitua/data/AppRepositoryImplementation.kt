@@ -139,6 +139,8 @@ class AppRepositoryImplementation(
     = habitDao.updatePrinciple(principle)
     override suspend fun deletePrinciple(principle: Principle)
     = habitDao.deletePrinciple(principle)
+    override suspend fun updatePrincipleOrigin(date: Long, principleId: Int)
+    = habitDao.updatePrincipleOrigin(date, principleId)
 
 
     override fun getAllPrinciplesStream(): Flow<List<Principle>>

@@ -1,4 +1,4 @@
-package com.example.habitua.ui.home
+package com.example.habitua.ui.habit
 
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import com.example.habitua.data.AppRepository
 import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
-import coil.compose.rememberAsyncImagePainter
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import kotlinx.coroutines.Job
