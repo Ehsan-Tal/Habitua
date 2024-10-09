@@ -36,6 +36,22 @@ fun VisualizationScreen(
 
 }
 
+@Composable
+fun VisualizationBody(
+    navigateBack: () -> Unit = {}
+){
+    AppTitleBar(
+        title = stringResource(id = VisualizationDestination.title)
+    )
+
+    Button(
+        onClick = navigateBack
+    ) {
+        Text("go back")
+    }
+
+}
+
 /*
 @Composable
 fun VisualizationScreen (

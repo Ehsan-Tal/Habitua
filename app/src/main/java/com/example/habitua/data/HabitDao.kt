@@ -279,33 +279,14 @@ interface HabitDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPrincipleDate(principleDate: PrincipleDate)
 
-    /**
-     * The left join allows us to append our first table results with records of the second table
-     * that have a relationship with the first
-     * We decide so with both the principleId and that the date values equal by date terms
-     */
-    @Query("""
-       SELECT
-        principles.principleId,
-        principles.name,
-        principles.description,
-        COALESCE(principles_dates.date, :date) AS date,
-        principles_dates.value
-        FROM principles
-        LEFT JOIN principles_dates 
-        ON principles.principleId = principles_dates.principleId
-        AND DATE(principles_dates.date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch')
-        
-    """)
-    fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>>
-    //TODO: modify this to SELECT from principle dates and LEFT JOIN the names
-
     @Query("""
         SELECT
             principles.principleId,
             principles.name,
             principles.description,
             COALESCE(principles_dates.date, :date) AS date,
+            principles.dateCreated,
+            principles.dateFirstActive,
             principles_dates.value
         FROM 
             principles_dates

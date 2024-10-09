@@ -211,6 +211,9 @@ data class PrincipleUiState(
     var principleListToday: List<PrincipleDetails> = listOf(),
     val isPrincipleListTodayEmpty: Boolean = principleListToday.isEmpty()
 ) {
+    val canApplyChanges: Boolean = false
+    //TODO: make this true if changes occurred
+
     private val dateBefore: Instant
         get() = dateBase.minus(1, ChronoUnit.DAYS)
     private val dateAfter: Instant

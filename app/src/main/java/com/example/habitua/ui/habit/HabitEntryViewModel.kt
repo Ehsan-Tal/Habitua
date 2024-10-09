@@ -8,12 +8,8 @@ import androidx.lifecycle.ViewModel
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
 import java.time.Instant
-import java.time.LocalDate
-import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -32,7 +28,7 @@ class HabitEntryViewModel(
     /**
      * Stream of habits
      */
-    var habitUiState by mutableStateOf(HabitUiState())
+    var habitDetailsUiState by mutableStateOf(HabitDetailsUiState())
         private set
 
     /**
@@ -41,7 +37,7 @@ class HabitEntryViewModel(
      * @param habitDetails the new habit's details
      */
     fun updateUiState(habitDetails: HabitDetails) {
-        habitUiState = HabitUiState(
+        habitDetailsUiState = HabitDetailsUiState(
             habitDetails = habitDetails,
             isEntryValid = validateInput(habitDetails)
         )
@@ -49,17 +45,17 @@ class HabitEntryViewModel(
 
     fun updateName(newName:String ) {
         Log.d(TAG, "updateName: $newName")
-        habitUiState.habitDetails = habitUiState.habitDetails.copy(name = newName)
+        habitDetailsUiState.habitDetails = habitDetailsUiState.habitDetails.copy(name = newName)
     }
 
     fun updateDescription( newDescription: String ) {
-        habitUiState.habitDetails = habitUiState.habitDetails.copy(description = newDescription)
+        habitDetailsUiState.habitDetails = habitDetailsUiState.habitDetails.copy(description = newDescription)
     }
 
     /**
      * Validates the user input - ensures name and description aren't blank
      */
-    private fun validateInput(uiState: HabitDetails = habitUiState.habitDetails): Boolean {
+    private fun validateInput(uiState: HabitDetails = habitDetailsUiState.habitDetails): Boolean {
         return with(uiState) {
             name.isNotBlank() && description.isNotBlank()
         }
@@ -70,7 +66,7 @@ class HabitEntryViewModel(
      */
     suspend fun saveHabit(){
         if (validateInput()) {
-            appRepository.insertHabit((habitUiState.habitDetails.toHabit()))
+            appRepository.insertHabit((habitDetailsUiState.habitDetails.toHabit()))
         }
     }
 
@@ -81,7 +77,7 @@ class HabitEntryViewModel(
 /**
  * Represents the UI state for an entry form.
  */
-data class HabitUiState(
+data class HabitDetailsUiState(
     var habitDetails: HabitDetails = HabitDetails(),
     val isEntryValid: Boolean = false
 )
@@ -100,7 +96,7 @@ fun HabitDetails.toHabit(): Habit = Habit(
     description = description,
 )
 
-fun Habit.toHabitEntryUiState(isEntryValid: Boolean = false): HabitUiState = HabitUiState(
+fun Habit.toHabitEntryUiState(isEntryValid: Boolean = false): HabitDetailsUiState = HabitDetailsUiState(
     habitDetails = this.toHabitDetails(),
     isEntryValid = isEntryValid
 )

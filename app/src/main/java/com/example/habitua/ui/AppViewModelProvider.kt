@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.habitua.HabitApplication
 import com.example.habitua.ui.habit.HabitEditViewModel
-import com.example.habitua.ui.habit.HomeViewModel
+import com.example.habitua.ui.habit.HabitViewModel
 import com.example.habitua.ui.habit.HabitEntryViewModel
 import com.example.habitua.ui.issues.IssueViewModel
 import com.example.habitua.ui.principles.PrincipleViewModel
@@ -21,7 +21,7 @@ object AppViewModelProvider {
 
         // initializer for home
         initializer {
-            HomeViewModel(
+            HabitViewModel(
                 habitApplication().container.appRepository
             )
         }

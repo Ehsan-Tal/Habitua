@@ -44,6 +44,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.AppNavBar
+import com.example.habitua.ui.AppTitleBar
+import com.example.habitua.ui.habit.HabitDestination
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
 
@@ -55,7 +57,7 @@ object SettingDestination: NavigationDestination {
 
 // we need a button to initiate the toggling
 @Composable
-fun SettingScreenWrapperCHANGESOON (
+fun SettingBody (
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
@@ -64,9 +66,32 @@ fun SettingScreenWrapperCHANGESOON (
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 
-    viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    uiState: SettingUiState = viewModel.uiState.collectAsState().value,
 ) {
+
+    Scaffold (
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AppTitleBar(
+                title = stringResource( id= SettingDestination.title)
+            )
+
+            AppNavBar(
+                currentScreenName = currentScreenName,
+                navigateToHabit = navigateToHabit,
+                navigateToPrinciple = navigateToPrinciple,
+                navigateToIssue = navigateToIssue,
+                navigateToYou = navigateToYou
+            )
+        }
+    }
 
 }
 
@@ -80,8 +105,10 @@ fun SettingScreen (
     navigateToVisualize: () -> Unit,
     //onShareButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier,
+
     viewModel: SettingViewModel = viewModel(factory = AppViewModelProvider.Factory),
     uiState: SettingUiState = viewModel.uiState.collectAsState().value,
+
 ) {
     val newReceipt = stringResource(R.string.new_habit_receipt)
 

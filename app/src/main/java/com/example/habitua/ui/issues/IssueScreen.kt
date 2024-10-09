@@ -7,7 +7,7 @@ import com.example.habitua.R
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.habit.HomeViewModel
+
 import com.example.habitua.ui.navigation.NavigationDestination
 
 object IssueDestination: NavigationDestination {
@@ -20,8 +20,7 @@ object IssueDestination: NavigationDestination {
 
 @Composable
 fun IssueScreen(
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
-
+    viewModel: IssueViewModel = viewModel(factory = AppViewModelProvider.Factory),
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,

@@ -63,9 +63,15 @@
     <string name="review_dialog_affirmation">I\'m ready for review</string>
 
     <string name="habit_title">Your Habits</string>
-    <string name="habit_nav_title">Habits</string>
+    <string name="principle_title">Your Principles</string>
+    <string name="issue_title">Your Issues</string>
+    <string name="visualization_title">Your Data</string>
+    <string name="habit_nav_title">Habit</string>
     <string name="setting_title">Your Settings</string>
-    <string name="setting_nav_title">Settings</string>
+    <string name="principle_nav_title">Principle</string>
+    <string name="setting_nav_title">You</string>
+    <string name="issue_nav_title">Issue</string>
+
     <string name="habit_edit_title">The Edit Screen</string>
     <string name="habit_entry_title">The Entry Screen</string>
 
@@ -81,8 +87,6 @@
     <string name="streak_length_zero_day_count">That was today, believe it or not</string>
     <string name="image_menu_dialog_title">Select an Image</string>
 
-    <string name="principle_title">Your Principles</string>
-    <string name="principle_nav_title">Principles</string>
     <string name="review_dialog_principle_title">Review Principle Record</string>
     <string name="principle_list_empty">"...nothing yet !"</string>
     <string name="content_description_FAB_principle_create">Add a principle</string>
@@ -91,9 +95,7 @@
     <string name="content_description_rebaseToToday">rebase principle sheet\'s date to today</string>
     <string name="principle_list_empty_variant_2">Add some principles from the bottom action bar buttons\n</string>
 
-    <string name="issue_title">Your Issues</string>
-    <string name="issue_nav_title">Issues\n</string>
-    <string name="visualization_title">Your Data</string>
+
 
     <!--
         <string name=""></string>

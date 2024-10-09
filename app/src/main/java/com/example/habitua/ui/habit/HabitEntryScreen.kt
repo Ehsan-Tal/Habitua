@@ -50,9 +50,9 @@ fun HabitEntryPostview(
     val coroutineScope = rememberCoroutineScope()
 
     HabitEntryScreen(
-        name = viewModel.habitUiState.habitDetails.name,
-        description = viewModel.habitUiState.habitDetails.description,
-        isEntryValid = viewModel.habitUiState.isEntryValid,
+        name = viewModel.habitDetailsUiState.habitDetails.name,
+        description = viewModel.habitDetailsUiState.habitDetails.description,
+        isEntryValid = viewModel.habitDetailsUiState.isEntryValid,
         onNameChange = viewModel::updateName,
         onDescriptionChange = viewModel::updateDescription,
         onSaveClick = {

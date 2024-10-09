@@ -15,14 +15,14 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-private const val TAG = "HomeViewModel"
+private const val TAG = "HabitViewModel"
 
 /**
  * View Model to provide data to the Home screen.
  *
  * @param appRepository the repository of habits
  */
-class HomeViewModel(
+class HabitViewModel(
     private val appRepository: AppRepository,
 ): ViewModel() {
 
@@ -39,8 +39,8 @@ class HomeViewModel(
         TODO, AT_RISK, NOT_STREAKING, NOT_ACQUIRED, ACQUIRED, ALL
     }
 
-    private val _homeUiState = MutableStateFlow(HomeUiState())
-    val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
+    private val _habitUiState = MutableStateFlow(HabitUiState())
+    val habitUiState: StateFlow<HabitUiState> = _habitUiState.asStateFlow()
 
     private var habitsJob: Job? = null
 
@@ -59,7 +59,7 @@ class HomeViewModel(
                 DataSource.ACQUIRED -> appRepository.getAllHabitsAcquiredStream()
                 DataSource.ALL -> appRepository.getAllHabitsStream()
             }.collect{ habits ->
-                _homeUiState.value = _homeUiState.value.copy(habitList = habits)
+                _habitUiState.value = _habitUiState.value.copy(habitList = habits)
             }
         }
     }
@@ -69,8 +69,8 @@ class HomeViewModel(
         viewModelScope.launch {
             // only this one works.
             appRepository.countAllHabitsStream().collect { count ->
-                _homeUiState.value = _homeUiState.value.copy(
-                    countList = _homeUiState.value.countList + (DataSource.ALL to count)
+                _habitUiState.value = _habitUiState.value.copy(
+                    countList = _habitUiState.value.countList + (DataSource.ALL to count)
                 )}
         }
 
@@ -81,38 +81,37 @@ class HomeViewModel(
 
         viewModelScope.launch {
             appRepository.countAllHabitsAcquiredStream().collect { count ->
-                _homeUiState.value = _homeUiState.value.copy(
-                    countList = _homeUiState.value.countList + (DataSource.ACQUIRED to count)
+                _habitUiState.value = _habitUiState.value.copy(
+                    countList = _habitUiState.value.countList + (DataSource.ACQUIRED to count)
                 )}
         }
         viewModelScope.launch {
             appRepository.countAllHabitsNotAcquiredStream().collect { count ->
-                _homeUiState.value = _homeUiState.value.copy(
-                    countList = _homeUiState.value.countList + (DataSource.NOT_ACQUIRED to count)
+                _habitUiState.value = _habitUiState.value.copy(
+                    countList = _habitUiState.value.countList + (DataSource.NOT_ACQUIRED to count)
                 )}
         }
         viewModelScope.launch {
             appRepository.countAllHabitsNotStreakingStream().collect { count ->
-                _homeUiState.value = _homeUiState.value.copy(
-                    countList = _homeUiState.value.countList + (DataSource.NOT_STREAKING to count)
+                _habitUiState.value = _habitUiState.value.copy(
+                    countList = _habitUiState.value.countList + (DataSource.NOT_STREAKING to count)
                 )}
         }
         viewModelScope.launch {
             appRepository.countAllHabitsTODOStream(dateTodayMilli, dateYesterdayMilli).collect { count ->
-            _homeUiState.value = _homeUiState.value.copy(
-                countList = _homeUiState.value.countList + (DataSource.TODO to count)
+            _habitUiState.value = _habitUiState.value.copy(
+                countList = _habitUiState.value.countList + (DataSource.TODO to count)
             )}
         }
         viewModelScope.launch {
             appRepository.countAllHabitsAtRiskStream(dateYesterdayMilli).collect{ count ->
-                _homeUiState.value = _homeUiState.value.copy(
-                    countList = _homeUiState.value.countList + (DataSource.AT_RISK to count)
+                _habitUiState.value = _habitUiState.value.copy(
+                    countList = _habitUiState.value.countList + (DataSource.AT_RISK to count)
                 )}
         }
 }
 
     fun setDataSource(dataSource: DataSource) {
-        Log.d(TAG, "setDataSource: $dataSource")
         updateDataSource(dataSource)
         updateCountList()
     }
@@ -158,16 +157,16 @@ class HomeViewModel(
 }
 
 
-data class HomeUiState(
+data class HabitUiState(
     var habitList: List<Habit> = listOf(),
-    var countList: Map<HomeViewModel.DataSource, Int> = emptyMap(),
-    var nameMaps: Map<HomeViewModel.DataSource, String> = mapOf(
-        HomeViewModel.DataSource.ALL to "All",
-        HomeViewModel.DataSource.TODO to "TODO",
-        HomeViewModel.DataSource.AT_RISK to "Streak at Risk",
-        HomeViewModel.DataSource.ACQUIRED to "Acquired",
-        HomeViewModel.DataSource.NOT_ACQUIRED to "Not Acquired",
-        HomeViewModel.DataSource.NOT_STREAKING to "Not in a streak"
+    var countList: Map<HabitViewModel.DataSource, Int> = emptyMap(),
+    var nameMaps: Map<HabitViewModel.DataSource, String> = mapOf(
+        HabitViewModel.DataSource.ALL to "All",
+        HabitViewModel.DataSource.TODO to "TODO",
+        HabitViewModel.DataSource.AT_RISK to "Streak at Risk",
+        HabitViewModel.DataSource.ACQUIRED to "Acquired",
+        HabitViewModel.DataSource.NOT_ACQUIRED to "Not Acquired",
+        HabitViewModel.DataSource.NOT_STREAKING to "Not in a streak"
     ),
     var iconList: List<Painting> = listOf(
         Painting(R.drawable.tal_derpy, "Tal the cat having a derp face"),

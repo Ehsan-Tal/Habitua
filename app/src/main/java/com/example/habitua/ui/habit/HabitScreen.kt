@@ -98,7 +98,7 @@ object HabitDestination : NavigationDestination {
 
 @Composable
 fun HabitScreen(
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     currentScreenName: String,
     navigateToHabitEdit: (Int) -> Unit,
@@ -107,11 +107,11 @@ fun HabitScreen(
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
 ) {
-    val homeUiState by viewModel.homeUiState.collectAsState()
+    val habitUiState by viewModel.habitUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     var reviewConfirmationRequired by rememberSaveable { mutableStateOf(false) }
-    var dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
+    var dataSource by remember { mutableStateOf(HabitViewModel.DataSource.TODO) }
     var expandedIconMenu by remember { mutableStateOf(false) }
 
     HabitHomeBody(
@@ -122,10 +122,10 @@ fun HabitScreen(
         navigateToIssue = navigateToIssue,
         navigateToYou = navigateToYou,
 
-        habitList = homeUiState.habitList,
-        countList = homeUiState.countList,
-        stringMap = homeUiState.nameMaps,
-        iconList = homeUiState.iconList,
+        habitList = habitUiState.habitList,
+        countList = habitUiState.countList,
+        stringMap = habitUiState.nameMaps,
+        iconList = habitUiState.iconList,
 
         onClickHabitCard = { habit: Habit ->
             coroutineScope.launch{ viewModel.toggleHabitActive(habit) }
@@ -192,10 +192,10 @@ fun HabitHomeBody(
     onReviewDismiss: () -> Unit,
     userReviewedToday: Boolean,
 
-    dataSource: HomeViewModel.DataSource,
-    onOptionSelected: (HomeViewModel.DataSource) -> Unit,
-    countList: Map<HomeViewModel.DataSource, Int>,
-    stringMap: Map<HomeViewModel.DataSource, String>,
+    dataSource: HabitViewModel.DataSource,
+    onOptionSelected: (HabitViewModel.DataSource) -> Unit,
+    countList: Map<HabitViewModel.DataSource, Int>,
+    stringMap: Map<HabitViewModel.DataSource, String>,
 ){
 
     Scaffold(
@@ -248,7 +248,6 @@ private fun HabitHomeSkeleton(
     reviewConfirmationRequired: Boolean,
     userReviewedToday: Boolean,
 
-
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
@@ -263,11 +262,11 @@ private fun HabitHomeSkeleton(
     onReviewAccept: () -> Unit,
     onReviewDismiss: () -> Unit,
 
-    dataSource: HomeViewModel.DataSource,
-    onOptionSelected: (HomeViewModel.DataSource) -> Unit,
+    dataSource: HabitViewModel.DataSource,
+    onOptionSelected: (HabitViewModel.DataSource) -> Unit,
 
-    countList: Map<HomeViewModel.DataSource, Int>,
-    nameMaps: Map<HomeViewModel.DataSource, String>,
+    countList: Map<HabitViewModel.DataSource, Int>,
+    nameMaps: Map<HabitViewModel.DataSource, String>,
 
     iconList: List<Painting>,
     onSelectImage: (Habit, Int) -> Unit,
@@ -300,7 +299,7 @@ private fun HabitHomeSkeleton(
         ){
 
             // START OF DROPDOWN MENU
-            var dataSourceOptionText by remember { mutableStateOf(HomeViewModel.DataSource.TODO.name) }
+            var dataSourceOptionText by remember { mutableStateOf(HabitViewModel.DataSource.TODO.name) }
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }
@@ -316,7 +315,7 @@ private fun HabitHomeSkeleton(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    HomeViewModel.DataSource.entries.forEach { dataSourceOption ->
+                    HabitViewModel.DataSource.entries.forEach { dataSourceOption ->
                         DropdownMenuItem(
                             text = {
                                 Row {
@@ -774,297 +773,3 @@ fun ImageGallery(){
     }
 }
 
-
-/*
-@Preview(
-    showBackground = true,
-    name = "Light-no-Habits",
-    group = "Empty"
-)
-@Composable
-fun LightEmptyPreview(){
-    PreviewHabituaTheme(darkTheme = false){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = false,
-
-            dataSource = dataSource,
-            onOptionSelected = {},
-
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "Dark-no-Habits",
-    group = "Empty"
-)
-@Composable
-fun DarkEmptyPreview(){
-    PreviewHabituaTheme(darkTheme = true){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = false,
-            dataSource = dataSource,
-            onOptionSelected = {},
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "Light-Habits",
-    group = "HasHabits"
-)
-@Composable
-fun LightHabitsPreview(){
-    PreviewHabituaTheme(darkTheme = false){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(
-                Habit(
-                    id = 0,
-                    name = "Glove Chopping",
-                    description = "With a snippers"
-                ),
-                Habit(
-                    id = 1,
-                    name = "Pouring one Out",
-                    description = "sample text"
-
-                ),
-                Habit(
-                    id = 3,
-                    name = "Diisononyl phthalate",
-                    description = "get grapes",
-                    isActive = true,
-                ),
-            ),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = false,
-            dataSource = dataSource,
-            onOptionSelected = {},
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-//TODO: Consolidate previews to reduce inconvenice of change
-
-//TODO: this should use Test Data because things will change soon(TM)
-@Preview(
-    showBackground = true,
-    name = "Dark-Habits",
-    group = "HasHabits"
-)
-@Composable
-fun DarkHabitsPreview(){
-    PreviewHabituaTheme(darkTheme = true){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(
-                Habit(
-                    id = 0,
-                    name = "Glove Chopping",
-                    description = "With a snippers"
-                ),
-                Habit(
-                    id = 1,
-                    name = "Pouring one Out",
-                    description = "sample text"
-
-                ),
-                Habit(
-                    id = 3,
-                    name = "Diisononyl phthalate",
-                    description = "get grapes",
-                    isActive = true,
-                ),
-            ),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = false,
-
-            dataSource = dataSource,
-            onOptionSelected = {},
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-
-// Reviewed Previews
-@Preview(
-    showBackground = true,
-    name = "Light-Habits-Reviewed",
-    group = "Reviewed"
-)
-@Composable
-fun LightHabitsReviewedPreview(){
-    PreviewHabituaTheme(darkTheme = false){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(
-                Habit(
-                    id = 0,
-                    name = "Glove Chopping",
-                    description = "With a snippers"
-                ),
-                Habit(
-                    id = 1,
-                    name = "Pouring one Out",
-                    description = "sample text"
-
-                ),
-                Habit(
-                    id = 3,
-                    name = "Diisononyl phthalate",
-                    description = "get grapes",
-                    isActive = true,
-                ),
-            ),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = true,
-
-            dataSource = dataSource,
-            onOptionSelected = {},
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "Dark-Habits-Reviewed",
-    group = "Reviewed"
-)
-@Composable
-fun DarkHabitsReviewedPreview(){
-    PreviewHabituaTheme(darkTheme = true){
-        val dataSource by remember { mutableStateOf(HomeViewModel.DataSource.TODO) }
-        HabitHomeBody(
-            navigateToHabitDestination = {},
-            navigateToVisualizeDestination = {},
-            navigateToSettingDestination = {},
-
-            currentScreenName = stringResource(id = HabitDestination.navTitle),
-            navigateToHabitEntry = {},
-            navigateToHabitEdit = {},
-
-            habitList = listOf(
-                Habit(
-                    id = 0,
-                    name = "Glove Chopping",
-                    description = "With a snippers"
-                ),
-                Habit(
-                    id = 1,
-                    name = "Pouring one Out",
-                    description = "sample text"
-
-                ),
-                Habit(
-                    id = 3,
-                    name = "Diisononyl phthalate",
-                    description = "get grapes",
-                    isActive = true,
-                ),
-            ),
-            onClickHabitCard = {},
-
-            reviewConfirmationRequired = false,
-            onReviewClick = {},
-            onReviewAccept = {},
-            onReviewDismiss = {},
-            userReviewedToday = true,
-
-            dataSource = dataSource,
-            onOptionSelected = {},
-            countList = emptyMap(),
-            stringMap = emptyMap(),
-            iconList = listOf()
-        )
-    }
-}
-
-
- */

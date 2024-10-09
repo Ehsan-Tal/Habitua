@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -43,14 +46,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.graphics.alpha
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.PrincipleDetails
@@ -68,6 +68,9 @@ import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 
@@ -129,6 +132,7 @@ fun PrincipleScreen(
             //TODO: change sorting order
         },
         principleListToday = principleUiState.principleListToday,
+        canApplyChanges = principleUiState.canApplyChanges,
 
         // Action Bar items
         addPrinciple = { viewModel.addPrinciple() },
@@ -149,12 +153,6 @@ fun PrincipleScreen(
             expandEditMenu = false
             viewModel.editMenuDeletePrinciple()
         },
-        // delete confirmation
-        //TODO: figure out how if we can have two dialogs
-        // or how we could have a delete button - e.g.,
-        // a button that asks, do you want to delete this, and then it's
-        // set to readonly and a new one appears to the right of it
-        // and that one actually deletes it.
     )
 }
 
@@ -194,6 +192,8 @@ fun PrincipleBody(
     isEqualToToday: Boolean,
 
     // principles
+    canApplyChanges: Boolean,
+
     principleListToday: List<PrincipleDetails>,
     onClickPrinciple: (PrincipleDetails) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
@@ -219,83 +219,76 @@ fun PrincipleBody(
              * Title and Nav bar should not have padding beyond the scaffold
              */
             val paddedModifier = Modifier
-                .fillMaxSize()
                 .padding(dimensionResource(id = R.dimen.padding_large))
                 .border(1.dp, MaterialTheme.colorScheme.tertiary, RectangleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
 
             var editMenuDeleteConfirmation by remember { mutableStateOf(false) }
 
+            AppTitleBar(
+                title = stringResource(id = PrincipleDestination.title)
+            )
 
-            Column( modifier = Modifier.weight(1f) ){
-                // title bar
-                AppTitleBar( title = stringResource(id = PrincipleDestination.title) )
-            }
-            Column( modifier = Modifier.weight(8f)) {
-                Column (modifier = Modifier.weight(1f)) {
-                    // principle filter list
-                    PrincipleFilterBar(
-                        modifier = paddedModifier,
+            // principle filter bar
+            PrincipleFilterBar(
+                modifier = paddedModifier,
 
-                        dateBase = dateBase,
-                        isEqualToToday = isEqualToToday,
-                        isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
+                dateBase = dateBase,
+                isEqualToToday = isEqualToToday,
+                isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
 
-                        onDateSwipe = onDateSwipe,
-                        updateToTomorrow = updateToTomorrow,
-                        updateToYesterday = updateToYesterday
-                    )
-                }
-                Column( modifier = Modifier.weight(4f) ){
-                    // principle list bar
-                    PrincipleListBar(
-                        modifier = paddedModifier,
+                onDateSwipe = onDateSwipe,
+                updateToTomorrow = updateToTomorrow,
+                updateToYesterday = updateToYesterday
+            )
 
-                        // background drawables
-                        backgroundPatternList = backgroundPatternList,
-                        backgroundAccessorIndex = backgroundAccessorIndex,
 
-                        onClickPrinciple = onClickPrinciple,
-                        onHoldPrinciple = onHoldPrinciple,
-                        principleListToday = principleListToday,
+            // principle list bar
+            PrincipleListBar(
+                modifier = paddedModifier
+                    .weight(8f),
 
-                        isBeforeYesterday = isBeforeYesterday,
+                // background drawables
+                backgroundPatternList = backgroundPatternList,
+                backgroundAccessorIndex = backgroundAccessorIndex,
 
-                        // edit menus
-                        expandEditMenu = expandEditMenu,
-                        onEditMenuDismiss = onEditMenuDismiss,
-                        onEditMenuExpand = onEditMenuExpand,
-                        editMenuPrincipleDetails = editMenuPrincipleDetails,
-                        editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
-                        editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
-                        editMenuDeletePrinciple = editMenuDeletePrinciple,
-                        editMenuDeleteConfirmation = editMenuDeleteConfirmation,
-                        editMenuDeleteToExpand = { editMenuDeleteConfirmation = true}
+                onClickPrinciple = onClickPrinciple,
+                onHoldPrinciple = onHoldPrinciple,
+                principleListToday = principleListToday,
 
-                    )
-                }
-                Column ( modifier = Modifier.weight(1f) ) {
-                    // action bar
-                    PrincipleActionBar(
-                        modifier = paddedModifier,
+                isBeforeYesterday = isBeforeYesterday,
+                canApplyChanges = canApplyChanges,
 
-                        addPrinciple = addPrinciple,
-                        setOfferRebase = !isEqualToToday,
-                        rebaseToToday = updateToToday
-                    )
-                }
+                // edit menus
+                expandEditMenu = expandEditMenu,
+                onEditMenuDismiss = onEditMenuDismiss,
+                onEditMenuExpand = onEditMenuExpand,
+                editMenuPrincipleDetails = editMenuPrincipleDetails,
+                editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
+                editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
+                editMenuDeletePrinciple = editMenuDeletePrinciple,
+                editMenuDeleteConfirmation = editMenuDeleteConfirmation,
+                editMenuDeleteToExpand = { editMenuDeleteConfirmation = true }
 
-            }
-            Column ( modifier = Modifier.weight(1f) ) {
-                // navigation bar
-                AppNavBar(
-                    currentScreenName = currentScreenName,
-                    navigateToHabit = navigateToHabit,
-                    navigateToPrinciple = navigateToPrinciple,
-                    navigateToIssue = navigateToIssue,
-                    navigateToYou = navigateToYou
-                )
-            }
+            )
+
+            // action bar
+            PrincipleActionBar(
+                modifier = paddedModifier,
+
+                addPrinciple = addPrinciple,
+                setOfferRebase = !isEqualToToday,
+                rebaseToToday = updateToToday
+            )
+
+            // navigation bar
+            AppNavBar(
+                currentScreenName = currentScreenName,
+                navigateToHabit = navigateToHabit,
+                navigateToPrinciple = navigateToPrinciple,
+                navigateToIssue = navigateToIssue,
+                navigateToYou = navigateToYou
+            )
         }
     }
 }
@@ -324,7 +317,7 @@ fun PrincipleFilterBar(
         Row (
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
         ){
             IconButton(
                 enabled = !isEqualToWeekBeforeToday,
@@ -369,6 +362,7 @@ fun PrincipleListBar(
     backgroundAccessorIndex: Int,
 
     isBeforeYesterday: Boolean,
+    canApplyChanges: Boolean,
 
     principleListToday: List<PrincipleDetails>,
 
@@ -439,26 +433,39 @@ fun PrincipleListBar(
             editMenuDeleteToExpand = editMenuDeleteToExpand,
 
             isBeforeYesterday = isBeforeYesterday,
+            canApplyChanges = canApplyChanges
         )
 
         if (principleListToday.isEmpty()){
-            if (Random.nextBoolean()) {
-                Text(
-                    text = stringResource(id = R.string.principle_list_empty),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.displayMedium,
-                    modifier = Modifier
-                        .padding(dimensionResource(id = R.dimen.padding_medium))
-                )
 
-            } else {
-                Text(
-                    text = stringResource(id = R.string.principle_list_empty_variant_2),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.displayMedium,
-                    modifier = Modifier
-                        .padding(dimensionResource(id = R.dimen.padding_medium))
-                )
+            OutlinedCard(
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_large))
+                    .fillMaxWidth(),
+                colors = CardDefaults.outlinedCardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
+
+                ) {
+                if (Random.nextBoolean()) {
+                    Text(
+                        text = stringResource(id = R.string.principle_list_empty),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.displayMedium,
+                        modifier = Modifier
+                            .padding(dimensionResource(id = R.dimen.padding_medium))
+                    )
+
+                } else {
+                    Text(
+                        text = stringResource(id = R.string.principle_list_empty_variant_2),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.displayMedium,
+                        modifier = Modifier
+                            .padding(dimensionResource(id = R.dimen.padding_medium))
+                    )
+                }
             }
         }
         else {
@@ -612,6 +619,7 @@ fun PrincipleDetailEditMenuDialog(
     onEditMenuDismiss: () -> Unit,
 
     isBeforeYesterday: Boolean,
+    canApplyChanges: Boolean,
     editMenuPrincipleDetails: PrincipleDetails,
 
     editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
@@ -624,7 +632,6 @@ fun PrincipleDetailEditMenuDialog(
     if (expandEditMenu) {
         Dialog(
             onDismissRequest = onEditMenuDismiss,
-            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             PrincipleDetailEditMenuDialogContent(
                 editMenuPrincipleDetails = editMenuPrincipleDetails,
@@ -635,6 +642,7 @@ fun PrincipleDetailEditMenuDialog(
                 editMenuDeleteToExpand = editMenuDeleteToExpand,
 
                 isBeforeYesterday = isBeforeYesterday,
+                canApplyChanges = canApplyChanges
             )
         }
     }
@@ -644,6 +652,7 @@ fun PrincipleDetailEditMenuDialog(
 fun PrincipleDetailEditMenuDialogContent(
     editMenuPrincipleDetails: PrincipleDetails,
     isBeforeYesterday: Boolean,
+    canApplyChanges: Boolean,
     editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
     editMenuApplyChangesToPrinciple: () -> Unit,
     editMenuDeletePrinciple: () -> Unit,
@@ -651,69 +660,90 @@ fun PrincipleDetailEditMenuDialogContent(
     editMenuDeleteConfirmation: Boolean,
     editMenuDeleteToExpand: () -> Unit,
 ){
-    Column {
+    val modifierMaxWidth = Modifier
+        .fillMaxWidth()
+        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
+        .padding(dimensionResource(id = R.dimen.padding_large))
+
+    OutlinedCard (
+        modifier = Modifier
+            .padding(dimensionResource(id = R.dimen.padding_large))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .fillMaxWidth(),
+
+    ){
         // title
         Text(
-            text = "Editing principle"
+            text = "Editing principle",
+            style = MaterialTheme.typography.displayMedium,
+            modifier = Modifier
+                .padding(dimensionResource(id = R.dimen.padding_large))
         )
 
         Button(
-            onClick = editMenuApplyChangesToPrinciple
-        ) {
-            Text(
-                text = "Apply changes"
-            )
-        }
+            onClick = editMenuApplyChangesToPrinciple,
+            enabled = canApplyChanges,
+            modifier = Modifier
+                .padding(dimensionResource(id = R.dimen.padding_large))
+        ) { Text( text = "Apply changes" ) }
         //TODO: set this read only if there were no changes made
 
-        // name
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(id = R.string.form_required_name)) },
-            value = editMenuPrincipleDetails.name,
-            onValueChange = {
-                editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(name = it))
-            },
-            singleLine = true
-        )
-
-        // description
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(id = R.string.form_required_description)) },
-            value = editMenuPrincipleDetails.description,
-            onValueChange = {
-                editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(description = it))
-            },
-            singleLine = true
-        )
-
-        // value
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = "Checked",
-                style = MaterialTheme.typography.displaySmall
+        Column( modifier = modifierMaxWidth ) {
+            // name
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.padding_medium)),
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.form_required_name),
+                        style = MaterialTheme.typography.displaySmall
+                    ) },
+                value = editMenuPrincipleDetails.name,
+                onValueChange = {
+                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(name = it))
+                },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.displaySmall
             )
 
-            OutlinedButton(
-                onClick = {
-                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(value =
-                    !editMenuPrincipleDetails.value ))
+            // description
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.padding_medium)),
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.form_required_description),
+                        style = MaterialTheme.typography.displaySmall
+                    )},
+                value = editMenuPrincipleDetails.description,
+                onValueChange = {
+                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(description = it))
                 },
+                singleLine = false,
+                minLines = 2,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // value
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (editMenuPrincipleDetails.value) {
-                    Text(
-                        text = "Yes"
-                    )
-                } else {
-                    Text(
-                        text = "No"
-                    )
+                Text( text = "Checked" )
+                OutlinedButton(
+                    onClick = {
+                        editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(value =
+                        !editMenuPrincipleDetails.value ))
+                    },
+                ) {
+                    if (editMenuPrincipleDetails.value) { Text(text = "Yes") }
+                    else { Text(text = "No") }
                 }
             }
-
         }
 
 
@@ -725,34 +755,64 @@ fun PrincipleDetailEditMenuDialogContent(
         //TODO: add group as a property and allow some editing maybe
          */
 
-        // date created
-        /*
-        Text(
-            text = longToStringFormat_ddMMYYYY(editMenuPrincipleDetails.dateCreated)
-        )
-        //TODO: Make a function and pass it down for the dating
-        //TODO: make a property for that
-         */
-
-
-        // delete expand and actual delete
-        Button(
-            onClick = editMenuDeleteToExpand
-        ){
-            Text(
-                text = "Delete principle"
-            )
-        }
-        if ( editMenuDeleteConfirmation ) {
-            Button(
-                onClick = editMenuDeletePrinciple
+        if (editMenuPrincipleDetails.dateFirstActive != null) {
+            // Date first active
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
+                    .padding(dimensionResource(id = R.dimen.padding_large)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Text(
-                    text = "Confirm deletion"
-                )
+                Text( text = "First active on:" )
+                Text( text = SimpleDateFormat("dd-MM-yyyy").format(editMenuPrincipleDetails.dateFirstActive) )
             }
         }
 
+        // date created
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
+                .padding(dimensionResource(id = R.dimen.padding_large)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Text( text = "Created on:" )
+            Text( text = SimpleDateFormat("dd-MM-yyyy").format(editMenuPrincipleDetails.dateCreated) )
+        }
+        //TODO: Make a function and pass it down for the dating
+        //TODO: make a property for that
+
+
+
+        // delete expand and actual delete
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
+                .padding(dimensionResource(id = R.dimen.padding_large)),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = editMenuDeleteToExpand,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) { Text( text = "Delete principle" ) }
+
+            if ( editMenuDeleteConfirmation ) {
+                Button(
+                    onClick = editMenuDeletePrinciple,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) { Text( text = "Confirm deletion" ) }
+            }
+        }
     }
 }
 
