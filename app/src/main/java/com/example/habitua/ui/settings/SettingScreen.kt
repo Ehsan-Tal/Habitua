@@ -45,15 +45,11 @@ import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
-import com.example.habitua.ui.habit.HabitDestination
 import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.navigation.SettingDestination
 import com.example.habitua.ui.theme.HabituaTheme
 
-object SettingDestination: NavigationDestination {
-    override val route = "settings"
-    override val title = R.string.setting_title
-    val navTitle = R.string.setting_nav_title
-}
+
 
 // we need a button to initiate the toggling
 @Composable

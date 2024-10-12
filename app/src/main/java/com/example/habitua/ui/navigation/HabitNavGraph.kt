@@ -8,15 +8,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.habitua.ui.habit.HabitDestination
-import com.example.habitua.ui.habit.HabitEditDestination
 import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitScreen
-import com.example.habitua.ui.issues.IssueDestination
 import com.example.habitua.ui.issues.IssueScreen
-import com.example.habitua.ui.principles.PrincipleDestination
 import com.example.habitua.ui.principles.PrincipleScreen
-import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.settings.SettingScreen
 import com.example.habitua.ui.visual.VisualizationDestination
 import com.example.habitua.ui.visual.VisualizationScreen
@@ -35,7 +30,7 @@ fun HabitNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = PrincipleDestination.route, //HabitDestination.route,
+        startDestination = IssueDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
 

@@ -52,19 +52,21 @@ class PrincipleViewModel(
             }
         }
     }
-
-    /*
-                    if (it.isNotEmpty()) {
-                    _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
-
-                } else {
-                    _principleUiState.value = _principleUiState.value.copy(
-                        principleListToday = listOf(P)
-                    )
-                }
-       // this shouldn't result in any updates as it's a temp one.
-    * */
-    //TODO: Add a temporary principleDetail here in case principleListToday is empty
+    //TODO: change record traversal - we must create date records by each items origin date
+    // say, if Happiness had a set origin of 8-10 and today is 8-12
+    // then records containing Happiness must be created for each date until that date.
+    // *space*
+    // d
+    // either we create records in the DB that may or may not be read only
+    // , OR
+    // we we create in the DAO, i.e., we send back things with their assumed values
+    // the
+    // the second option is superior for data redundancy - they can't change it, so why bother
+    // On the other hand, if we are to allow them to modify ANY value from any date - pref ?
+    // Then we could use the first
+    // but, that's alot of work
+    // So...
+    // just create them in the DAO for any whose origin is before the given :date
 
     private fun collectPrinciplesWithoutCreating(){
         principleJob?.cancel()
@@ -78,23 +80,10 @@ class PrincipleViewModel(
                 _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
             }
         }
-
     }
 
-    init {
+    init { collectPrinciples() }
 
-        collectPrinciples()
-    }
-
-/*
-    fun updateDate(direction: SwipeDirection) {
-        when (direction) {
-            SwipeDirection.Start ->
-            SwipeDirection.End ->
-        }
-
-    }
- */
     fun addPrinciple() {
 
         //TODO: Add a date created to Principles
@@ -112,7 +101,7 @@ class PrincipleViewModel(
     }
 
     private fun collectPrincipleAfterUpdates(){
-        if (_principleUiState.value.isBaseEqualToday() || _principleUiState.value.isBaseEqualYesterday()) {
+        if (_principleUiState.value.canCardClickBoolean) {
             collectPrinciples()
         } else {
             collectPrinciplesWithoutCreating()
@@ -209,7 +198,11 @@ data class PrincipleUiState(
 
     var dateBase: Instant = Instant.now(),
     var principleListToday: List<PrincipleDetails> = listOf(),
-    val isPrincipleListTodayEmpty: Boolean = principleListToday.isEmpty()
+    val isPrincipleListTodayEmpty: Boolean = principleListToday.isEmpty(),
+
+    val isFirstActionButtonEnabled: Boolean = true,
+    val isSecondActionButtonEnabled: Boolean = true,
+    // second action button should be NOT today
 ) {
     val canApplyChanges: Boolean = false
     //TODO: make this true if changes occurred
@@ -219,18 +212,24 @@ data class PrincipleUiState(
     private val dateAfter: Instant
         get() = dateBase.plus(1, ChronoUnit.DAYS)
 
+    val canCardClickBoolean: Boolean
+        get() = dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
+                .isEqual(dateToday.atZone(ZoneId.systemDefault()).toLocalDate()) ||
+                dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
+                .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
+
+    val isSerialBackwardButtonEnabled: Boolean
+        get() = false
+
+    val isSerialForwardButtonEnabled: Boolean
+        get() = true
+    //TODO: use the same stuff that the view model uses to disable traversal
+
+
     val dateBaseString: String
         get() = DateTimeFormatter.ofPattern(dateFormat)
             .withZone(ZoneId.systemDefault())
             .format(dateBase)
-    val dateBeforeString: String
-        get() = DateTimeFormatter.ofPattern(dateFormat)
-            .withZone(ZoneId.systemDefault())
-            .format(dateBefore)
-    val dateAfterString: String
-        get() = DateTimeFormatter.ofPattern(dateFormat)
-            .withZone(ZoneId.systemDefault())
-            .format(dateAfter)
 
     fun convertInstantToString(instant: Instant): String {
         return DateTimeFormatter.ofPattern(dateFormat)
@@ -269,6 +268,10 @@ data class PrincipleUiState(
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
             .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
     }
+    fun isBaseNotEqualYesterday(): Boolean {
+        return !(dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
+            .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate()))
+    }
     fun isBaseBeforeYesterday(): Boolean {
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
             .isBefore(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
@@ -277,4 +280,6 @@ data class PrincipleUiState(
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
             .isEqual(dateWeekBeforeToday.atZone(ZoneId.systemDefault()).toLocalDate())
     }
+
+
 }

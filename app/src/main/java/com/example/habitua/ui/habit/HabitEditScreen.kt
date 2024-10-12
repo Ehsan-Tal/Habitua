@@ -33,17 +33,11 @@ import com.example.habitua.HabitTopAppBar
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
+import com.example.habitua.ui.navigation.HabitEditDestination
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.HabituaTheme
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 import kotlinx.coroutines.launch
-
-object HabitEditDestination: NavigationDestination{
-    override val route = "habit_edit"
-    override val title = R.string.habit_edit_title
-    const val HABIT_ID_ARG = "habitId"
-    val routeWithArgs = "$route/{$HABIT_ID_ARG}"
-}
 
 
 @Composable

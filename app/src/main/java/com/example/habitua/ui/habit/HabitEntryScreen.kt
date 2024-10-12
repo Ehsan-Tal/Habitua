@@ -28,15 +28,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.HabitTopAppBar
 import com.example.habitua.R
 import com.example.habitua.ui.AppViewModelProvider
+import com.example.habitua.ui.navigation.HabitEntryDestination
 import com.example.habitua.ui.theme.HabituaTheme
 import kotlinx.coroutines.launch
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 
-object HabitEntryDestination : NavigationDestination {
-    override val route = "habit_entry"
-    override val title =  R.string.habit_entry_title
-}
 
 //TODO: reduce the renderer's reliance on the view model
 

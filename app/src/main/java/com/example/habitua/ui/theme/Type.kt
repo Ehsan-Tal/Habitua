@@ -1,4 +1,5 @@
 package com.example.habitua.ui.theme
+
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -7,47 +8,66 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.habitua.R
 
+
+
 val UbuntuMono = FontFamily(
     Font(R.font.ubuntumono_regular),
     Font(R.font.ubuntumono_bold, FontWeight.Bold)
 )
-
-val SingleDay = FontFamily(
-    Font(R.font.singleday_regular)
+val Lemon = FontFamily(
+    Font(R.font.lemon_regular)
 )
+val AllertaStencil = FontFamily(
+    Font(R.font.allertastencil_regular)
+)
+
 
 // Default Material 3 typography values
 val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = SingleDay,
+        fontFamily = Lemon,
         fontWeight = FontWeight.Normal,
-        fontSize = 46.sp
+        fontSize = 32.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = SingleDay,
+        fontFamily = Lemon,
         fontWeight = FontWeight.Normal,
-        fontSize = 26.sp
+        fontSize = 14.sp
     ),
     displaySmall = TextStyle(
-        fontFamily = SingleDay,
+        fontFamily = AllertaStencil,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp
+        fontSize = 12.sp
     ),
-    labelSmall = TextStyle(
+    labelLarge = TextStyle(
+        fontFamily = Lemon,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    ),
+    labelMedium = TextStyle(
         fontFamily = UbuntuMono,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp
     ),
+    labelSmall = TextStyle(
+        fontFamily = UbuntuMono,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp
+    ),
     bodyLarge = TextStyle(
         fontFamily = UbuntuMono,
         fontWeight = FontWeight.Normal,
-        fontSize = 18.sp
+        fontSize = 16.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = UbuntuMono,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
     ),
     bodySmall = TextStyle(
         fontFamily = UbuntuMono,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontSize = 12.sp
+    )
 )
-)
-
 

@@ -1,21 +1,34 @@
 package com.example.habitua.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.data.PrincipleDetails
-import com.example.habitua.ui.habit.HabitDestination
 import com.example.habitua.ui.habit.HabitHomeBody
 import com.example.habitua.ui.habit.HabitViewModel
 import com.example.habitua.ui.habit.Painting
 import com.example.habitua.ui.issues.IssueBody
-import com.example.habitua.ui.issues.IssueDestination
+import com.example.habitua.ui.navigation.HabitDestination
+import com.example.habitua.ui.navigation.IssueDestination
+import com.example.habitua.ui.navigation.PrincipleDestination
+import com.example.habitua.ui.navigation.SettingDestination
 import com.example.habitua.ui.principles.PrincipleBody
-import com.example.habitua.ui.principles.PrincipleDestination
 import com.example.habitua.ui.settings.SettingBody
-import com.example.habitua.ui.settings.SettingDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 import com.example.habitua.ui.visual.VisualizationBody
 import kotlin.random.Random
@@ -137,7 +150,7 @@ fun PrincipleScreenPreview(
         PrincipleBody(
             // navigation
             currentScreenName = stringResource(id = PrincipleDestination.navTitle),
-            navigateToHabit = {  },
+            navigateToHabit = { },
             navigateToPrinciple = { },
             navigateToIssue = { },
             navigateToYou = { },
@@ -145,36 +158,33 @@ fun PrincipleScreenPreview(
             // background patterns
             backgroundPatternList = backgroundDrawables,
             backgroundAccessorIndex = backgroundAccessorIndex,
+            listOfCards = principleListToday,
+            isListOfCardsEmpty = principleListToday.isEmpty(),
+            getCanCardClickBoolean = true,
 
-            // dates
-            dateBase = "Sunday, 8-10",
-
-            onDateSwipe = {},
-            updateToToday = { },
-            updateToTomorrow = {  },
-            updateToYesterday = {},
-
-            isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
-            isBeforeYesterday = isBeforeYesterday,
-            isEqualToToday = isEqualToToday,
-
-            // principles
             onClickPrinciple = { principleDetails: PrincipleDetails -> },
             onHoldPrinciple = { principleDetails: PrincipleDetails -> },
-            principleListToday = principleListToday,
-            canApplyChanges = false,
-
-            // Action Bar items
-            addPrinciple = {  },
-
-            // edit dialog items
-            expandEditMenu = expandEditMenu,
-            editMenuPrincipleDetails = editablePrincipleDetails,
-            onEditMenuDismiss = {},
-            onEditMenuExpand = { principleDetails: PrincipleDetails -> },
-            editMenuUpdatePrincipleInUiState = { principleDetail: PrincipleDetails -> },
-            editMenuApplyChangesToPrinciple = {},
-            editMenuDeletePrinciple = {},
+            appTitle = stringResource(id = PrincipleDestination.title),
+            serialCategoryString = "Sunday, 8-10",
+            serialBackwardButtonLambda = {},
+            serialForwardButtonLambda = {},
+            serialBackwardButtonContentDescription = "",
+            serialForwardButtonContentDescription = "",
+            isSerialBackwardButtonEnabled = true,
+            isSerialForwardButtonEnabled = false,
+            isFilterDropdownEnabled = false,
+            emptyCardTitle = "No Principles",
+            emptyCardDescription = "No desc in preview",
+            firstActionButtonName = "Create",
+            firstActionButtonIcon = Icons.Outlined.AddCircleOutline,
+            firstActionButtonIconContentDescription = "",
+            firstActionButtonLambda = {},
+            isFirstButtonEnabled = true,
+            secondActionButtonName = "",
+            secondActionButtonIcon = Icons.Outlined.AddCircleOutline,
+            secondActionButtonIconContentDescription = "",
+            secondActionButtonLambda = {},
+            isSecondButtonEnabled = false,
         )
     }
 }
@@ -187,6 +197,16 @@ fun PrincipleScreenPreview(
 fun IssueScreenPreview(
     darkTheme: Boolean = false,
 ) {
+
+    val backgroundDrawables = listOf(
+        R.drawable.baseline_circle_24,
+        R.drawable.baseline_elderly_24,
+        R.drawable.baseline_hexagon_24,
+        R.drawable.baseline_electric_bolt_24
+    )
+
+    val backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
     PreviewHabituaTheme {
         IssueBody(
             currentScreenName = stringResource(id = IssueDestination.navTitle),
@@ -194,6 +214,9 @@ fun IssueScreenPreview(
             navigateToPrinciple = { },
             navigateToIssue = { },
             navigateToYou = { },
+            appTitle = stringResource(id = IssueDestination.title),
+            backgroundPatternList = backgroundDrawables,
+            backgroundAccessorIndex = backgroundAccessorIndex
         )
     }
 }
@@ -227,6 +250,69 @@ fun DataScreenPreview() {
 }
 
 
+
+@Preview(
+    showBackground = true,
+    name = "background pattern",
+    group = "background"
+)
+@Composable
+fun BackgroundPattern() {
+
+    val backgroundDrawables = listOf(
+        R.drawable.baseline_circle_24,
+        R.drawable.baseline_elderly_24,
+        R.drawable.baseline_hexagon_24,
+        R.drawable.baseline_electric_bolt_24
+    )
+
+    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
+    val patternPainter = painterResource(id = backgroundDrawables[backgroundAccessorIndex])
+    val color = MaterialTheme.colorScheme.tertiary
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .drawBehind {
+
+                val patternWidth = patternPainter.intrinsicSize.width
+                val patternHeight = patternPainter.intrinsicSize.height
+
+                clipRect (
+                    left = 0f,
+                    top = 0f,
+                    right = size.width,
+                    bottom = size.height - patternHeight / 2
+                ){
+                    val repetitionsX = (size.width / patternWidth).toInt() + 1
+                    val repetitionsY = (size.height / patternHeight).toInt() + 1
+
+                    for (i in 0..repetitionsX) {
+                        for (j in 0..repetitionsY) {
+                            val translateX = if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
+
+                            translate(translateX - patternWidth, j * patternHeight * 2 + patternHeight ) {
+                                with(patternPainter) {
+                                    draw(
+                                        size = Size(patternWidth, patternHeight),
+                                        alpha = 0.5f,
+                                        colorFilter = ColorFilter.tint(color)
+
+                                    )
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        ,
+        contentAlignment = Alignment.Center
+    ) {
+        // This Box will be behind other content
+    }
+}
 
 
 // Habit Screen Modifiers

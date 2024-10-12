@@ -69,6 +69,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
@@ -85,16 +86,14 @@ import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.AppNavBar
+import com.example.habitua.ui.issues.innerShadow
+import com.example.habitua.ui.navigation.HabitDestination
 import com.example.habitua.ui.navigation.NavigationDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 import kotlinx.coroutines.launch
 
 
-object HabitDestination : NavigationDestination {
-    override val route = "home"
-    override val title = R.string.habit_title
-    val navTitle = R.string.habit_nav_title
-}
+
 
 @Composable
 fun HabitScreen(
@@ -504,13 +503,6 @@ private fun HabitList(
                         tween(200)
                     )
             ){
-                HabitCard(
-                    habit = habit,
-                    onClickHabitCard = onClickHabitCard,
-                    onMoreOptionsClick = { onMoreOptionsClick(habit.id) },
-                    userReviewedToday = userReviewedToday,
-                    onIconClick = onIconClick
-                )
                 ImageMenu(
                     onSelectImage = onSelectImage,
                     listOfImages = iconList,
@@ -521,161 +513,6 @@ private fun HabitList(
             }
         }
     }
-}
-
-@Composable
-fun HabitCard (
-    habit: Habit,
-//    onHabitIconChanged: (Int) -> Unit,
-    userReviewedToday: Boolean,
-    modifier: Modifier = Modifier,
-    onClickHabitCard: (Habit) -> Unit,
-    onMoreOptionsClick: (Habit) -> Unit,
-
-    onIconClick: () -> Unit
-) {
-
-    val scale = remember { Animatable(1f) }
-
-    val foregroundColor by animateColorAsState(
-        targetValue =
-        if (habit.isActive){ MaterialTheme.colorScheme.primary }
-        else MaterialTheme.colorScheme.secondary,
-        label = "Foreground color change")
-
-    val backgroundColor by animateColorAsState(
-        targetValue =
-            if (habit.isActive){ MaterialTheme.colorScheme.primaryContainer }
-            else MaterialTheme.colorScheme.secondaryContainer,
-        label = "Background color change"
-    )
-
-    // Animating card.
-
-    // Trigger animation when either color changes
-    LaunchedEffect(key1 = habit.isActive) {
-        val randomDelay = 0.2f
-
-        scale.animateTo(
-            targetValue = 0.9f,
-            animationSpec = tween( (randomDelay * 1000).toInt(), easing = LinearEasing)
-        )
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(easing = LinearEasing)
-        )
-    }
-
-    OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = backgroundColor,
-            contentColor = foregroundColor
-        ),
-        elevation = CardDefaults.cardElevation(
-            4.dp
-        ),
-        modifier = Modifier
-            .scale(scale.value)
-            .padding(dimensionResource(R.dimen.padding_small))
-            .padding(bottom = 0.dp)
-            .border(
-                if (userReviewedToday) 0.dp else if (habit.isActive) 3.dp else 1.dp,
-                MaterialTheme.colorScheme.tertiary, MaterialTheme.shapes.medium
-            )
-            .alpha(if (userReviewedToday) 0.5f else 1f)
-            .clickable {
-                if (!userReviewedToday) {
-                    onClickHabitCard(habit)
-                }
-            },
-    ) {
-
-        Column (
-            modifier = Modifier
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                    // not really sure what this did to improve the animation
-                    // perhaps text fields are a bit laggy
-                )
-        ) {
-            Row (
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                //TODO: have something that connects the content description with the image, pls.
-                    HabitIcon(
-                        drawableRes = habit.imageResId,
-                        contentDescription = "",
-                        onIconClick = onIconClick,
-                        modifier = Modifier
-                            .weight(1f)
-                        )
-                    /*
-                    HabitIcon(
-                        imageURI = habit.imageURI,
-                        iconMenuExpanded = iconMenuExpanded
-                    ) */
-
-                Column(
-                    modifier = Modifier
-                        .padding(dimensionResource(R.dimen.padding_medium))
-                        .weight(6f),
-                ) {
-                    Text(
-                        text = habit.name,
-                        style = MaterialTheme.typography.displaySmall,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = habit.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                IconButton(
-                    onClick = { onMoreOptionsClick(habit) },
-                    modifier = modifier
-                        .weight(1f)
-                ) {
-                    Icon (
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.expand_button_content_description),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HabitIcon(
-    drawableRes: Int,
-    contentDescription: String,
-    onIconClick: () -> Unit,
-    modifier: Modifier
-){
-    Image(
-        painter = painterResource(id =  drawableRes),
-        contentDescription = contentDescription,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .padding(dimensionResource(R.dimen.padding_small))
-            .size(dimensionResource(R.dimen.image_size))
-            .clip(RoundedCornerShape(100))
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.tertiary,
-                shape = CircleShape
-            )
-            .shadow(elevation = 6.dp)
-            .clickable { onIconClick() },
-    )
-
 }
 
 @Composable

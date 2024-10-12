@@ -1,40 +1,42 @@
 package com.example.habitua.ui.principles
 
+import android.graphics.BlurMaskFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.util.Log
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.PanoramaVertical
+import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,39 +48,86 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.PrincipleDetails
+import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
-import com.example.habitua.ui.AppNavBar
-import com.example.habitua.ui.navigation.NavigationDestination
+import com.example.habitua.ui.navigation.PrincipleDestination
+import com.example.habitua.ui.theme.toothpasteShape
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import kotlin.random.Random
 
 
-object PrincipleDestination: NavigationDestination {
-    override val route = "principle"
-    override val title = R.string.principle_title
-    val navTitle = R.string.principle_nav_title
+//TODO - what items should be module
+fun Modifier.innerShadow(
+    shape: Shape,
+    color: Color = Color.Black,
+    blur: Dp = 4.dp,
+    offsetY: Dp = 2.dp,
+    offsetX: Dp = 2.dp,
+    spread: Dp = 0.dp
+) = this.drawWithContent {
+    drawContent()
+    drawIntoCanvas { canvas ->
+        val shadowSize = Size(size.width + spread.toPx(), size.height + spread.toPx())
+        val shadowOutline = shape.createOutline(shadowSize, layoutDirection, this)
+
+        val paint = Paint()
+        paint.color = color
+
+        // save the current layer of the canvas
+        canvas.saveLayer(size.toRect(), paint)
+
+        // Drawing the shadow outline of the canvas
+        canvas.drawOutline(shadowOutline, paint)
+
+        // Configure the paint to act as an eraser to clip the shadow
+        paint.asFrameworkPaint().apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
+            if (blur.toPx() > 0) {
+                maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
+            }
+        }
+
+        // set clipping color
+        paint.color = Color.Black
+
+        // Translate the canvas to the offset position
+        canvas.translate(offsetX.toPx(), offsetY.toPx())
+
+        // Draw the outline again to clip the shadow
+        canvas.drawOutline(shadowOutline, paint)
+
+        // Restore the canvas
+        canvas.restore()
+    }
 }
+
+
+
 
 
 @Composable
@@ -90,38 +139,43 @@ fun PrincipleScreen(
     navigateToPrinciple: () -> Unit,
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
-){
-
+) {
     val principleUiState by viewModel.principleUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     var expandEditMenu by remember { mutableStateOf(false) }
 
     PrincipleBody(
-        // navigation
-        currentScreenName = currentScreenName,
-        navigateToHabit = navigateToHabit,
-        navigateToPrinciple = navigateToPrinciple,
-        navigateToIssue = navigateToIssue,
-        navigateToYou = navigateToYou,
+        // app title bar stuff
+        appTitle = stringResource(id = PrincipleDestination.title),
 
-        // background patterns
+
+        // FILTER BAR
+        serialCategoryString = principleUiState.dateBaseString,
+        serialBackwardButtonLambda = { viewModel.updateToYesterday() },
+        serialForwardButtonLambda = { viewModel.updateToTomorrow() },
+        serialBackwardButtonContentDescription = stringResource(R.string.serial_backward_button_content_description),
+        serialForwardButtonContentDescription = stringResource(R.string.serial_forward_button_content_description_for_dates),
+        isSerialBackwardButtonEnabled = principleUiState.isSerialBackwardButtonEnabled,
+        isSerialForwardButtonEnabled = principleUiState.isSerialForwardButtonEnabled,
+        //TODO: change the serial button booleans to not need a !
+        //TODO: add filter parameters
+        //TODO: add string resources
+        //TODO: add a serial category swipe function
+
+        isFilterDropdownEnabled = false,
+
+
+        // LIST BAR
+        // principles
         backgroundPatternList = viewModel.backgroundDrawables,
         backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
-        // dates
-        dateBase = principleUiState.dateBaseString,
+        listOfCards = principleUiState.principleListToday,
+        isListOfCardsEmpty = principleUiState.isPrincipleListTodayEmpty,
+        getCanCardClickBoolean = principleUiState.canCardClickBoolean,
 
-        onDateSwipe = {},
-        updateToToday = { viewModel.updateToToday() },
-        updateToTomorrow = { viewModel.updateToTomorrow() },
-        updateToYesterday = { viewModel.updateToYesterday() },
-
-        isEqualToWeekBeforeToday = principleUiState.isBaseEqualWeekBefore(),
-        isBeforeYesterday = principleUiState.isBaseBeforeYesterday(),
-        isEqualToToday = principleUiState.isBaseEqualToday(),
-
-        // principles
+        // background patterns
         onClickPrinciple = { principleDetails: PrincipleDetails ->
             coroutineScope.launch {
                 viewModel.togglePrinciple(principleDetails)
@@ -131,12 +185,25 @@ fun PrincipleScreen(
             Log.d("t", "$principleDetails held")
             //TODO: change sorting order
         },
-        principleListToday = principleUiState.principleListToday,
-        canApplyChanges = principleUiState.canApplyChanges,
+
+        emptyCardTitle = "No principles to show",
+        emptyCardDescription = "how can I get this from the view Model",
+
 
         // Action Bar items
-        addPrinciple = { viewModel.addPrinciple() },
+        firstActionButtonName = stringResource(id = R.string.action_bar_create_button_general),
+        firstActionButtonIcon = Icons.Outlined.AddCircleOutline,
+        firstActionButtonIconContentDescription = stringResource(id = R.string.action_bar_create_issue_content_description),
+        firstActionButtonLambda = { viewModel.addPrinciple() },
+        isFirstButtonEnabled = principleUiState.isFirstActionButtonEnabled,
 
+        secondActionButtonName = stringResource(id = R.string.action_bar_today_button),
+        secondActionButtonIcon = Icons.Outlined.Today,
+        secondActionButtonIconContentDescription = stringResource(id = R.string.action_bar_today_button_content_description),
+        secondActionButtonLambda = { viewModel.updateToToday() },
+        isSecondButtonEnabled = principleUiState.isSecondActionButtonEnabled,
+
+        /*
         // edit dialog items
         expandEditMenu = expandEditMenu,
         editMenuPrincipleDetails = principleUiState.editablePrincipleDetails,
@@ -144,7 +211,7 @@ fun PrincipleScreen(
         onEditMenuExpand = { principleDetails: PrincipleDetails ->
             viewModel.setEditablePrincipleDetails(principleDetails)
             expandEditMenu = true
-       },
+        },
         editMenuUpdatePrincipleInUiState = { principleDetail: PrincipleDetails ->
             viewModel.editMenuUpdatePrincipleInUiState(principleDetail)
         },
@@ -153,135 +220,107 @@ fun PrincipleScreen(
             expandEditMenu = false
             viewModel.editMenuDeletePrinciple()
         },
+
+         */
+
+        //navigation
+        currentScreenName = currentScreenName,
+        navigateToHabit = navigateToHabit,
+        navigateToPrinciple = navigateToPrinciple,
+        navigateToIssue = navigateToIssue,
+        navigateToYou = navigateToYou,
     )
 }
 
-
+/**
+ *
+ * secondActionButtonName: String = "" // if no given name, do not generate a second button
+ */
 @Composable
-fun PrincipleBody(
-    // navigation
+fun PrincipleBody (
+    // app title bar stuff
+    appTitle: String,
+
+    // filter bar stuff
+    // serial category
+    serialCategoryString: String,
+    serialBackwardButtonLambda: () -> Unit,
+    serialForwardButtonLambda: () -> Unit,
+    serialBackwardButtonContentDescription: String,
+    serialForwardButtonContentDescription: String,
+    isSerialBackwardButtonEnabled: Boolean,
+    isSerialForwardButtonEnabled: Boolean,
+
+    // Dropdowns
+    isFilterDropdownEnabled: Boolean,
+
+
+    // LIST BAR STUFF
+    // background drawables for the list bar
+    backgroundPatternList: List<Int>,
+    backgroundAccessorIndex: Int,
+
+    // edit menus - TODO: what here ?
+
+    // principles
+    listOfCards: List<PrincipleDetails>,
+    isListOfCardsEmpty: Boolean,
+    getCanCardClickBoolean: Boolean,
+
+    onClickPrinciple: (PrincipleDetails) -> Unit,
+    onHoldPrinciple: (PrincipleDetails) -> Unit,
+
+    emptyCardTitle: String,
+    emptyCardDescription: String,
+
+
+    // ACTION BAR stuff
+    firstActionButtonName: String = "", // if no given name, do not generate a second button
+    firstActionButtonIcon: ImageVector = Icons.Filled.AddCircleOutline,
+    firstActionButtonIconContentDescription: String = "",
+    firstActionButtonLambda: () -> Unit = {},
+    isFirstButtonEnabled: Boolean = true,
+
+    secondActionButtonName: String = "", // if no given name, do not generate a second button
+    secondActionButtonIcon: ImageVector = Icons.Outlined.PanoramaVertical,
+    secondActionButtonIconContentDescription: String = "",
+    secondActionButtonLambda: () -> Unit = {},
+    isSecondButtonEnabled: Boolean = true,
+
+    // navigation necessities
     currentScreenName: String,
     navigateToHabit: () -> Unit,
     navigateToPrinciple: () -> Unit,
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
+) {
 
-    // background drawables
-    backgroundPatternList: List<Int>,
-    backgroundAccessorIndex: Int,
+    var editMenuDeleteConfirmation by remember { mutableStateOf(false) }
 
-    // edit menus
-    expandEditMenu: Boolean,
-    editMenuPrincipleDetails: PrincipleDetails,
-    onEditMenuDismiss: () -> Unit,
-    onEditMenuExpand: (PrincipleDetails) -> Unit,
-    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
-    editMenuApplyChangesToPrinciple: () -> Unit,
-    editMenuDeletePrinciple: () -> Unit,
+    val modifierForBars = Modifier
+        .fillMaxWidth()
+        .padding(
+            horizontal = dimensionResource(id = R.dimen.padding_large),
+            vertical = dimensionResource(id = R.dimen.padding_small)
+        )
+        .background(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.small
+        )
+        .innerShadow(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.outline.copy(0.68f),
+            offsetY = (4).dp, offsetX = (0).dp
+        )
 
-    // dates
-    dateBase: String,
-    onDateSwipe: (Long) -> Unit,
-
-    updateToToday: () -> Unit,
-    updateToTomorrow: () -> Unit,
-    updateToYesterday: () -> Unit,
-
-    isEqualToWeekBeforeToday: Boolean,
-    isBeforeYesterday: Boolean,
-    isEqualToToday: Boolean,
-
-    // principles
-    canApplyChanges: Boolean,
-
-    principleListToday: List<PrincipleDetails>,
-    onClickPrinciple: (PrincipleDetails) -> Unit,
-    onHoldPrinciple: (PrincipleDetails) -> Unit,
-
-    // action bar
-    addPrinciple: () -> Unit
-){
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-    ) { innerPadding ->
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            /**
-             * How can we un-fragment the title coloring such that the title bar only needs
-             * the current Screen name
-             * Title and Nav bar should not have padding beyond the scaffold
-             */
-            val paddedModifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_large))
-                .border(1.dp, MaterialTheme.colorScheme.tertiary, RectangleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-
-            var editMenuDeleteConfirmation by remember { mutableStateOf(false) }
-
-            AppTitleBar(
-                title = stringResource(id = PrincipleDestination.title)
-            )
-
-            // principle filter bar
-            PrincipleFilterBar(
-                modifier = paddedModifier,
-
-                dateBase = dateBase,
-                isEqualToToday = isEqualToToday,
-                isEqualToWeekBeforeToday = isEqualToWeekBeforeToday,
-
-                onDateSwipe = onDateSwipe,
-                updateToTomorrow = updateToTomorrow,
-                updateToYesterday = updateToYesterday
-            )
-
-
-            // principle list bar
-            PrincipleListBar(
-                modifier = paddedModifier
-                    .weight(8f),
-
-                // background drawables
-                backgroundPatternList = backgroundPatternList,
-                backgroundAccessorIndex = backgroundAccessorIndex,
-
-                onClickPrinciple = onClickPrinciple,
-                onHoldPrinciple = onHoldPrinciple,
-                principleListToday = principleListToday,
-
-                isBeforeYesterday = isBeforeYesterday,
-                canApplyChanges = canApplyChanges,
-
-                // edit menus
-                expandEditMenu = expandEditMenu,
-                onEditMenuDismiss = onEditMenuDismiss,
-                onEditMenuExpand = onEditMenuExpand,
-                editMenuPrincipleDetails = editMenuPrincipleDetails,
-                editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
-                editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
-                editMenuDeletePrinciple = editMenuDeletePrinciple,
-                editMenuDeleteConfirmation = editMenuDeleteConfirmation,
-                editMenuDeleteToExpand = { editMenuDeleteConfirmation = true }
-
-            )
-
-            // action bar
-            PrincipleActionBar(
-                modifier = paddedModifier,
-
-                addPrinciple = addPrinciple,
-                setOfferRebase = !isEqualToToday,
-                rebaseToToday = updateToToday
-            )
-
-            // navigation bar
+            .statusBarsPadding(),
+        topBar = {
+            AppTitleBar( title = appTitle )
+        },
+        bottomBar = {
             AppNavBar(
                 currentScreenName = currentScreenName,
                 navigateToHabit = navigateToHabit,
@@ -290,204 +329,262 @@ fun PrincipleBody(
                 navigateToYou = navigateToYou
             )
         }
+    ) { innerPadding ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
+        ){
+
+            PrincipleFilterBar(
+                modifier = modifierForBars,
+
+                serialCategoryString = serialCategoryString,
+                serialBackwardButtonLambda = serialBackwardButtonLambda,
+                serialForwardButtonLambda = serialForwardButtonLambda,
+                serialBackwardButtonContentDescription = serialBackwardButtonContentDescription,
+                serialForwardButtonContentDescription = serialForwardButtonContentDescription,
+                isSerialForwardButtonEnabled = isSerialForwardButtonEnabled,
+                isSerialBackwardButtonEnabled = isSerialBackwardButtonEnabled,
+
+                isFilterDropdownEnabled = isFilterDropdownEnabled,
+            )
+            PrincipleListBar(
+                // modifiers
+                modifier = modifierForBars.weight(1f),
+
+                // background drawables
+                backgroundPatternList = backgroundPatternList,
+                backgroundAccessorIndex = backgroundAccessorIndex,
+
+                // principles
+                listOfCards = listOfCards,
+                getCanCardClickBoolean = getCanCardClickBoolean,
+                isListOfCardsEmpty = isListOfCardsEmpty,
+
+                onClickPrinciple = onClickPrinciple,
+                onHoldPrinciple = onHoldPrinciple,
+
+                emptyCardTitle = emptyCardTitle,
+                emptyCardDescription = emptyCardDescription
+            )
+            PrincipleActionBar(
+                modifier = modifierForBars,
+
+                firstActionButtonName = firstActionButtonName,
+                firstActionButtonIcon = firstActionButtonIcon,
+                firstActionButtonIconContentDescription = firstActionButtonIconContentDescription,
+                firstActionButtonLambda = firstActionButtonLambda,
+                isFirstButtonEnabled = isFirstButtonEnabled,
+
+                secondActionButtonName = secondActionButtonName,
+                secondActionButtonIcon = secondActionButtonIcon,
+                secondActionButtonIconContentDescription = secondActionButtonIconContentDescription,
+                secondActionButtonLambda = secondActionButtonLambda,
+                isSecondButtonEnabled = isSecondButtonEnabled,
+            )
+        }
     }
 }
 
-
 /**
- * setVisible - true when dateBase is today, so only show it when it isn't
+ * category is often a date, but can be other serial properties as well
  */
 @Composable
 fun PrincipleFilterBar(
+    // serial category
+    serialCategoryString: String,
+    serialBackwardButtonLambda: () -> Unit,
+    serialForwardButtonLambda: () -> Unit,
+    serialBackwardButtonContentDescription: String,
+    serialForwardButtonContentDescription: String,
+    isSerialBackwardButtonEnabled: Boolean,
+    isSerialForwardButtonEnabled: Boolean,
+
+    // Dropdowns
+    isFilterDropdownEnabled: Boolean,
     modifier: Modifier = Modifier,
-
-    dateBase: String,
-
-    isEqualToToday: Boolean,
-    isEqualToWeekBeforeToday: Boolean,
-
-    onDateSwipe: (Long) -> Unit,
-    updateToTomorrow: () -> Unit,
-    updateToYesterday: () -> Unit,
-){
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .padding(horizontal = dimensionResource(id = R.dimen.padding_xmedium))
+            .padding(vertical = dimensionResource(id = R.dimen.padding_small))
     ){
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-        ){
+        // Dropdowns
+        if (isFilterDropdownEnabled) {
+            Row(
+                Modifier
+                    .border(
+                        BorderStroke(
+                            dimensionResource(id = R.dimen.border_stroke_small),
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .padding(dimensionResource(id = R.dimen.padding_medium))
+                    .weight(1f)
+            ){ Text(text = "Acquired 99", style = MaterialTheme.typography.labelMedium) }
+        } //TODO: what heck, how do ????????
+        //TODO: make this a dropdown
+        //TODO: max text = 11 characters + 2 integer
+
+
+        // Serial categories
+        Row ( verticalAlignment = Alignment.CenterVertically ){
             IconButton(
-                enabled = !isEqualToWeekBeforeToday,
-                onClick = updateToYesterday,
-                modifier = Modifier.weight(1f)
+                enabled = isSerialBackwardButtonEnabled,
+                onClick = serialBackwardButtonLambda,
             ) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardDoubleArrowLeft,
-                    contentDescription = "Yesterday"
+                    contentDescription = serialBackwardButtonContentDescription
                 )
             }
             Text(
-                modifier = Modifier.weight(2f),
                 textAlign = TextAlign.Center,
-                text = dateBase,
+                text = serialCategoryString,
                 style = MaterialTheme.typography.displayMedium
             )
             IconButton(
-                enabled = !isEqualToToday,
-                onClick = updateToTomorrow,
-                modifier = Modifier.weight(1f)
+                enabled = isSerialForwardButtonEnabled,
+                onClick = serialForwardButtonLambda,
             ) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardDoubleArrowRight,
-                    contentDescription = "Tomorrow"
+                    contentDescription = serialForwardButtonContentDescription
                 )
             }
         }
     }
 }
 
-/**
- * onHold is where we can edit the name of the principle
- */
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun PrincipleListBar(
-    modifier: Modifier = Modifier,
-
     // background drawables
     backgroundPatternList: List<Int>,
     backgroundAccessorIndex: Int,
 
-    isBeforeYesterday: Boolean,
-    canApplyChanges: Boolean,
+    //TODO: remember, we need to generic these functions as much as possible
+    // we do this so that it's not as nasty to change
+    // because we are not smart enough to get it right the first time :)
 
-    principleListToday: List<PrincipleDetails>,
+    // Principles
+    listOfCards: List<PrincipleDetails>,
+    getCanCardClickBoolean: Boolean,
+    isListOfCardsEmpty: Boolean,
 
     onClickPrinciple: (PrincipleDetails) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
 
-    // edit menus
-    expandEditMenu: Boolean,
-    onEditMenuDismiss: () -> Unit,
-    onEditMenuExpand: (PrincipleDetails) -> Unit,
-    editMenuPrincipleDetails: PrincipleDetails,
-    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
-    editMenuApplyChangesToPrinciple: () -> Unit,
-    editMenuDeletePrinciple: () -> Unit,
-    editMenuDeleteConfirmation: Boolean,
-    editMenuDeleteToExpand: () -> Unit,
+    modifier: Modifier = Modifier,
+
+    emptyCardTitle: String,
+    emptyCardDescription: String,
 ){
+
     val patternPainter = painterResource(id = backgroundPatternList[backgroundAccessorIndex])
-    val color = MaterialTheme.colorScheme.onSurfaceVariant
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .drawBehind {
+    val color = MaterialTheme.colorScheme.tertiary
 
-                val patternWidth = patternPainter.intrinsicSize.width
-                val patternHeight = patternPainter.intrinsicSize.height
+    val listBarColumnModifier = modifier
+        .padding(vertical = dimensionResource(id = R.dimen.padding_large))
+        .drawBehind {
 
-                clipRect (
-                    left = 0f,
-                    top = 0f,
-                    right = size.width,
-                    bottom = size.height - patternHeight / 2
-                ){
-                    val repetitionsX = (size.width / patternWidth).toInt() + 1
-                    val repetitionsY = (size.height / patternHeight).toInt() + 1
+            val patternWidth = patternPainter.intrinsicSize.width
+            val patternHeight = patternPainter.intrinsicSize.height
 
-                    for (i in 0..repetitionsX) {
-                        for (j in 0..repetitionsY) {
-                            val translateX = if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
+            clipRect(
+                left = 0f,
+                top = 0f,
+                right = size.width,
+                bottom = size.height - patternHeight / 2
+            ) {
+                val repetitionsX = (size.width / patternWidth).toInt() + 1
+                val repetitionsY = (size.height / patternHeight).toInt() + 1
 
-                            translate(translateX - patternWidth, j * patternHeight * 2 + patternHeight ) {
-                                with(patternPainter) {
-                                    draw(
-                                        size = Size(patternWidth, patternHeight),
-                                        alpha = 0.5f,
-                                        colorFilter = ColorFilter.tint(color)
+                for (i in 0..repetitionsX) {
+                    for (j in 0..repetitionsY) {
+                        val translateX =
+                            if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
 
+                        translate(
+                            translateX - patternWidth,
+                            j * patternHeight * 2 + patternHeight
+                        ) {
+                            with(patternPainter) {
+                                draw(
+                                    size = Size(patternWidth, patternHeight),
+                                    alpha = 0.35f,
+                                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                                        color
                                     )
-                                }
+                                )
                             }
-
                         }
                     }
                 }
             }
-    ){
-
-        PrincipleDetailEditMenuDialog(
-            expandEditMenu = expandEditMenu,
-            onEditMenuDismiss = onEditMenuDismiss,
-            editMenuPrincipleDetails = editMenuPrincipleDetails,
-
-            editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
-            editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
-            editMenuDeletePrinciple = editMenuDeletePrinciple,
-
-            editMenuDeleteConfirmation = editMenuDeleteConfirmation,
-            editMenuDeleteToExpand = editMenuDeleteToExpand,
-
-            isBeforeYesterday = isBeforeYesterday,
-            canApplyChanges = canApplyChanges
-        )
-
-        if (principleListToday.isEmpty()){
-
-            OutlinedCard(
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_large))
-                    .fillMaxWidth(),
-                colors = CardDefaults.outlinedCardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ),
-
-                ) {
-                if (Random.nextBoolean()) {
-                    Text(
-                        text = stringResource(id = R.string.principle_list_empty),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.displayMedium,
-                        modifier = Modifier
-                            .padding(dimensionResource(id = R.dimen.padding_medium))
-                    )
-
-                } else {
-                    Text(
-                        text = stringResource(id = R.string.principle_list_empty_variant_2),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.displayMedium,
-                        modifier = Modifier
-                            .padding(dimensionResource(id = R.dimen.padding_medium))
-                    )
-                }
-            }
         }
-        else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_large))
-            ){
-                items(principleListToday, key = { principleDetail -> principleDetail.principleId }) { principleDetail ->
-                    Row(
-                        modifier = Modifier
-                            .padding(dimensionResource(id = R.dimen.padding_medium))
-                            .animateItemPlacement(tween(200))
-                            //onHoldPrinciple should be here to allow sort changes
-                    ) {
-                        PrincipleDetailsCard(
-                            principleDetail = principleDetail,
 
-                            onEditMenuExpand = { onEditMenuExpand(principleDetail) },
-                            onClickPrinciple = { value ->
-                                onClickPrinciple(principleDetail.copy(value = value))},
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = listBarColumnModifier
+    ){
+        if (isListOfCardsEmpty) {
+            TrackingCard(
+                // card icons
+                cardIconResource = 0,
+                cardIconContentDescription = "",
+                cardIconLambda = {},
 
-                            isBeforeYesterday = isBeforeYesterday,
+                // card stuff
+                cardTitle = emptyCardTitle,
+                cardDescription = emptyCardDescription,
+                cardValue = false,
+                onCardClick = {},
+                getCanCardClickBoolean = true,
+
+                // more options
+                onMoreOptionsClick = {},
+
+                //  option booleans
+                enableDescription = true,
+                enableMoreOptions = false,
+                enableIcon = false,
+            )
+
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(400.dp),
+            ) {
+                //TODO: I do not care to incorporate generics right now
+                //my mind weak.
+                items(listOfCards, key = {principle -> principle.principleId}) { principle ->
+                    Row( modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)) ) {
+                        //TODO: parameterize these where possible !
+                        // much of these cannot be ascertained since they are generated with
+                        // principle, an object of items
+
+                        //though, this is not the case with other items.
+
+                        //TODO: we could just use Tracking card instead an entirely new card
+                        PrincipleCard(
+                            principle = principle,
+
+                            cardIconLambda = { /*TODO*/ },
+
+                            onCardClick = { value -> onClickPrinciple(principle.copy(value = value)) }, // active/inactive
+                            getCanCardClickBoolean = getCanCardClickBoolean, // disable active/inactive
+
+                            onMoreOptionsClick = {  }, // more options
+//                            onMoreOptionsClick = { onEditMenuExpand(principle) }, // more options
                         )
                     }
                 }
@@ -497,383 +594,319 @@ fun PrincipleListBar(
 }
 
 
-/**
- * setOfferRebase - Base date !isEqual to Today, if true, show a button that offers rebasing to today.
- */
+@Composable
+fun PrincipleCard(
+    principle: PrincipleDetails,
+
+    onMoreOptionsClick: () -> Unit,
+    onCardClick: (Boolean) -> Unit,
+    getCanCardClickBoolean: Boolean,
+
+    cardIconLambda: () -> Unit,
+) {
+    TrackingCard(
+        // card icons
+        cardIconResource = R.drawable.tal_derpy, // this should come here, the principle
+        cardIconContentDescription = "", // this should come here, the principle
+        cardIconLambda = cardIconLambda, // this should travel from the body
+        //TODO: get a table for the card icons.
+
+        // card stuff
+        cardTitle = principle.name,
+        cardDescription = principle.description,
+        cardValue = principle.value,
+        onCardClick = onCardClick,
+        getCanCardClickBoolean = getCanCardClickBoolean,
+
+        // more options
+        onMoreOptionsClick = onMoreOptionsClick,
+
+        //  option booleans
+        enableDescription = false,
+        enableMoreOptions = true,
+    )
+}
+
+
+
 @Composable
 fun PrincipleActionBar(
     modifier: Modifier = Modifier,
+    firstActionButtonName: String,
+    firstActionButtonIcon: ImageVector,
+    firstActionButtonIconContentDescription: String,
+    firstActionButtonLambda: () -> Unit,
+    isFirstButtonEnabled: Boolean,
 
-    setOfferRebase: Boolean,
-    rebaseToToday: () -> Unit,
+    secondActionButtonName: String, // if no given name, do not generate a second button
+    secondActionButtonIcon: ImageVector,
+    secondActionButtonIconContentDescription: String,
+    secondActionButtonLambda: () -> Unit,
+    isSecondButtonEnabled: Boolean,
+    ){
 
-    addPrinciple: () -> Unit,
-){
     Row(
+        horizontalArrangement = Arrangement.SpaceAround,
         modifier = modifier
-            .padding(dimensionResource(id = R.dimen.padding_medium))
-    ) {
-
-        // Create button portion
-        ElevatedButton(
-            onClick = addPrinciple,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.secondary
-            ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary),
-            modifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_small)),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                tint = MaterialTheme.colorScheme.tertiary,
-                contentDescription = stringResource(R.string.content_description_FAB_principle_create)
-            )
-            Text(
-                text = stringResource(id = R.string.principle_button_create),
-                style = MaterialTheme.typography.displaySmall
+    ){
+        if (firstActionButtonName != "") {
+            ActionBarButton(
+                buttonGeneralText = firstActionButtonName,
+                iconContentDescription = firstActionButtonIconContentDescription,
+                icon = firstActionButtonIcon,
+                actionBarButtonOnClick = firstActionButtonLambda,
+                isActionBarButtonEnabled = isFirstButtonEnabled
             )
         }
 
-
-        //rebase to today button
-        ElevatedButton(
-            enabled = setOfferRebase,
-            onClick = rebaseToToday,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.secondary
-            ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary),
-            modifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_small)),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.CalendarToday,
-                tint = MaterialTheme.colorScheme.tertiary,
-                contentDescription = stringResource(R.string.content_description_rebaseToToday)
-            )
-            Text(
-                text = stringResource(id = R.string.rebaseToToday),
-                style = MaterialTheme.typography.displaySmall
+        if (secondActionButtonName != "") {
+            ActionBarButton(
+                buttonGeneralText = secondActionButtonName,
+                iconContentDescription = secondActionButtonIconContentDescription,
+                icon = secondActionButtonIcon,
+                actionBarButtonOnClick = secondActionButtonLambda,
+                isActionBarButtonEnabled = isSecondButtonEnabled
             )
         }
     }
 }
 
 
+//TODO Move TrackingCard() to its own App_Bar thing ?
 /**
- * setReadOnly - checks if base date == day before yesterday.
+ * we've separated a lot of stuff into component parts to reduce the visual quagmire
+ * that prevents modification by being so nasty.
+ *
+ * Now we can hopefully create custom items for other tracking cards easier
+ *
+ * For example, I want there to be a checkbox for issue cards, but that shouldn't
+ * be present for other items
+ *
+ * I could use an "enableX" option provide for that - modifying the CenterDescriptors
+ * or adding a whole additional row for the checkbox that acts as a lazy list
+ * or even a lazy vertical grid
  */
 @Composable
-fun PrincipleDetailsCard(
-    principleDetail: PrincipleDetails,
+fun TrackingCard(
+    // card descriptor stuff
+    cardTitle: String,
+    cardDescription: String,
+    cardValue: Boolean,
+    onCardClick: (Boolean) -> Unit,
+    getCanCardClickBoolean: Boolean,
 
-    onEditMenuExpand: () -> Unit,
-    onClickPrinciple: (Boolean) -> Unit,
+    // icon stuff
+    cardIconResource: Int,
+    cardIconContentDescription: String,
+    cardIconLambda: () -> Unit,
 
-    isBeforeYesterday: Boolean
-){
-    // should be the coloured portion
-    // onMoreClick allows you to change the name of it
+    // more options stuff
+    onMoreOptionsClick: () -> Unit,
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp),
-    ){
-        OutlinedCard(
-            modifier = Modifier
-                .weight(2f)
-                .padding(dimensionResource(id = R.dimen.padding_small))
-                .fillMaxSize()
-                .clickable { onEditMenuExpand() }
-        ){
-            Text(
-                text = principleDetail.name,
-                style = MaterialTheme.typography.displaySmall
-            )
- //           Text(principleDetail.description)
-        }
-
-        Checkbox(
-            modifier = Modifier
-                .weight(1f)
-                .padding(dimensionResource(id = R.dimen.padding_small))
-                .fillMaxSize(),
-            checked = principleDetail.value,
-            onCheckedChange = onClickPrinciple,
-            enabled = !isBeforeYesterday
-        )
-
-    }
-    //TODO: we need to change the checkbox to have different visuals
-    //TODO:
-    //principleDetail.description should be a hover or equivalent.
-}
-
-@Composable
-fun PrincipleDetailEditMenuDialog(
-    expandEditMenu: Boolean,
-    onEditMenuDismiss: () -> Unit,
-
-    isBeforeYesterday: Boolean,
-    canApplyChanges: Boolean,
-    editMenuPrincipleDetails: PrincipleDetails,
-
-    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
-    editMenuApplyChangesToPrinciple: () -> Unit,
-    editMenuDeletePrinciple: () -> Unit,
-
-    editMenuDeleteConfirmation: Boolean,
-    editMenuDeleteToExpand: () -> Unit,
-){
-    if (expandEditMenu) {
-        Dialog(
-            onDismissRequest = onEditMenuDismiss,
-        ) {
-            PrincipleDetailEditMenuDialogContent(
-                editMenuPrincipleDetails = editMenuPrincipleDetails,
-                editMenuUpdatePrincipleInUiState = editMenuUpdatePrincipleInUiState,
-                editMenuApplyChangesToPrinciple = editMenuApplyChangesToPrinciple,
-                editMenuDeletePrinciple = editMenuDeletePrinciple,
-                editMenuDeleteConfirmation = editMenuDeleteConfirmation,
-                editMenuDeleteToExpand = editMenuDeleteToExpand,
-
-                isBeforeYesterday = isBeforeYesterday,
-                canApplyChanges = canApplyChanges
-            )
-        }
-    }
-}
-
-@Composable
-fun PrincipleDetailEditMenuDialogContent(
-    editMenuPrincipleDetails: PrincipleDetails,
-    isBeforeYesterday: Boolean,
-    canApplyChanges: Boolean,
-    editMenuUpdatePrincipleInUiState: (PrincipleDetails) -> Unit,
-    editMenuApplyChangesToPrinciple: () -> Unit,
-    editMenuDeletePrinciple: () -> Unit,
-
-    editMenuDeleteConfirmation: Boolean,
-    editMenuDeleteToExpand: () -> Unit,
-){
-    val modifierMaxWidth = Modifier
-        .fillMaxWidth()
-        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
-        .padding(dimensionResource(id = R.dimen.padding_large))
-
-    OutlinedCard (
-        modifier = Modifier
-            .padding(dimensionResource(id = R.dimen.padding_large))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .fillMaxWidth(),
-
-    ){
-        // title
-        Text(
-            text = "Editing principle",
-            style = MaterialTheme.typography.displayMedium,
-            modifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_large))
-        )
-
-        Button(
-            onClick = editMenuApplyChangesToPrinciple,
-            enabled = canApplyChanges,
-            modifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_large))
-        ) { Text( text = "Apply changes" ) }
-        //TODO: set this read only if there were no changes made
-
-        Column( modifier = modifierMaxWidth ) {
-            // name
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(id = R.dimen.padding_medium)),
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.form_required_name),
-                        style = MaterialTheme.typography.displaySmall
-                    ) },
-                value = editMenuPrincipleDetails.name,
-                onValueChange = {
-                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(name = it))
-                },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.displaySmall
-            )
-
-            // description
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(id = R.dimen.padding_medium)),
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.form_required_description),
-                        style = MaterialTheme.typography.displaySmall
-                    )},
-                value = editMenuPrincipleDetails.description,
-                onValueChange = {
-                    editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(description = it))
-                },
-                singleLine = false,
-                minLines = 2,
-                textStyle = MaterialTheme.typography.bodyMedium
-            )
-
-            // value
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text( text = "Checked" )
-                OutlinedButton(
-                    onClick = {
-                        editMenuUpdatePrincipleInUiState(editMenuPrincipleDetails.copy(value =
-                        !editMenuPrincipleDetails.value ))
-                    },
-                ) {
-                    if (editMenuPrincipleDetails.value) { Text(text = "Yes") }
-                    else { Text(text = "No") }
-                }
-            }
-        }
-
-
-        // group
-        /*
-        Text(
-            text = "${editMenuPrincipleDetails.group}"
-        )
-        //TODO: add group as a property and allow some editing maybe
-         */
-
-        if (editMenuPrincipleDetails.dateFirstActive != null) {
-            // Date first active
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
-                    .padding(dimensionResource(id = R.dimen.padding_large)),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                Text( text = "First active on:" )
-                Text( text = SimpleDateFormat("dd-MM-yyyy").format(editMenuPrincipleDetails.dateFirstActive) )
-            }
-        }
-
-        // date created
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
-                .padding(dimensionResource(id = R.dimen.padding_large)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Text( text = "Created on:" )
-            Text( text = SimpleDateFormat("dd-MM-yyyy").format(editMenuPrincipleDetails.dateCreated) )
-        }
-        //TODO: Make a function and pass it down for the dating
-        //TODO: make a property for that
-
-
-
-        // delete expand and actual delete
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
-                .padding(dimensionResource(id = R.dimen.padding_large)),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(
-                onClick = editMenuDeleteToExpand,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-            ) { Text( text = "Delete principle" ) }
-
-            if ( editMenuDeleteConfirmation ) {
-                Button(
-                    onClick = editMenuDeletePrinciple,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                ) { Text( text = "Confirm deletion" ) }
-            }
-        }
-    }
-}
-
-
-@Preview(
-    showBackground = true,
-)
-@Composable
-fun BackgroundPattern() {
-
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
+    // card options
+    enableIcon: Boolean = true,
+    enableDescription: Boolean = false,
+    enableMoreOptions: Boolean = true,
+) {
+    val contentColor by animateColorAsState(
+        targetValue =
+        if (cardValue){ MaterialTheme.colorScheme.onPrimaryContainer }
+        else MaterialTheme.colorScheme.onSecondaryContainer,
+        label = "Foreground color change"
+    )
+    val containerColor by animateColorAsState(
+        targetValue =
+        if (cardValue){ MaterialTheme.colorScheme.primaryContainer }
+        else MaterialTheme.colorScheme.secondaryContainer,
+        label = "Background color change"
     )
 
-    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
-
-    val patternPainter = painterResource(id = backgroundDrawables[backgroundAccessorIndex])
-    val color = MaterialTheme.colorScheme.tertiary
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .drawBehind {
-
-                val patternWidth = patternPainter.intrinsicSize.width
-                val patternHeight = patternPainter.intrinsicSize.height
-
-                clipRect (
-                    left = 0f,
-                    top = 0f,
-                    right = size.width,
-                    bottom = size.height - patternHeight / 2
-                ){
-                    val repetitionsX = (size.width / patternWidth).toInt() + 1
-                    val repetitionsY = (size.height / patternHeight).toInt() + 1
-
-                    for (i in 0..repetitionsX) {
-                        for (j in 0..repetitionsY) {
-                            val translateX = if (j % 2 == 0) i * patternWidth * 3 - patternWidth / 2 else i * patternWidth * 3 + patternWidth
-
-                            translate(translateX - patternWidth, j * patternHeight * 2 + patternHeight ) {
-                                with(patternPainter) {
-                                    draw(
-                                        size = Size(patternWidth, patternHeight),
-                                        alpha = 0.5f,
-                                        colorFilter = ColorFilter.tint(color)
-
-                                    )
-                                }
-                            }
-
-                        }
-                    }
-                }
+    val cardElevation = CardDefaults.cardElevation(
+        defaultElevation = 4.dp,
+        pressedElevation = 2.dp
+    )
+    val cardColors = CardDefaults.cardColors(
+        containerColor = containerColor,
+        contentColor = contentColor
+    )
+    val cardModifier = Modifier
+        .padding(horizontal = dimensionResource(id = R.dimen.padding_small))
+        .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
+        .clickable {
+            if (getCanCardClickBoolean) {
+                onCardClick(cardValue)
             }
-        ,
-        contentAlignment = Alignment.Center
+        }
+        .innerShadow(
+            shape = toothpasteShape,
+            color = MaterialTheme.colorScheme.surfaceTint.copy(0.65f),
+            blur = 1.dp,
+        )
+        .border(
+            if (cardValue) 3.dp else 1.dp,
+            MaterialTheme.colorScheme.outlineVariant,
+            toothpasteShape
+        )
+        .alpha(
+            if (getCanCardClickBoolean) 1f else 0.5f
+        )
+
+
+    OutlinedCard(
+        modifier = cardModifier,
+        elevation = cardElevation,
+        colors = cardColors,
+        shape = toothpasteShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        // This Box will be behind other content
+        Row ( verticalAlignment = Alignment.CenterVertically ){
+
+            // Iconic
+            if (enableIcon) {
+                CardIcon(
+                    drawableRes = cardIconResource,
+                    contentDescription = cardIconContentDescription,
+                    onIconClick = cardIconLambda,
+                    contentColor = contentColor
+                )
+            }
+
+            // Body names
+            CardCenterDescriptors(
+                cardTitle = cardTitle,
+                enableDescription = enableDescription,
+                cardDescription = cardDescription,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_small))
+                    .weight(1f)
+            )
+
+            // More options
+            if (enableMoreOptions){
+                CardMoreOptionsIcon(onMoreOptionsClick)
+            }
+        }
     }
 }
+@Composable
+private fun CardCenterDescriptors(
+    cardTitle: String,
+    enableDescription: Boolean,
+    cardDescription: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = cardTitle,
+            style = MaterialTheme.typography.labelLarge,
+            softWrap = false,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        if (enableDescription) {
+            Text(
+                text = cardDescription,
+                style = MaterialTheme.typography.bodyMedium,
+                softWrap = true,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+    }
+}
+@Composable
+private fun CardMoreOptionsIcon(onMoreOptionsClick: () -> Unit) {
+    IconButton(onClick = onMoreOptionsClick) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.expand_button_content_description)
+        )
+    }
+}
+@Composable
+fun CardIcon(
+    drawableRes: Int,
+    contentDescription: String,
+    onIconClick: () -> Unit,
+    contentColor: Color,
+    modifier: Modifier = Modifier
+){
+
+    Image(
+        painter = painterResource(id =  drawableRes),
+        contentDescription = contentDescription,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .padding(dimensionResource(R.dimen.padding_small))
+            .size(dimensionResource(R.dimen.image_size))
+            .clip(toothpasteShape)
+            .innerShadow(
+                shape = toothpasteShape,
+                color = contentColor.copy(0.8f),
+                offsetY = (2).dp,
+                offsetX = (2).dp,
+            )
+            .innerShadow(
+                shape = toothpasteShape,
+                color = contentColor.copy(0.8f),
+                offsetY = (-1).dp,
+                offsetX = (-1).dp,
+                spread = (-1).dp
+            )
+            .border(
+                BorderStroke(
+                    width = 1.dp,
+                    color = contentColor,
+                ),
+                shape = toothpasteShape
+            )
+
+            .clickable { onIconClick() },
+    )
+}
+
+
+@Composable
+fun ActionBarButton(
+    buttonGeneralText: String,
+
+    icon: ImageVector,
+    iconContentDescription: String,
+
+    actionBarButtonOnClick: () -> Unit,
+    isActionBarButtonEnabled: Boolean
+) {
+    Button(
+        enabled = isActionBarButtonEnabled,
+        onClick = actionBarButtonOnClick,
+        modifier = Modifier
+            .padding(dimensionResource(id = R.dimen.padding_small)),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+        ),
+        shape = MaterialTheme.shapes.small,
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = dimensionResource(id = R.dimen.elevation_small),
+            pressedElevation = dimensionResource(id = R.dimen.elevation_medium)
+        )
+    ) {
+        Text(
+            text = buttonGeneralText,
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Spacer(
+            modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small))
+        )
+        Icon(
+            imageVector = icon,
+            contentDescription = iconContentDescription
+        )
+    }
+}
+
+
+
