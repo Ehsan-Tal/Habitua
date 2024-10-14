@@ -74,7 +74,7 @@ class SettingViewModel(
         viewModelScope.launch {
             _canCreateTestData.value = appRepository.getAllHabitsStream().first().isEmpty()
         }
-    }//TODO: why is this here ?
+    }//TODO: why is this here ? DELETE
 
     fun createTestData(){
         //TODO: this took a long time

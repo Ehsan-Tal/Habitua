@@ -1,19 +1,19 @@
 package com.example.habitua.ui.principles
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
-import com.example.habitua.data.PrincipleDate
 import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.data.toPrinciple
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -29,6 +29,13 @@ class PrincipleViewModel(
 
     private val _principleUiState = MutableStateFlow(PrincipleUiState())
     val principleUiState: StateFlow<PrincipleUiState> = _principleUiState.asStateFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(600L),
+            initialValue = PrincipleUiState()
+        )
+    // I am starting to understand what scope would define.
+    // viewModel relates to the main thread, what we can do to reduce the load on it.
 
     val backgroundDrawables = listOf(
         R.drawable.baseline_circle_24,
@@ -55,13 +62,11 @@ class PrincipleViewModel(
             }
         }
     }
-
     private fun getCountOfPrinciplesOnDateBefore(){
         principleJob = viewModelScope.launch {
             appRepository.countPrinciplesDetailsByDateCreated(
                 principleUiState.value.dateBefore.toEpochMilli()
             ).collect {
-                Log.d(TAG, "count of principles on yesterday: $it")
                 _principleUiState.value = _principleUiState.value.copy(countOfPrinciplesOnDateBefore = it)
             }
         }
@@ -76,8 +81,7 @@ class PrincipleViewModel(
 
     fun addPrinciple() {
 
-        //TODO: Add a date created to Principles
-        // also, a "group" with the default being "Manual"
+        //TODO: this should create a new principle and redirect the user to the principle edit screen
         val defaultPrinciple = Principle(
             name = "Added principle",
             description = "Added on ${_principleUiState.value.convertInstantToString(principleUiState.value.dateToday)}}",
@@ -87,8 +91,9 @@ class PrincipleViewModel(
         viewModelScope.launch {
             appRepository.insertPrinciple(defaultPrinciple)
         }
-        collectPrinciples()
-
+    }
+    suspend fun togglePrinciple(id: Int, date: Long){
+        appRepository.updatePrincipleDate(date, id)
     }
 
     private fun collectPrincipleAfterUpdates(){
@@ -106,10 +111,6 @@ class PrincipleViewModel(
     fun updateToYesterday(){
         _principleUiState.value.removeDay()
         collectPrincipleAfterUpdates()
-    }
-
-    suspend fun togglePrinciple(id: Int, date: Long){
-        appRepository.updatePrincipleDate(date, id)
     }
 
 
@@ -183,15 +184,9 @@ data class PrincipleUiState(
     var dateBase: Instant = Instant.now(),
     var principleListToday: List<PrincipleDetails> = listOf(),
 
-    var listOfPrinciplesWithoutDateRecords: List<Principle> = listOf(),
     var countOfPrinciplesOnDateBefore: Int = 1,
 
-    val isFirstActionButtonEnabled: Boolean = true,
-    val isSecondActionButtonEnabled: Boolean = true,
-    // second action button should be NOT today
 ) {
-    val canApplyChanges: Boolean = false
-    //TODO: make this true if changes occurred
 
     val dateBefore: Instant
         get() = dateBase.minus(1, ChronoUnit.DAYS)
@@ -204,14 +199,19 @@ data class PrincipleUiState(
                 dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
                 .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
 
+    val isFirstActionButtonEnabled: Boolean
+        get() = true
+
+    val isSecondActionButtonEnabled: Boolean
+        get() = !(dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
+            .isEqual(dateToday.atZone(ZoneId.systemDefault()).toLocalDate()))
 
     val isSerialBackwardButtonEnabled: Boolean
         get() = countOfPrinciplesOnDateBefore != 0
 
     val isSerialForwardButtonEnabled: Boolean
         get() = dateBase < dateToday
-    //TODO: use the same stuff that the view model uses to disable traversal
-    //TODO: Forward should be set to false if base date is equal to today
+    //TODO: ideally these would mention Filter or Action bars
 
 
     val dateBaseString: String

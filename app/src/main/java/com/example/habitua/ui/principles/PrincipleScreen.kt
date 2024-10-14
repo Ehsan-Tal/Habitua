@@ -274,10 +274,8 @@ fun PrincipleBody (
 
     val modifierForBars = Modifier
         .fillMaxWidth()
-        .padding(
-            horizontal = dimensionResource(id = R.dimen.padding_large),
-            vertical = dimensionResource(id = R.dimen.padding_small)
-        )
+        .padding( horizontal = dimensionResource(id = R.dimen.padding_small) )
+        .padding( bottom= dimensionResource(id = R.dimen.padding_small) )
         .background(
             color = MaterialTheme.colorScheme.surfaceVariant,
             shape = MaterialTheme.shapes.small
@@ -706,9 +704,6 @@ fun TrackingCard(
         else MaterialTheme.colorScheme.secondaryContainer,
         label = "Background color change"
     )
-    val cardElevation = CardDefaults.cardElevation(
-        defaultElevation = 4.dp, pressedElevation = 2.dp
-    )
     val cardColors = CardDefaults.cardColors(
         containerColor = containerColor, contentColor = contentColor
     )
@@ -723,7 +718,7 @@ fun TrackingCard(
             blur = 1.dp,
         )
         .border(
-            if (cardValue) 3.dp else 1.dp,
+            1.dp,
             MaterialTheme.colorScheme.outlineVariant,
             toothpasteShape
         )
@@ -734,7 +729,6 @@ fun TrackingCard(
 
     OutlinedCard(
         modifier = cardModifier,
-        elevation = cardElevation,
         colors = cardColors,
         shape = toothpasteShape,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -823,13 +817,6 @@ fun CardIcon(
             .padding(dimensionResource(R.dimen.padding_small))
             .size(dimensionResource(R.dimen.image_size))
             .clip(toothpasteShape)
-            .border(
-                BorderStroke(
-                    width = 1.dp,
-                    color = contentColor,
-                ),
-                shape = toothpasteShape
-            )
             .clickable { onIconClick() },
     )
 }
@@ -855,10 +842,6 @@ fun ActionBarButton(
             contentColor = MaterialTheme.colorScheme.onTertiary,
         ),
         shape = MaterialTheme.shapes.small,
-        elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = dimensionResource(id = R.dimen.elevation_small),
-            pressedElevation = dimensionResource(id = R.dimen.elevation_medium)
-        )
     ) {
         Text(
             text = buttonGeneralText,
