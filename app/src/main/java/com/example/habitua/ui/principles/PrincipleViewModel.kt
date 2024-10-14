@@ -1,10 +1,13 @@
 package com.example.habitua.ui.principles
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
+import com.example.habitua.data.PrincipleDate
 import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.data.toPrinciple
 import kotlinx.coroutines.Job
@@ -52,37 +55,24 @@ class PrincipleViewModel(
             }
         }
     }
-    //TODO: change record traversal - we must create date records by each items origin date
-    // say, if Happiness had a set origin of 8-10 and today is 8-12
-    // then records containing Happiness must be created for each date until that date.
-    // *space*
-    // d
-    // either we create records in the DB that may or may not be read only
-    // , OR
-    // we we create in the DAO, i.e., we send back things with their assumed values
-    // the
-    // the second option is superior for data redundancy - they can't change it, so why bother
-    // On the other hand, if we are to allow them to modify ANY value from any date - pref ?
-    // Then we could use the first
-    // but, that's alot of work
-    // So...
-    // just create them in the DAO for any whose origin is before the given :date
 
-    private fun collectPrinciplesWithoutCreating(){
-        principleJob?.cancel()
-
-        backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
-
+    private fun getCountOfPrinciplesOnDateBefore(){
         principleJob = viewModelScope.launch {
-            appRepository.getPrinciplesAndPrincipleDatesWithoutCreating(
-                principleUiState.value.dateBase.toEpochMilli()
+            appRepository.countPrinciplesDetailsByDateCreated(
+                principleUiState.value.dateBefore.toEpochMilli()
             ).collect {
-                _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
+                Log.d(TAG, "count of principles on yesterday: $it")
+                _principleUiState.value = _principleUiState.value.copy(countOfPrinciplesOnDateBefore = it)
             }
         }
+        //TODO: we need to stop this running when off the manners page
+        //TODO: we need some way to "unsubscribe" from the flow
     }
 
-    init { collectPrinciples() }
+    init {
+        collectPrinciples()
+        getCountOfPrinciplesOnDateBefore()
+    }
 
     fun addPrinciple() {
 
@@ -98,14 +88,12 @@ class PrincipleViewModel(
             appRepository.insertPrinciple(defaultPrinciple)
         }
         collectPrinciples()
+
     }
 
     private fun collectPrincipleAfterUpdates(){
-        if (_principleUiState.value.canCardClickBoolean) {
-            collectPrinciples()
-        } else {
-            collectPrinciplesWithoutCreating()
-        }
+        collectPrinciples()
+        getCountOfPrinciplesOnDateBefore()
     }
     fun updateToToday(){
         _principleUiState.value.rebaseToToday()
@@ -120,16 +108,8 @@ class PrincipleViewModel(
         collectPrincipleAfterUpdates()
     }
 
-    suspend fun togglePrinciple(principleDetails: PrincipleDetails) {
-       appRepository.updatePrincipleDate(
-            principleDetails.date, principleDetails.principleId, principleDetails.value
-        )
-
-        if (principleDetails.value && principleDetails.dateFirstActive == null){
-            appRepository.updatePrincipleOrigin(
-                principleDetails.date, principleDetails.principleId
-            )
-        }
+    suspend fun togglePrinciple(id: Int, date: Long){
+        appRepository.updatePrincipleDate(date, id)
     }
 
 
@@ -140,11 +120,15 @@ class PrincipleViewModel(
         }
     }
 
-    //TODO: THIS HAS MAJOR SETBACKS TO EFFICIENT CHANGE MANAGEMENT
-    // but I"m sleepy, so wee.
-    // and then again, so is it with most edit forms.
-    // I feel like we can get away with just modifying it with PrincipleDetails
-    fun setEditablePrincipleDetails(principleDetail: PrincipleDetails){
+    //TODO: Make a dedicated principle Edit page
+    // And have the addPrinciple go to it with the newly created principleId
+    //
+
+    //TODO: and the moreOptionsClick send the user to it
+    // we can have moreOptionsClick be a () -> Unit after we attach the
+    // principle.id to it
+
+   fun setEditablePrincipleDetails(principleDetail: PrincipleDetails){
         _principleUiState.value.editablePrincipleDetails = principleDetail
     }
     fun editMenuUpdatePrincipleInUiState(principleDetail: PrincipleDetails){
@@ -198,7 +182,9 @@ data class PrincipleUiState(
 
     var dateBase: Instant = Instant.now(),
     var principleListToday: List<PrincipleDetails> = listOf(),
-    val isPrincipleListTodayEmpty: Boolean = principleListToday.isEmpty(),
+
+    var listOfPrinciplesWithoutDateRecords: List<Principle> = listOf(),
+    var countOfPrinciplesOnDateBefore: Int = 1,
 
     val isFirstActionButtonEnabled: Boolean = true,
     val isSecondActionButtonEnabled: Boolean = true,
@@ -207,7 +193,7 @@ data class PrincipleUiState(
     val canApplyChanges: Boolean = false
     //TODO: make this true if changes occurred
 
-    private val dateBefore: Instant
+    val dateBefore: Instant
         get() = dateBase.minus(1, ChronoUnit.DAYS)
     private val dateAfter: Instant
         get() = dateBase.plus(1, ChronoUnit.DAYS)
@@ -218,12 +204,14 @@ data class PrincipleUiState(
                 dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
                 .isEqual(dateYesterday.atZone(ZoneId.systemDefault()).toLocalDate())
 
+
     val isSerialBackwardButtonEnabled: Boolean
-        get() = false
+        get() = countOfPrinciplesOnDateBefore != 0
 
     val isSerialForwardButtonEnabled: Boolean
-        get() = true
+        get() = dateBase < dateToday
     //TODO: use the same stuff that the view model uses to disable traversal
+    //TODO: Forward should be set to false if base date is equal to today
 
 
     val dateBaseString: String

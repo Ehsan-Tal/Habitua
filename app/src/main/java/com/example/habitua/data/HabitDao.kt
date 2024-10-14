@@ -279,6 +279,7 @@ interface HabitDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPrincipleDate(principleDate: PrincipleDate)
 
+
     @Query("""
         SELECT
             principles.principleId,
@@ -299,6 +300,30 @@ interface HabitDao {
     """)
     fun getPrinciplesDetails(date: Long): Flow<List<PrincipleDetails>>
 
+
+    @Query("""
+        SELECT 
+            *
+        FROM
+            principles
+        WHERE
+            DATE(principles.dateCreated / 1000, 'unixepoch') < DATE(:date/ 1000, 'unixepoch')
+    """)
+    fun getPrinciplesDetailsByDateCreated(date: Long): Flow<List<Principle>>
+
+
+    // NEW
+    @Query("""
+        SELECT 
+            COUNT(principles.principleId)    
+        FROM
+            principles
+        WHERE
+            DATE(principles.dateCreated / 1000, 'unixepoch') <= DATE(:date/ 1000, 'unixepoch')
+        """)
+    fun countPrinciplesDetailsByDateCreated(date: Long): Flow<Int>
+
+
     @Query ("DELETE FROM principles")
     suspend fun deleteAllPrinciples()
 
@@ -306,12 +331,12 @@ interface HabitDao {
         UPDATE 
             principles_dates 
         SET 
-            value = :value 
+            value = CASE WHEN value = 0 THEN 1 ELSE 0 END 
         WHERE 
             principleId = :principleId
             AND DATE(date / 1000, 'unixepoch') = DATE(:date / 1000, 'unixepoch') 
     """)
-    suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
+    suspend fun updatePrincipleDate(date: Long, principleId: Int)
 
     @Query("""
         UPDATE 

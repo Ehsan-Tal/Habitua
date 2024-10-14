@@ -143,8 +143,6 @@ fun PrincipleScreen(
     val principleUiState by viewModel.principleUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    var expandEditMenu by remember { mutableStateOf(false) }
-
     PrincipleBody(
         // app title bar stuff
         appTitle = stringResource(id = PrincipleDestination.title),
@@ -172,13 +170,13 @@ fun PrincipleScreen(
         backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
         listOfCards = principleUiState.principleListToday,
-        isListOfCardsEmpty = principleUiState.isPrincipleListTodayEmpty,
+        isListOfCardsEmpty = false,
         getCanCardClickBoolean = principleUiState.canCardClickBoolean,
 
         // background patterns
-        onClickPrinciple = { principleDetails: PrincipleDetails ->
+        onClickPrinciple = { date: Long, id: Int ->
             coroutineScope.launch {
-                viewModel.togglePrinciple(principleDetails)
+                viewModel.togglePrinciple(id, date)
             }
         },
         onHoldPrinciple = { principleDetails: PrincipleDetails ->
@@ -188,7 +186,6 @@ fun PrincipleScreen(
 
         emptyCardTitle = "No principles to show",
         emptyCardDescription = "how can I get this from the view Model",
-
 
         // Action Bar items
         firstActionButtonName = stringResource(id = R.string.action_bar_create_button_general),
@@ -202,26 +199,6 @@ fun PrincipleScreen(
         secondActionButtonIconContentDescription = stringResource(id = R.string.action_bar_today_button_content_description),
         secondActionButtonLambda = { viewModel.updateToToday() },
         isSecondButtonEnabled = principleUiState.isSecondActionButtonEnabled,
-
-        /*
-        // edit dialog items
-        expandEditMenu = expandEditMenu,
-        editMenuPrincipleDetails = principleUiState.editablePrincipleDetails,
-        onEditMenuDismiss = { expandEditMenu = false },
-        onEditMenuExpand = { principleDetails: PrincipleDetails ->
-            viewModel.setEditablePrincipleDetails(principleDetails)
-            expandEditMenu = true
-        },
-        editMenuUpdatePrincipleInUiState = { principleDetail: PrincipleDetails ->
-            viewModel.editMenuUpdatePrincipleInUiState(principleDetail)
-        },
-        editMenuApplyChangesToPrinciple = { viewModel.editMenuApplyChangesToPrinciple() },
-        editMenuDeletePrinciple = {
-            expandEditMenu = false
-            viewModel.editMenuDeletePrinciple()
-        },
-
-         */
 
         //navigation
         currentScreenName = currentScreenName,
@@ -267,7 +244,7 @@ fun PrincipleBody (
     isListOfCardsEmpty: Boolean,
     getCanCardClickBoolean: Boolean,
 
-    onClickPrinciple: (PrincipleDetails) -> Unit,
+    onClickPrinciple: (Long, Int) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
 
     emptyCardTitle: String,
@@ -294,8 +271,6 @@ fun PrincipleBody (
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
 ) {
-
-    var editMenuDeleteConfirmation by remember { mutableStateOf(false) }
 
     val modifierForBars = Modifier
         .fillMaxWidth()
@@ -353,6 +328,7 @@ fun PrincipleBody (
 
                 isFilterDropdownEnabled = isFilterDropdownEnabled,
             )
+
             PrincipleListBar(
                 // modifiers
                 modifier = modifierForBars.weight(1f),
@@ -372,6 +348,7 @@ fun PrincipleBody (
                 emptyCardTitle = emptyCardTitle,
                 emptyCardDescription = emptyCardDescription
             )
+
             PrincipleActionBar(
                 modifier = modifierForBars,
 
@@ -387,9 +364,14 @@ fun PrincipleBody (
                 secondActionButtonLambda = secondActionButtonLambda,
                 isSecondButtonEnabled = isSecondButtonEnabled,
             )
+
+
         }
     }
 }
+
+
+
 
 /**
  * category is often a date, but can be other serial properties as well
@@ -480,7 +462,7 @@ fun PrincipleListBar(
     getCanCardClickBoolean: Boolean,
     isListOfCardsEmpty: Boolean,
 
-    onClickPrinciple: (PrincipleDetails) -> Unit,
+    onClickPrinciple: (Long, Int) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
 
     modifier: Modifier = Modifier,
@@ -548,7 +530,7 @@ fun PrincipleListBar(
                 cardTitle = emptyCardTitle,
                 cardDescription = emptyCardDescription,
                 cardValue = false,
-                onCardClick = {},
+                onCardClick = { },
                 getCanCardClickBoolean = true,
 
                 // more options
@@ -566,7 +548,10 @@ fun PrincipleListBar(
             ) {
                 //TODO: I do not care to incorporate generics right now
                 //my mind weak.
-                items(listOfCards, key = {principle -> principle.principleId}) { principle ->
+                items(listOfCards, key = {principle -> principle.principleId} ) { principle ->
+                    // it doubles...
+                    // this is empty, why is this empty.
+
                     Row( modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)) ) {
                         //TODO: parameterize these where possible !
                         // much of these cannot be ascertained since they are generated with
@@ -580,7 +565,7 @@ fun PrincipleListBar(
 
                             cardIconLambda = { /*TODO*/ },
 
-                            onCardClick = { value -> onClickPrinciple(principle.copy(value = value)) }, // active/inactive
+                            onClickPrinciple = {onClickPrinciple(principle.date, principle.principleId)}, // active/inactive
                             getCanCardClickBoolean = getCanCardClickBoolean, // disable active/inactive
 
                             onMoreOptionsClick = {  }, // more options
@@ -599,7 +584,8 @@ fun PrincipleCard(
     principle: PrincipleDetails,
 
     onMoreOptionsClick: () -> Unit,
-    onCardClick: (Boolean) -> Unit,
+
+    onClickPrinciple: () -> Unit,
     getCanCardClickBoolean: Boolean,
 
     cardIconLambda: () -> Unit,
@@ -615,7 +601,7 @@ fun PrincipleCard(
         cardTitle = principle.name,
         cardDescription = principle.description,
         cardValue = principle.value,
-        onCardClick = onCardClick,
+        onCardClick = onClickPrinciple,
         getCanCardClickBoolean = getCanCardClickBoolean,
 
         // more options
@@ -692,7 +678,7 @@ fun TrackingCard(
     cardTitle: String,
     cardDescription: String,
     cardValue: Boolean,
-    onCardClick: (Boolean) -> Unit,
+    onCardClick: () -> Unit,
     getCanCardClickBoolean: Boolean,
 
     // icon stuff
@@ -708,35 +694,29 @@ fun TrackingCard(
     enableDescription: Boolean = false,
     enableMoreOptions: Boolean = true,
 ) {
+    var localCardValue by remember { mutableStateOf(cardValue) }
+
     val contentColor by animateColorAsState(
-        targetValue =
-        if (cardValue){ MaterialTheme.colorScheme.onPrimaryContainer }
+        targetValue = if (localCardValue){ MaterialTheme.colorScheme.onPrimaryContainer }
         else MaterialTheme.colorScheme.onSecondaryContainer,
         label = "Foreground color change"
     )
     val containerColor by animateColorAsState(
-        targetValue =
-        if (cardValue){ MaterialTheme.colorScheme.primaryContainer }
+        targetValue = if (localCardValue){ MaterialTheme.colorScheme.primaryContainer }
         else MaterialTheme.colorScheme.secondaryContainer,
         label = "Background color change"
     )
-
     val cardElevation = CardDefaults.cardElevation(
-        defaultElevation = 4.dp,
-        pressedElevation = 2.dp
+        defaultElevation = 4.dp, pressedElevation = 2.dp
     )
     val cardColors = CardDefaults.cardColors(
-        containerColor = containerColor,
-        contentColor = contentColor
+        containerColor = containerColor, contentColor = contentColor
     )
     val cardModifier = Modifier
         .padding(horizontal = dimensionResource(id = R.dimen.padding_small))
         .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
-        .clickable {
-            if (getCanCardClickBoolean) {
-                onCardClick(cardValue)
-            }
-        }
+        .clickable(enabled = getCanCardClickBoolean, onClick = onCardClick)
+        .clickable(enabled = getCanCardClickBoolean, onClick = {localCardValue = !localCardValue})
         .innerShadow(
             shape = toothpasteShape,
             color = MaterialTheme.colorScheme.surfaceTint.copy(0.65f),
@@ -843,19 +823,6 @@ fun CardIcon(
             .padding(dimensionResource(R.dimen.padding_small))
             .size(dimensionResource(R.dimen.image_size))
             .clip(toothpasteShape)
-            .innerShadow(
-                shape = toothpasteShape,
-                color = contentColor.copy(0.8f),
-                offsetY = (2).dp,
-                offsetX = (2).dp,
-            )
-            .innerShadow(
-                shape = toothpasteShape,
-                color = contentColor.copy(0.8f),
-                offsetY = (-1).dp,
-                offsetX = (-1).dp,
-                spread = (-1).dp
-            )
             .border(
                 BorderStroke(
                     width = 1.dp,
@@ -863,7 +830,6 @@ fun CardIcon(
                 ),
                 shape = toothpasteShape
             )
-
             .clickable { onIconClick() },
     )
 }

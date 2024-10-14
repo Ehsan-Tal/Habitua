@@ -17,6 +17,8 @@ const val February12th2001_inMilli = 1007769600000
 
 val todayMinus66days_inMilli = Instant.now().minus(66, ChronoUnit.DAYS).toEpochMilli()
 val todayMinus24days_inMilli = Instant.now().minus(24, ChronoUnit.DAYS).toEpochMilli()
+val todayMinus3day_inMilli = Instant.now().minus(3, ChronoUnit.DAYS).toEpochMilli()
+val todayMinus2day_inMilli = Instant.now().minus(2, ChronoUnit.DAYS).toEpochMilli()
 val todayMinus1day_inMilli = Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli()
 val today_inMilli = Instant.now().toEpochMilli()
 val todayPlus24days_inMilli = Instant.now().plus(24, ChronoUnit.DAYS).toEpochMilli()
@@ -24,12 +26,10 @@ val todayPlus66Days_inMilli = Instant.now().plus(66, ChronoUnit.DAYS).toEpochMil
 
 val test_data_HabitList = listOf(
     Habit(
-        id = 0,
         name = "Glove Chopping",
         description = "With a snippers"
     ),
     Habit(
-        id = 1,
         name = "Pouring one Out",
         description = "sample text",
         dateCreated = todayMinus24days_inMilli,
@@ -38,7 +38,6 @@ val test_data_HabitList = listOf(
 
     ),
     Habit(
-        id = 2,
         name = "Diisononyl phthalate",
         description = "get grapes",
         isActive = true,
@@ -47,7 +46,6 @@ val test_data_HabitList = listOf(
         nextReviewedDate = today_inMilli
     ),
     Habit(
-        id = 3,
         name = "Reviewing a Movie",
         description = "Spoilers for Alien Romulus",
         isActive = true,
@@ -56,7 +54,6 @@ val test_data_HabitList = listOf(
         nextReviewedDate = todayMinus1day_inMilli
     ),
     Habit(
-        id = 4,
         name = "Ghost hunting",
         description = "800 dollar ovilius",
         dateCreated = todayMinus66days_inMilli,
@@ -74,25 +71,21 @@ val test_data_iconList: List<Painting> = listOf(
 
 val test_data_PrincipleList = listOf(
     Principle(
-        principleId = 0,
         name = "Readiness",
-        description = "",
-        dateCreated = todayMinus66days_inMilli,
+        description = "minus 66",
+        dateCreated = todayMinus2day_inMilli,
     ),
     Principle(
-        principleId = 1,
         name = "Industry",
-        description = "",
-        dateCreated = todayMinus66days_inMilli,
+        description = "minus 24",
+        dateCreated = todayMinus1day_inMilli,
     ),
     Principle(
-        principleId = 0,
-        name = "Temperance",
-        description = "",
-        dateCreated = todayMinus66days_inMilli,
-    )
-
-)
+        name = "Minus 2",
+        description = "Minus 2 days",
+        dateCreated = todayMinus3day_inMilli,
+    ),
+) // I took away the other ones, and now it doubled Industry.,..
 
 val test_data_principleListToday = listOf(
     PrincipleDetails(

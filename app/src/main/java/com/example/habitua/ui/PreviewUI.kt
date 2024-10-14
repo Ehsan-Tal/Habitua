@@ -19,10 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.habitua.R
 import com.example.habitua.data.Habit
 import com.example.habitua.data.PrincipleDetails
-import com.example.habitua.ui.habit.HabitHomeBody
 import com.example.habitua.ui.habit.HabitViewModel
 import com.example.habitua.ui.habit.Painting
-import com.example.habitua.ui.issues.IssueBody
 import com.example.habitua.ui.navigation.HabitDestination
 import com.example.habitua.ui.navigation.IssueDestination
 import com.example.habitua.ui.navigation.PrincipleDestination
@@ -60,6 +58,7 @@ import kotlin.random.Random
  *
  */
 
+/*
 @Preview(
     showBackground = true,
     name = "default, light, empty - Habit screen",
@@ -504,3 +503,5 @@ fun DataScreenPreviewDark() {
         )
     }
 }
+
+ */

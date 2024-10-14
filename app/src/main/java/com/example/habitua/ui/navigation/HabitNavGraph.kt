@@ -30,7 +30,7 @@ fun HabitNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = IssueDestination.route, //HabitDestination.route,
+        startDestination = PrincipleDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
 

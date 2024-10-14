@@ -14,9 +14,10 @@ import androidx.room.RoomDatabase
  * Currently `.fallbackToDestructiveMigration()` is used as I'd rather not handle
  * migration
  */
-@Database(entities = [Habit::class, Principle::class, PrincipleDate::class], version = 6, exportSchema = false)
+@Database(entities = [Habit::class, Principle::class, PrincipleDate::class], version = 9, exportSchema = false)
 abstract class HabitDatabase: RoomDatabase() {
 
+    //ROOM foreign key constraints break my brain
     abstract fun habitDao(): HabitDao
 
     // where the streak dao would go

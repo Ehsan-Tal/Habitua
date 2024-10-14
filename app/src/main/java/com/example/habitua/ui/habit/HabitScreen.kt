@@ -113,6 +113,8 @@ fun HabitScreen(
     var dataSource by remember { mutableStateOf(HabitViewModel.DataSource.TODO) }
     var expandedIconMenu by remember { mutableStateOf(false) }
 
+}
+/*
     HabitHomeBody(
         currentScreenName = currentScreenName,
         navigateToHabitEdit = navigateToHabitEdit,
@@ -610,3 +612,4 @@ fun ImageGallery(){
     }
 }
 
+ */

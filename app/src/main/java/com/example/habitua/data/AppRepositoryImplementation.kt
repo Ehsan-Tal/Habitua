@@ -1,10 +1,14 @@
 package com.example.habitua.data
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 /**
  * Implementation of [AppRepository] interface - provides habit data to the app
@@ -85,53 +89,41 @@ class AppRepositoryImplementation(
      *
      * we need to leave combined principles at the end as that functions as a return statement
      */
-    override suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>> =
-        habitDao.getPrinciplesDetails(date).map { combinedPrinciples ->
-            val principles = habitDao.getAllPrinciples().first()
+    override suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>> = flow {
 
-            val missingPrincipleIds = principles
-                .filterNot { combinedPrinciples.map { principleDate -> principleDate.principleId }.contains(it.principleId) }
-                .map {
-                    PrincipleDate(
-                        principleId = it.principleId,
-                        date = date,
-                        value = false
-                    )
-                }
-            missingPrincipleIds.forEach {habitDao.insertPrincipleDate(it) }
+        // gemini gave me this, I hate it <- it autocomplete this !
+        // I don't hate you Gemini, <- It gave me a suggestion to pass it off to Kotlin !
+        // I don't hate any of these, I'm just frustrated with myself
 
-            combinedPrinciples
+        val combinedPrinciples = habitDao.getPrinciplesDetails(date).first() // Get initial list
+        val principles = habitDao.getAllPrinciples().first()
+
+        val missingPrinciples = principles
+            .filterNot { p -> combinedPrinciples.map { it.principleId }.contains(p.principleId) }
+            .filterNot { p -> Instant.ofEpochMilli(p.dateCreated).isAfter(Instant.ofEpochMilli(date)) }
+            .map {
+                PrincipleDate(
+                    principleId = it.principleId,
+                    date = date,
+                    value = false
+                )
+            }
+
+        missingPrinciples.forEach { habitDao.insertPrincipleDate(it) } // Insert missing data
+
+        emit(habitDao.getPrinciplesDetails(date).first()) // Emit the updated list
     }
+    override fun countPrinciplesDetailsByDateCreated(date: Long): Flow<Int> =
+        habitDao.countPrinciplesDetailsByDateCreated(date)
 
-    /*
-        habitDao.getPrinciplesAndPrincipleDates(date).map { combinedPrinciples ->
 
-            val principles = habitDao.getAllPrinciples().first()
-
-            val principleDates = habitDao.getPrinciplesDatesByDate(date).first()
-
-            val missingPrincipleIds = principles
-                .filterNot { principleDates.map { principleDate -> principleDate.principleId }.contains(it.principleId) }
-                .map {
-                    PrincipleDate(
-                        principleId = it.principleId,
-                        date = date,
-                        value = false
-                    )
-                }
-            missingPrincipleIds.forEach {habitDao.insertPrincipleDate(it) }
-
-            combinedPrinciples
-    }
-
-     */
-
-    override suspend fun getPrinciplesAndPrincipleDatesWithoutCreating(date: Long): Flow<List<PrincipleDetails>> =
-        habitDao.getPrinciplesDetails(date)
+    override fun getPrinciplesDetailsByDateCreated(date: Long): Flow<List<Principle>> =
+        habitDao.getPrinciplesDetailsByDateCreated(date)
 
     override suspend fun createTestPrinciples(principleList: List<Principle>): Void
     = habitDao.createTestPrinciples(principleList)
     override suspend fun deleteAllPrinciples() = habitDao.deleteAllPrinciples()
+    override suspend fun deleteAllPrinciplesDates() = habitDao.deleteAllPrincipleDates()
 
     override suspend fun insertPrinciple(principle: Principle)
     = habitDao.insertPrinciple(principle)
@@ -150,13 +142,13 @@ class AppRepositoryImplementation(
 
     override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>>
     = habitDao.getPrinciplesDatesByDate(date)
-    override fun getPrinciplesByDateRangeStream(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
-    = habitDao.getPrinciplesByDateRange(dateStartInclusive, dateEndInclusive)
+    override fun getPrinciplesByDateRangeStream(dateStart: Long, dateEnd: Long): Flow<List<PrincipleDate>>
+    = habitDao.getPrinciplesByDateRange(dateStart, dateEnd)
 
     override suspend fun insertPrincipleDate(principleDate: PrincipleDate)
     = habitDao.insertPrincipleDate(principleDate)
-    override suspend fun updatePrincipleDate(date: Long, principleId: Int, value: Boolean)
-    = habitDao.updatePrincipleDate(date, principleId, value)
+    override suspend fun updatePrincipleDate(date: Long, principleId: Int)
+    = habitDao.updatePrincipleDate(date, principleId)
     override suspend fun deletePrincipleDate(principleDate: PrincipleDate)
     = habitDao.deletePrincipleDate(principleDate)
 }

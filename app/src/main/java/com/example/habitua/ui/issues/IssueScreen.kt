@@ -137,7 +137,8 @@ fun IssueScreen(
 
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
-
+}
+/*
     IssueBody(
         // app title bar stuff
         appTitle = stringResource(id = IssueDestination.title),
@@ -662,3 +663,5 @@ fun idd(){
         )
     }
 }
+
+ */

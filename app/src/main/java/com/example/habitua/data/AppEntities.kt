@@ -29,9 +29,7 @@ data class Habit (
 // since frequency matters more, and it would help calculations maybe
 // we currently assume it - and we can add days if missed and dropped - just solve for x
 
-enum class Complexity {
-SIMPLE, MEDIUM, COMPLEX
-}
+enum class Complexity { SIMPLE, MEDIUM, COMPLEX }
 
 @Entity(tableName = "principles")
 data class Principle (
@@ -43,17 +41,7 @@ data class Principle (
     var description: String
 )
 
-@Entity(
-    tableName = "principles_dates",
-    foreignKeys = [
-        ForeignKey(
-            entity = Principle::class,
-            parentColumns = ["principleId"],
-            childColumns = ["principleId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-)
+@Entity( tableName = "principles_dates" )
 data class PrincipleDate (
     @PrimaryKey(autoGenerate = true)
     val dateId: Int = 0,
@@ -76,6 +64,7 @@ fun PrincipleDetails.toPrinciple(): Principle {
     return Principle(
         principleId = principleId,
         name = name,
+        dateCreated = dateCreated,
         description = description,
         dateFirstActive = dateFirstActive
     )

@@ -58,7 +58,7 @@ class SettingViewModel(
             SettingUiState(isDarkMode)
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(1_000),
             initialValue = SettingUiState()
         )
 
@@ -74,10 +74,10 @@ class SettingViewModel(
         viewModelScope.launch {
             _canCreateTestData.value = appRepository.getAllHabitsStream().first().isEmpty()
         }
-    }
+    }//TODO: why is this here ?
 
     fun createTestData(){
-
+        //TODO: this took a long time
         viewModelScope.launch {
             appRepository.createAllHabits(test_data_HabitList)
             _canCreateTestData.value = true
@@ -97,6 +97,9 @@ class SettingViewModel(
 
         viewModelScope.launch {
             appRepository.deleteAllPrinciples()
+        }
+        viewModelScope.launch {
+            appRepository.deleteAllPrinciplesDates()
         }
     }
 
