@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Color
@@ -139,6 +140,7 @@ fun PrincipleScreen(
     navigateToPrinciple: () -> Unit,
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
+    navigateToPrincipleEdit: (Int) -> Unit,
 ) {
     val principleUiState by viewModel.principleUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -183,6 +185,7 @@ fun PrincipleScreen(
             Log.d("t", "$principleDetails held")
             //TODO: change sorting order
         },
+        navigateToPrincipleEdit = navigateToPrincipleEdit,
 
         emptyCardTitle = "No principles to show",
         emptyCardDescription = "how can I get this from the view Model",
@@ -191,7 +194,7 @@ fun PrincipleScreen(
         firstActionButtonName = stringResource(id = R.string.action_bar_create_button_general),
         firstActionButtonIcon = Icons.Outlined.AddCircleOutline,
         firstActionButtonIconContentDescription = stringResource(id = R.string.action_bar_create_issue_content_description),
-        firstActionButtonLambda = { viewModel.addPrinciple() },
+        firstActionButtonLambda = { viewModel.addPrinciple(navigateToPrincipleEdit) },
         isFirstButtonEnabled = principleUiState.isFirstActionButtonEnabled,
 
         secondActionButtonName = stringResource(id = R.string.action_bar_today_button),
@@ -246,6 +249,7 @@ fun PrincipleBody (
 
     onClickPrinciple: (Long, Int) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
+    navigateToPrincipleEdit: (Int) -> Unit,
 
     emptyCardTitle: String,
     emptyCardDescription: String,
@@ -323,6 +327,8 @@ fun PrincipleBody (
                 serialForwardButtonContentDescription = serialForwardButtonContentDescription,
                 isSerialForwardButtonEnabled = isSerialForwardButtonEnabled,
                 isSerialBackwardButtonEnabled = isSerialBackwardButtonEnabled,
+                onSerialDragLeft = {},
+                onSerialDragRight = {},
 
                 isFilterDropdownEnabled = isFilterDropdownEnabled,
             )
@@ -342,6 +348,7 @@ fun PrincipleBody (
 
                 onClickPrinciple = onClickPrinciple,
                 onHoldPrinciple = onHoldPrinciple,
+                navigateToPrincipleEdit = navigateToPrincipleEdit,
 
                 emptyCardTitle = emptyCardTitle,
                 emptyCardDescription = emptyCardDescription
@@ -385,10 +392,16 @@ fun PrincipleFilterBar(
     isSerialBackwardButtonEnabled: Boolean,
     isSerialForwardButtonEnabled: Boolean,
 
+    onSerialDragLeft: () -> Unit,
+    onSerialDragRight: () -> Unit,
+
     // Dropdowns
     isFilterDropdownEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
+
+    var dragStartPOS by remember { mutableStateOf(Offset.Zero) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -462,6 +475,7 @@ fun PrincipleListBar(
 
     onClickPrinciple: (Long, Int) -> Unit,
     onHoldPrinciple: (PrincipleDetails) -> Unit,
+    navigateToPrincipleEdit: (Int) -> Unit,
 
     modifier: Modifier = Modifier,
 
@@ -566,7 +580,9 @@ fun PrincipleListBar(
                             onClickPrinciple = {onClickPrinciple(principle.date, principle.principleId)}, // active/inactive
                             getCanCardClickBoolean = getCanCardClickBoolean, // disable active/inactive
 
-                            onMoreOptionsClick = {  }, // more options
+                            onMoreOptionsClick = {
+                                navigateToPrincipleEdit(principle.principleId)
+                            }, // more options
 //                            onMoreOptionsClick = { onEditMenuExpand(principle) }, // more options
                         )
                     }

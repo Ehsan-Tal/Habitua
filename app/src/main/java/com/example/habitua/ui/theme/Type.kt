@@ -50,8 +50,8 @@ val AppTypography = Typography(
         fontSize = 14.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = UbuntuMono,
-        fontWeight = FontWeight.Bold,
+        fontFamily = Lemon,
+        fontWeight = FontWeight.Normal,
         fontSize = 12.sp
     ),
     bodyLarge = TextStyle(

@@ -7,13 +7,14 @@ import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
 import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.data.toPrinciple
+import com.example.habitua.ui.navigation.PrincipleEditDestination
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -79,18 +80,27 @@ class PrincipleViewModel(
         getCountOfPrinciplesOnDateBefore()
     }
 
-    fun addPrinciple() {
+    fun addPrinciple(navToPrincipleEdit: (Int) -> Unit) {
 
         //TODO: this should create a new principle and redirect the user to the principle edit screen
         val defaultPrinciple = Principle(
-            name = "Added principle",
-            description = "Added on ${_principleUiState.value.convertInstantToString(principleUiState.value.dateToday)}}",
+            name = "",
+            description = "",
             dateCreated = principleUiState.value.dateToday.toEpochMilli()
         )
-
+        var principleId = 0
         viewModelScope.launch {
-            appRepository.insertPrinciple(defaultPrinciple)
+            principleId = appRepository.insertPrinciple(defaultPrinciple).toInt()
+
+            _principleUiState.update { currentState ->
+                currentState.copy( currentPrincipleId = principleId)
+            }
         }
+
+        navToPrincipleEdit(principleId)
+        //"${PrincipleEditDestination.route}/$principleId"
+        // we pass it the principle Id since it will finish it over there.
+
     }
     suspend fun togglePrinciple(id: Int, date: Long){
         appRepository.updatePrincipleDate(date, id)
@@ -173,7 +183,9 @@ data class PrincipleUiState(
         dateCreated = 0,
         dateFirstActive = null,
         value = false,
-    ),
+    ),// TODO: delete this
+
+
 
     var dateFormat: String = "EEEE, dd-MM",
 
@@ -186,6 +198,7 @@ data class PrincipleUiState(
 
     var countOfPrinciplesOnDateBefore: Int = 1,
 
+    var currentPrincipleId : Int = 0,
 ) {
 
     val dateBefore: Instant

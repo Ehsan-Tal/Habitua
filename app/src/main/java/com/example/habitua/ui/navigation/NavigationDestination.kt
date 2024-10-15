@@ -38,10 +38,17 @@ object SettingDestination: NavigationDestination {
 object HabitEntryDestination : NavigationDestination {
     override val route = "habit_entry"
     override val title =  R.string.habit_entry_title
-}
+} //TODO: delete this
 object HabitEditDestination: NavigationDestination{
     override val route = "habit_edit"
     override val title = R.string.habit_edit_title
-    const val HABIT_ID_ARG = "habitId"
-    val routeWithArgs = "$route/{$HABIT_ID_ARG}"
+    const val ID_ARG = "habitId"
+    val routeWithArgs = "$route/{$ID_ARG}"
 }
+object PrincipleEditDestination: NavigationDestination{
+    override val route = "principle_edit"
+    override val title = R.string.principle_edit_title
+    const val ID_ARG = "principleId"
+    val routeWithArgs = "$route/{$ID_ARG}"
+}
+

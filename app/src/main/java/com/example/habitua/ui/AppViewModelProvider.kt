@@ -11,6 +11,7 @@ import com.example.habitua.ui.habit.HabitEditViewModel
 import com.example.habitua.ui.habit.HabitViewModel
 import com.example.habitua.ui.habit.HabitEntryViewModel
 import com.example.habitua.ui.issues.IssueViewModel
+import com.example.habitua.ui.principles.PrincipleEditViewModel
 import com.example.habitua.ui.principles.PrincipleViewModel
 import com.example.habitua.ui.settings.SettingViewModel
 import com.example.habitua.ui.visual.VisualizationViewModel
@@ -30,7 +31,7 @@ object AppViewModelProvider {
         // -update used h instead of H, so now it works
         initializer {
             HabitEntryViewModel(habitApplication().container.appRepository)
-        }
+        } //TODO: remove this soon
 
         // initializer for habit edit
         initializer {
@@ -40,12 +41,19 @@ object AppViewModelProvider {
             )
         }
 
-        // initializer for ui.package
+        // initializer for ui.principle
         initializer {
             PrincipleViewModel(
                 habitApplication().container.appRepository
             )
         }
+        initializer {
+            PrincipleEditViewModel(
+                this.createSavedStateHandle(),
+                habitApplication().container.appRepository
+            )
+        }
+
 
         // initializer for ui.issues
         initializer {

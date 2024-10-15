@@ -125,7 +125,8 @@ class AppRepositoryImplementation(
     override suspend fun deleteAllPrinciples() = habitDao.deleteAllPrinciples()
     override suspend fun deleteAllPrinciplesDates() = habitDao.deleteAllPrincipleDates()
 
-    override suspend fun insertPrinciple(principle: Principle)
+
+    override suspend fun insertPrinciple(principle: Principle): Long
     = habitDao.insertPrinciple(principle)
     override suspend fun updatePrinciple(principle: Principle)
     = habitDao.updatePrinciple(principle)
@@ -135,11 +136,12 @@ class AppRepositoryImplementation(
     = habitDao.updatePrincipleOrigin(date, principleId)
 
 
+    override fun getPrincipleStream(id: Int): Flow<Principle?>
+    = habitDao.getPrinciple(id)
     override fun getAllPrinciplesStream(): Flow<List<Principle>>
     = habitDao.getAllPrinciples()
     override fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>>
     = habitDao.getAllPrinciplesDates()
-
     override fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>>
     = habitDao.getPrinciplesDatesByDate(date)
     override fun getPrinciplesByDateRangeStream(dateStart: Long, dateEnd: Long): Flow<List<PrincipleDate>>
@@ -151,4 +153,12 @@ class AppRepositoryImplementation(
     = habitDao.updatePrincipleDate(date, principleId)
     override suspend fun deletePrincipleDate(principleDate: PrincipleDate)
     = habitDao.deletePrincipleDate(principleDate)
+
+
+    override suspend fun deletePrincipleById(principleId: Int) =
+        habitDao.deletePrincipleById(principleId)
+
+    override suspend fun deletePrincipleDateById(principleId: Int) =
+        habitDao.deletePrincipleDateById(principleId)
+
 }

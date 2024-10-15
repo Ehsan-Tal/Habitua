@@ -106,6 +106,7 @@
     <string name="action_bar_today_button">To Today</string>
     <string name="serial_forward_button_content_description_for_dates">Tomorrow</string>
     <string name="serial_backward_button_content_description">Yesterday</string>
+    <string name="principle_edit_title">The Edit Screen</string>
 
 
     <!--

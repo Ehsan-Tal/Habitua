@@ -26,7 +26,7 @@ class HabitEditViewModel (
 ): ViewModel(){
 
     val habitId: Int =
-        checkNotNull(savedStateHandle[HabitEditDestination.HABIT_ID_ARG])
+        checkNotNull(savedStateHandle[HabitEditDestination.ID_ARG])
 
     var habitUiState by mutableStateOf(HabitEditUiState())
         private set

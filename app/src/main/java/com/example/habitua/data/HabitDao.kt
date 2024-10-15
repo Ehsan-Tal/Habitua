@@ -265,7 +265,7 @@ interface HabitDao {
 
     // principles
     @Insert
-    suspend fun insertPrinciple(principle: Principle)
+    suspend fun insertPrinciple(principle: Principle): Long
 
     @Update
     suspend fun updatePrinciple(principle: Principle)
@@ -355,6 +355,9 @@ interface HabitDao {
     suspend fun deleteAllPrincipleDates()
 
 
+    @Query("SELECT * FROM principles WHERE principleId = :id")
+    fun getPrinciple(id: Int): Flow<Principle>
+
     @Query ("SELECT * FROM principles")
     fun getAllPrinciples(): Flow<List<Principle>>
 
@@ -374,5 +377,16 @@ interface HabitDao {
             DATE(:dateEndInclusive / 1000, 'unixepoch') 
         """)
     fun getPrinciplesByDateRange(dateStartInclusive: Long, dateEndInclusive: Long): Flow<List<PrincipleDate>>
+
+
+    @Query("""
+        DELETE FROM principles_dates WHERE principleId = :principleId
+    """)
+    fun deletePrincipleDateById(principleId: Int)
+
+    @Query("""
+        DELETE FROM principles WHERE principleId = :principleId
+    """)
+    fun deletePrincipleById(principleId: Int)
 
 }

@@ -11,6 +11,7 @@ interface AppRepository {
     suspend fun deleteAllHabits(): Void
     suspend fun createAllHabits(habitList: List<Habit>): Void
 
+
     fun getHabitStream(habitId: Int): Flow<Habit?>
     fun getAllHabitsStream(): Flow<List<Habit>>
     fun getAllHabitsAcquiredStream(): Flow<List<Habit>>
@@ -26,6 +27,7 @@ interface AppRepository {
     fun countAllHabitsTODOStream(dateToday: Long, dateYesterday: Long): Flow<Int>
     fun countAllHabitsAtRiskStream(dateYesterday: Long): Flow<Int>
 
+
     suspend fun reviewHabits(dateToday: Long, dateYesterday: Long)
 
 
@@ -36,6 +38,8 @@ interface AppRepository {
 
     suspend fun getPrinciplesAndPrincipleDates(date: Long): Flow<List<PrincipleDetails>>
 
+
+    fun getPrincipleStream(id: Int): Flow<Principle?>
     fun getAllPrinciplesStream(): Flow<List<Principle>>
     fun getAllPrinciplesDatesStream(): Flow<List<PrincipleDate>>
     fun getPrinciplesByDateStream(date: Long): Flow<List<PrincipleDate>>
@@ -43,7 +47,7 @@ interface AppRepository {
     fun getPrinciplesDetailsByDateCreated(date: Long): Flow<List<Principle>>
     fun countPrinciplesDetailsByDateCreated(date: Long): Flow<Int>
 
-    suspend fun insertPrinciple(principle: Principle)
+    suspend fun insertPrinciple(principle: Principle): Long
     suspend fun updatePrinciple(principle: Principle)
     suspend fun deletePrinciple(principle: Principle)
     suspend fun updatePrincipleOrigin(date: Long, principleId: Int)
@@ -52,4 +56,7 @@ interface AppRepository {
     suspend fun deletePrincipleDate(principleDate: PrincipleDate)
     suspend fun updatePrincipleDate(date: Long, principleId: Int)
 
+
+    suspend fun deletePrincipleById(principleId: Int)
+    suspend fun deletePrincipleDateById(principleId: Int)
 }
