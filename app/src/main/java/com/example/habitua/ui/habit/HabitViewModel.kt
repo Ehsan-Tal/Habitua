@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
 import com.example.habitua.R
 import com.example.habitua.data.Habit
+import com.example.habitua.ui.backgroundDrawables
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlin.random.Random
 
 private const val TAG = "HabitViewModel"
 
@@ -38,6 +40,9 @@ class HabitViewModel(
     enum class DataSource {
         TODO, AT_RISK, NOT_STREAKING, NOT_ACQUIRED, ACQUIRED, ALL
     }
+
+    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
+
 
     private val _habitUiState = MutableStateFlow(HabitUiState())
     val habitUiState: StateFlow<HabitUiState> = _habitUiState.asStateFlow()

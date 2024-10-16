@@ -58,7 +58,6 @@ import kotlin.random.Random
  *
  */
 
-/*
 @Preview(
     showBackground = true,
     name = "default, light, empty - Habit screen",
@@ -77,6 +76,7 @@ fun HabitScreenPreview(
     PreviewHabituaTheme (
         darkTheme = darkTheme
     ) {
+        /*
         HabitHomeBody(
             currentScreenName = stringResource(id = HabitDestination.navTitle),
             navigateToHabitEdit = { },
@@ -107,6 +107,8 @@ fun HabitScreenPreview(
             onOptionSelected = {}
         )
 
+         */
+
     }
 }
 @Preview(
@@ -134,12 +136,6 @@ fun PrincipleScreenPreview(
     expandEditMenu: Boolean = false
 ) {
 
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
 
     val backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
@@ -161,7 +157,7 @@ fun PrincipleScreenPreview(
             isListOfCardsEmpty = principleListToday.isEmpty(),
             getCanCardClickBoolean = true,
 
-            onClickPrinciple = { principleDetails: PrincipleDetails -> },
+            onClickPrinciple = { _, _ -> },
             onHoldPrinciple = { principleDetails: PrincipleDetails -> },
             appTitle = stringResource(id = PrincipleDestination.title),
             serialCategoryString = "Sunday, 8-10",
@@ -184,6 +180,8 @@ fun PrincipleScreenPreview(
             secondActionButtonIconContentDescription = "",
             secondActionButtonLambda = {},
             isSecondButtonEnabled = false,
+            navigateToPrincipleEdit = {},
+            currentlyLoading = false,
         )
     }
 }
@@ -197,16 +195,11 @@ fun IssueScreenPreview(
     darkTheme: Boolean = false,
 ) {
 
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
 
     val backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
     PreviewHabituaTheme {
+        /*
         IssueBody(
             currentScreenName = stringResource(id = IssueDestination.navTitle),
             navigateToHabit = {  },
@@ -217,6 +210,8 @@ fun IssueScreenPreview(
             backgroundPatternList = backgroundDrawables,
             backgroundAccessorIndex = backgroundAccessorIndex
         )
+
+         */
     }
 }
 @Preview(
@@ -257,13 +252,6 @@ fun DataScreenPreview() {
 )
 @Composable
 fun BackgroundPattern() {
-
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
 
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
@@ -503,5 +491,3 @@ fun DataScreenPreviewDark() {
         )
     }
 }
-
- */

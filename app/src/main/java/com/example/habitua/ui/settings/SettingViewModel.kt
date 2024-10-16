@@ -21,6 +21,7 @@ import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Habit
 import com.example.habitua.data.Principle
+import com.example.habitua.ui.backgroundDrawables
 import com.example.habitua.ui.test_data_HabitList
 import com.example.habitua.ui.test_data_PrincipleList
 import com.example.habitua.ui.test_data_principleListToday
@@ -29,6 +30,7 @@ import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.random.Random
 
 const val TAG = "SettingViewModel"
 
@@ -47,6 +49,9 @@ class SettingViewModel(
 
     private val _canCreateTestData = MutableStateFlow(true)
     val canCreateTestData: StateFlow<Boolean> = _canCreateTestData
+
+
+    var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
     /**
      * UI state exposed to the UI

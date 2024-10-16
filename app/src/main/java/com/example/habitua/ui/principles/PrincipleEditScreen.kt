@@ -52,6 +52,7 @@ import com.example.habitua.data.Principle
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
+import com.example.habitua.ui.backgroundDrawables
 import com.example.habitua.ui.navigation.PrincipleDestination
 import com.example.habitua.ui.navigation.PrincipleEditDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
@@ -111,7 +112,7 @@ fun PrincipleEditScreen(
         // app title bar stuff
         appTitle = stringResource(id = PrincipleEditDestination.title),
 
-        backgroundPatternList = viewModel.backgroundDrawables,
+        backgroundPatternList = backgroundDrawables,
         backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
         principle = uiState.principle,
@@ -372,11 +373,8 @@ fun PrincipleEditBar(
         ){
             Text(
                 text = "Date Created: ",
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.weight(1f)
-            )
-            Spacer(
-                modifier = Modifier.padding(horizontal = 4.dp)
             )
             Text(principle.formatDateCreatedString())
         }
@@ -385,8 +383,13 @@ fun PrincipleEditBar(
             modifier = fieldModifier
         ){
             Text(
-                text = "That was ${principle.formatDaysSinceDateCreatedString()}",
-            )//TODO: find a font that isn't bolded
+                text = "Age: ",
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = principle.formatDaysSinceDateCreatedString(),
+            )
         }
 
         Spacer(

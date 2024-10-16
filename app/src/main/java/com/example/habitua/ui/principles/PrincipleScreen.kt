@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +78,7 @@ import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
+import com.example.habitua.ui.backgroundDrawables
 import com.example.habitua.ui.navigation.PrincipleDestination
 import com.example.habitua.ui.theme.toothpasteShape
 import kotlinx.coroutines.launch
@@ -168,7 +170,7 @@ fun PrincipleScreen(
 
         // LIST BAR
         // principles
-        backgroundPatternList = viewModel.backgroundDrawables,
+        backgroundPatternList = backgroundDrawables,
         backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
         listOfCards = principleUiState.principleListToday,
@@ -209,6 +211,7 @@ fun PrincipleScreen(
         navigateToPrinciple = navigateToPrinciple,
         navigateToIssue = navigateToIssue,
         navigateToYou = navigateToYou,
+        currentlyLoading = principleUiState.currentlyLoading,
     )
 }
 
@@ -274,6 +277,7 @@ fun PrincipleBody (
     navigateToPrinciple: () -> Unit,
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
+    currentlyLoading: Boolean,
 ) {
 
     val modifierForBars = Modifier
@@ -314,7 +318,8 @@ fun PrincipleBody (
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary)
-                .padding(vertical = dimensionResource(id = R.dimen.padding_medium))
+                .padding(top = dimensionResource(id = R.dimen.padding_medium))
+                .padding(bottom = dimensionResource(id = R.dimen.padding_small))
         ){
 
             PrincipleFilterBar(
@@ -335,23 +340,24 @@ fun PrincipleBody (
 
             PrincipleListBar(
                 // modifiers
-                modifier = modifierForBars.weight(1f),
+                backgroundPatternList = backgroundPatternList,
 
                 // background drawables
-                backgroundPatternList = backgroundPatternList,
                 backgroundAccessorIndex = backgroundAccessorIndex,
+                listOfCards = listOfCards,
 
                 // principles
-                listOfCards = listOfCards,
                 getCanCardClickBoolean = getCanCardClickBoolean,
                 isListOfCardsEmpty = isListOfCardsEmpty,
-
                 onClickPrinciple = onClickPrinciple,
+
                 onHoldPrinciple = onHoldPrinciple,
                 navigateToPrincipleEdit = navigateToPrincipleEdit,
+                modifier = modifierForBars.weight(1f),
 
                 emptyCardTitle = emptyCardTitle,
-                emptyCardDescription = emptyCardDescription
+                emptyCardDescription = emptyCardDescription,
+                currentlyLoading = currentlyLoading
             )
 
             PrincipleActionBar(
@@ -399,8 +405,6 @@ fun PrincipleFilterBar(
     isFilterDropdownEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
-
-    var dragStartPOS by remember { mutableStateOf(Offset.Zero) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -481,6 +485,7 @@ fun PrincipleListBar(
 
     emptyCardTitle: String,
     emptyCardDescription: String,
+    currentlyLoading: Boolean,
 ){
 
     val patternPainter = painterResource(id = backgroundPatternList[backgroundAccessorIndex])
@@ -531,7 +536,15 @@ fun PrincipleListBar(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = listBarColumnModifier
     ){
-        if (isListOfCardsEmpty) {
+        if (currentlyLoading) {
+            // insert a loading spinners
+            CircularProgressIndicator(
+                modifier = Modifier.size(dimensionResource(id = R.dimen.loading_spinner_size)),
+                color = MaterialTheme.colorScheme.tertiary,
+                trackColor = MaterialTheme.colorScheme.surface
+            )
+        }
+        else if (isListOfCardsEmpty) {
             TrackingCard(
                 // card icons
                 cardIconResource = 0,
@@ -564,7 +577,7 @@ fun PrincipleListBar(
                     // it doubles...
                     // this is empty, why is this empty.
 
-                    Row( modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)) ) {
+                    Row( modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)) ) {
                         //TODO: parameterize these where possible !
                         // much of these cannot be ascertained since they are generated with
                         // principle, an object of items

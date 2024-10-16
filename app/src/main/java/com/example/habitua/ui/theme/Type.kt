@@ -20,6 +20,9 @@ val Lemon = FontFamily(
 val AllertaStencil = FontFamily(
     Font(R.font.allertastencil_regular)
 )
+val SingleDay = FontFamily(
+    Font(R.font.singleday_regular)
+)
 
 
 // Default Material 3 typography values
@@ -30,9 +33,9 @@ val AppTypography = Typography(
         fontSize = 32.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = Lemon,
+        fontFamily = SingleDay,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontSize = 24.sp
     ),
     displaySmall = TextStyle(
         fontFamily = AllertaStencil,
@@ -40,9 +43,9 @@ val AppTypography = Typography(
         fontSize = 12.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = Lemon,
+        fontFamily = SingleDay,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+        fontSize = 20.sp
     ),
     labelMedium = TextStyle(
         fontFamily = UbuntuMono,
@@ -50,7 +53,7 @@ val AppTypography = Typography(
         fontSize = 14.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = Lemon,
+        fontFamily = SingleDay,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp
     ),

@@ -7,9 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.habitua.HabitApplication
-import com.example.habitua.ui.habit.HabitEditViewModel
 import com.example.habitua.ui.habit.HabitViewModel
-import com.example.habitua.ui.habit.HabitEntryViewModel
 import com.example.habitua.ui.issues.IssueViewModel
 import com.example.habitua.ui.principles.PrincipleEditViewModel
 import com.example.habitua.ui.principles.PrincipleViewModel
@@ -27,19 +25,17 @@ object AppViewModelProvider {
             )
         }
 
-        // initializer for habit Entry
-        // -update used h instead of H, so now it works
-        initializer {
-            HabitEntryViewModel(habitApplication().container.appRepository)
-        } //TODO: remove this soon
 
         // initializer for habit edit
+        /*
         initializer {
             HabitEditViewModel(
                 this.createSavedStateHandle(),
                 habitApplication().container.appRepository
             )
         }
+
+         */
 
         // initializer for ui.principle
         initializer {

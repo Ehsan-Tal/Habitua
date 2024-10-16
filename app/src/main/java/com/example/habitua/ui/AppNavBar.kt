@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Schedule
@@ -42,7 +43,11 @@ fun AppNavBar(
 
     currentScreenName: String,
 ){
-    Column ( modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
+    Column (
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
     {
         HorizontalDivider(
             thickness = dimensionResource(id = R.dimen.divider_thick_medium),
@@ -55,7 +60,8 @@ fun AppNavBar(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(dimensionResource(R.dimen.padding_small))
-        ) {
+                .padding(bottom = dimensionResource(id = R.dimen.padding_xlarge)),
+            ) {
             AppNavButton(
                 text = stringResource(id = HabitDestination.navTitle),
                 currentScreenName = currentScreenName,

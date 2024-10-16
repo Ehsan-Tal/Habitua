@@ -7,6 +7,7 @@ import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
 import com.example.habitua.data.PrincipleDetails
 import com.example.habitua.data.toPrinciple
+import com.example.habitua.ui.backgroundDrawables
 import com.example.habitua.ui.navigation.PrincipleEditDestination
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,13 +39,6 @@ class PrincipleViewModel(
     // I am starting to understand what scope would define.
     // viewModel relates to the main thread, what we can do to reduce the load on it.
 
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
-
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
     // create a function that collects all principles of today and yesterday and tomorrow.
@@ -61,6 +55,7 @@ class PrincipleViewModel(
             ).collect {
                 _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
             }
+            _principleUiState.value.currentlyLoading = false
         }
     }
     private fun getCountOfPrinciplesOnDateBefore(){
@@ -199,6 +194,8 @@ data class PrincipleUiState(
     var countOfPrinciplesOnDateBefore: Int = 1,
 
     var currentPrincipleId : Int = 0,
+
+    var currentlyLoading: Boolean = true,
 ) {
 
     val dateBefore: Instant

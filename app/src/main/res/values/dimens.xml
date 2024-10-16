@@ -13,4 +13,5 @@
     <dimen name="divider_thick_medium">4.dp</dimen>
     <dimen name="elevation_small">4.dp</dimen>
     <dimen name="elevation_medium">1.dp</dimen>
+    <dimen name="loading_spinner_size">64.dp</dimen>
 </resources>

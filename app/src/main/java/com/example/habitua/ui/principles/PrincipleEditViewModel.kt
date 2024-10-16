@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.habitua.R
 import com.example.habitua.data.AppRepository
 import com.example.habitua.data.Principle
+import com.example.habitua.ui.backgroundDrawables
 import com.example.habitua.ui.navigation.PrincipleEditDestination
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -50,13 +51,6 @@ class PrincipleEditViewModel (
                 .toPrincipleEditUiState(true)
         } //because we have the translate function, we can get the principle and do so
     }
-
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
 
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
@@ -129,7 +123,7 @@ fun Principle.formatDaysSinceDateCreatedString(): String{
             }
         }
         .joinToString(", ")
-        .ifEmpty { "today, believe it or not" }
+        .ifEmpty { "Born today, believe it or not." }
 
     return daySince
 }

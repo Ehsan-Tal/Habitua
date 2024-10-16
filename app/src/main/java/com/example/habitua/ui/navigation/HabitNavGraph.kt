@@ -8,7 +8,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitScreen
 import com.example.habitua.ui.issues.IssueScreen
 import com.example.habitua.ui.principles.PrincipleEditScreen
@@ -28,14 +27,11 @@ fun HabitNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
-
     NavHost(
         navController = navController,
         startDestination = PrincipleDestination.route, //HabitDestination.route,
         modifier = modifier
     ) {
-
-
 
         composable( route = HabitDestination.route ) {
             HabitScreen(
@@ -44,10 +40,13 @@ fun HabitNavHost(
                 navigateToPrinciple = { navController.navigate(PrincipleDestination.route) },
                 navigateToIssue = { navController.navigate(IssueDestination.route) },
                 navigateToYou = { navController.navigate(SettingDestination.route) },
-
+                navigateToHabitEdit = {_ -> }
+                /*
                 navigateToHabitEdit = { habitId ->
                     navController.navigate("${HabitEditDestination.route}/$habitId")
                 },
+
+                 */
             )
         }
         composable(route = PrincipleDestination.route) {
@@ -83,36 +82,18 @@ fun HabitNavHost(
             )
         }
 
-
-        /**
-         * The destination route contains the habit ID as a parameter
-         * It's view models perform the fetch function
-         *
-         * The screen composable takes the navigate back and up as parameters
-         */
-        composable(
-            route = HabitEditDestination.routeWithArgs,
-            arguments = listOf(navArgument(HabitEditDestination.ID_ARG) { type = NavType.IntType })
-        ) {
-            HabitEditScreen(
-                navigateBack = { navController.popBackStack() }
-            )
-        }
-
-
         composable(
             route = PrincipleEditDestination.routeWithArgs,
             arguments = listOf(navArgument(PrincipleEditDestination.ID_ARG) { type = NavType.IntType })
         ) {
             PrincipleEditScreen(
-                currentScreenName = stringResource(id = SettingDestination.navTitle),
+                currentScreenName = stringResource(id = PrincipleDestination.navTitle),
                 navigateToHabit = { navController.navigate(HabitDestination.route) },
                 navigateToPrinciple = { navController.navigate(PrincipleDestination.route) },
                 navigateToIssue = { navController.navigate(IssueDestination.route) },
                 navigateToYou = { navController.navigate(SettingDestination.route) },
 
         )}
-
         composable(route = VisualizationDestination.route) {
             VisualizationScreen(
                 navigateBack = { navController.popBackStack() },

@@ -34,11 +34,6 @@ object SettingDestination: NavigationDestination {
     val navTitle = R.string.setting_nav_title
 }
 
-
-object HabitEntryDestination : NavigationDestination {
-    override val route = "habit_entry"
-    override val title =  R.string.habit_entry_title
-} //TODO: delete this
 object HabitEditDestination: NavigationDestination{
     override val route = "habit_edit"
     override val title = R.string.habit_edit_title
