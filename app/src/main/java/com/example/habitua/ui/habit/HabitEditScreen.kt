@@ -1,4 +1,4 @@
-package com.example.habitua.ui.principles
+package com.example.habitua.ui.habit
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -40,20 +40,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.habitua.R
-import com.example.habitua.data.Principle
+import com.example.habitua.data.Habit
 import com.example.habitua.ui.AppNavBar
 import com.example.habitua.ui.AppTitleBar
 import com.example.habitua.ui.AppViewModelProvider
 import com.example.habitua.ui.backgroundDrawables
-import com.example.habitua.ui.navigation.PrincipleEditDestination
+import com.example.habitua.ui.issues.innerShadow
+import com.example.habitua.ui.navigation.HabitEditDestination
 import com.example.habitua.ui.theme.PreviewHabituaTheme
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
 @Composable
-fun PrincipleEditScreen(
-    viewModel: PrincipleEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
+fun HabitEditScreen(
+    viewModel: HabitEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     currentScreenName: String,
     navigateToHabit: () -> Unit,
@@ -61,60 +62,31 @@ fun PrincipleEditScreen(
     navigateToIssue: () -> Unit,
     navigateToYou: () -> Unit,
 ) {
-    //TODO: what.
-        // what you need to do now is work the view model
-    // and then pass in all the relevant parameterized functions
-    // And then give yourself a sanity check of it working
-    // and hope testing it would be easy to do.
-
-    /*
-            habitUiState = viewModel.habitUiState,
-        onHabitValueChange = viewModel::updateUiState,
-        onSaveClick = {
-            coroutineScope.launch {
-                viewModel.updateHabit()
-                navigateBack()
-            }
-        },
-        onDelete = {
-            coroutineScope.launch {
-                viewModel.deleteHabit()
-                navigateBack()
-            }
-        },
-
-
-    when (uiState) {
-        PrincipleEditUiState.Error -> {}
-        PrincipleEditUiState.Loading -> {}
-        PrincipleEditUiState.Success -> {}
-    }
-     */
 
     val coroutineScope = rememberCoroutineScope()
 
     val uiState = viewModel.uiState
 
-    PrincipleEditBody(
+    HabitEditBody(
         // app title bar stuff
-        appTitle = stringResource(id = PrincipleEditDestination.title),
+        appTitle = stringResource(id = HabitEditDestination.title),
 
         backgroundPatternList = backgroundDrawables,
         backgroundAccessorIndex = viewModel.backgroundAccessorIndex,
 
-        principle = uiState.principle,
+        habit = uiState.habit,
 
         onValueEdit = viewModel::updateUiState,
         //TODO: what does :: mean ? in this case
         onDelete = {
             coroutineScope.launch {
-                viewModel.deletePrinciple()
-                navigateToPrinciple()
+                viewModel.deleteHabit()
+                navigateToHabit()
             }
         },
         onSave = {
             coroutineScope.launch {
-                viewModel.savePrinciple()
+                viewModel.saveHabit()
             }
         },
         hasThereBeenChanges = uiState.hasThereBeenChanges,
@@ -133,9 +105,9 @@ fun PrincipleEditScreen(
  * secondActionButtonName: String = "" // if no given name, do not generate a second button
  */
 @Composable
-fun PrincipleEditBody (
+fun HabitEditBody (
 
-    onValueEdit: (Principle) -> Unit,
+    onValueEdit: (Habit) -> Unit,
     onDelete: () -> Unit,
     onSave: () -> Unit,
     hasThereBeenChanges: Boolean,
@@ -153,7 +125,7 @@ fun PrincipleEditBody (
     backgroundAccessorIndex: Int,
     backgroundPatternList: List<Int>,
 
-    principle: Principle,
+    habit: Habit,
 ) {
 
     val patternPainter = painterResource(id = backgroundPatternList[backgroundAccessorIndex])
@@ -203,7 +175,6 @@ fun PrincipleEditBody (
                 }
             }
         } //this changed the little bits alpha to be far lower for easier entry
-
         .innerShadow(
             shape = MaterialTheme.shapes.small,
             color = MaterialTheme.colorScheme.outline.copy(0.68f),
@@ -239,8 +210,8 @@ fun PrincipleEditBody (
                 .padding(vertical = dimensionResource(id = R.dimen.padding_large))
 
         ) {
-            PrincipleEditBar(
-                principle = principle,
+            HabitEditBar(
+                habit = habit,
                 modifier = modifierForBars,
                 onSave = onSave,
                 onValueEdit = onValueEdit,
@@ -253,14 +224,13 @@ fun PrincipleEditBody (
 
 @Composable
 
-fun PrincipleEditBar(
-    principle: Principle,
+fun HabitEditBar(
+    habit: Habit,
 
-    onValueEdit: (Principle) -> Unit,
+    onValueEdit: (Habit) -> Unit,
     onDelete: () -> Unit,
     onSave: () -> Unit,
     hasThereBeenChanges: Boolean,
-
 
     modifier: Modifier = Modifier,
 ){
@@ -275,15 +245,13 @@ fun PrincipleEditBar(
         .fillMaxWidth()
         .padding(dimensionResource(id=R.dimen.padding_large))
 
-    Column(
-        modifier = modifier
-    ){
+    Column( modifier = modifier ){
         // name
         OutlinedTextField(
             modifier = fieldModifier,
             label = { Text(text = stringResource(id = R.string.form_required_name), style = MaterialTheme.typography.displayMedium) },
-            value = principle.name,
-            onValueChange = { onValueEdit(principle.copy(name = it)) },
+            value = habit.name,
+            onValueChange = { onValueEdit(habit.copy(name = it)) },
             singleLine = true
         )
         //onValueChange(habitValues.copy(name = it))
@@ -292,8 +260,8 @@ fun PrincipleEditBar(
         OutlinedTextField(
             modifier = fieldModifier,
             label = { Text(text = stringResource(id = R.string.form_required_description), style = MaterialTheme.typography.displayMedium) },
-            value = principle.description,
-            onValueChange = { onValueEdit(principle.copy(description = it)) },
+            value = habit.description,
+            onValueChange = { onValueEdit(habit.copy(description = it)) },
             singleLine = false,
             minLines = 4,
             maxLines = 4
@@ -303,21 +271,16 @@ fun PrincipleEditBar(
         //TODO: add an icon
 
         // first active origin (though I'm not sure how would we trigger it).
-        if (principle.dateFirstActive != null) {
-            Row(
-                modifier = fieldModifier
-            ){
+        if (habit.currentStreakOrigin != null) {
+            Row( modifier = fieldModifier ){
                 Text(
                     text = "Date First Active: ",
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-                Text(principle.formatFirstActiveDateString())
+                Text(habit.formatCurrentStreakOriginString())
             }
-        }
+        } //TODO: add date items for each of the things.
 
         //  save row
         Row(
@@ -337,9 +300,7 @@ fun PrincipleEditBar(
                     text = "Save Changes",
                     style = MaterialTheme.typography.displayMedium
                 )
-                Spacer(
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
+                Spacer( modifier = Modifier.padding(horizontal = 4.dp) )
                 Icon(
                     imageVector = Icons.Outlined.AddCircleOutline,
                     contentDescription = "Save Changes"
@@ -355,33 +316,25 @@ fun PrincipleEditBar(
         // read only attributes
         // date Created
 
-        Row(
-            modifier = fieldModifier
-        ){
+        Row( modifier = fieldModifier ){
             Text(
                 text = "Date Created: ",
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.weight(1f)
             )
-            Text(principle.formatDateCreatedString())
+            Text( habit.formatDateCreatedString() )
         }
 
-        Row(
-            modifier = fieldModifier
-        ){
+        Row( modifier = fieldModifier ){
             Text(
                 text = "Age: ",
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.weight(1f)
             )
-            Text(
-                text = principle.formatDaysSinceDateCreatedString(),
-            )
+            Text( text = habit.formatDaysSinceDateCreatedString() )
         }
 
-        Spacer(
-            modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium))
-        )
+        Spacer( modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)) )
 
         // delete button (starts confirmation)
         Button(
@@ -437,29 +390,21 @@ fun PrincipleEditBar(
 
 @Preview
 @Composable
-fun PrincipleEditBodyPreview(){
-
-    val backgroundDrawables = listOf(
-        R.drawable.baseline_circle_24,
-        R.drawable.baseline_elderly_24,
-        R.drawable.baseline_hexagon_24,
-        R.drawable.baseline_electric_bolt_24
-    )
+fun HabitEditBodyPreview(){
 
     var backgroundAccessorIndex = Random.nextInt(backgroundDrawables.size)
 
-
     PreviewHabituaTheme {
-        PrincipleEditBody(
+        HabitEditBody(
             // app title bar stuff
-            appTitle = stringResource(id = PrincipleEditDestination.title),
+            appTitle = stringResource(id = HabitEditDestination.title),
 
             backgroundPatternList = backgroundDrawables,
             backgroundAccessorIndex = backgroundAccessorIndex,
-            principle = Principle(
+            habit = Habit(
                 0,
                 0,
-                null,
+                0,
                 "replace me",
                 "Oh, there needs to be an icon resource too",
             ),

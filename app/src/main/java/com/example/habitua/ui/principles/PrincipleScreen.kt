@@ -360,7 +360,7 @@ fun PrincipleBody (
                 currentlyLoading = currentlyLoading
             )
 
-            PrincipleActionBar(
+            ActionBar(
                 modifier = modifierForBars,
 
                 firstActionButtonName = firstActionButtonName,
@@ -643,7 +643,7 @@ fun PrincipleCard(
 
 
 @Composable
-fun PrincipleActionBar(
+fun ActionBar(
     modifier: Modifier = Modifier,
     firstActionButtonName: String,
     firstActionButtonIcon: ImageVector,

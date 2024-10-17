@@ -32,7 +32,7 @@ val test_data_HabitList = listOf(
     Habit(
         name = "Pouring one Out",
         description = "sample text",
-        dateCreated = todayMinus24days_inMilli,
+        dateCreated = todayMinus1day_inMilli,
         currentStreakOrigin = todayMinus1day_inMilli,
         nextReviewedDate = today_inMilli
 
@@ -41,8 +41,8 @@ val test_data_HabitList = listOf(
         name = "Diisononyl phthalate",
         description = "get grapes",
         isActive = true,
-        dateCreated = todayMinus24days_inMilli,
-        currentStreakOrigin = todayMinus24days_inMilli,
+        dateCreated = todayMinus3day_inMilli,
+        currentStreakOrigin = todayMinus2day_inMilli,
         nextReviewedDate = today_inMilli
     ),
     Habit(

@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.habitua.ui.habit.HabitEditScreen
 import com.example.habitua.ui.habit.HabitScreen
 import com.example.habitua.ui.issues.IssueScreen
 import com.example.habitua.ui.principles.PrincipleEditScreen
@@ -40,13 +41,9 @@ fun HabitNavHost(
                 navigateToPrinciple = { navController.navigate(PrincipleDestination.route) },
                 navigateToIssue = { navController.navigate(IssueDestination.route) },
                 navigateToYou = { navController.navigate(SettingDestination.route) },
-                navigateToHabitEdit = {_ -> }
-                /*
                 navigateToHabitEdit = { habitId ->
                     navController.navigate("${HabitEditDestination.route}/$habitId")
                 },
-
-                 */
             )
         }
         composable(route = PrincipleDestination.route) {
@@ -82,6 +79,18 @@ fun HabitNavHost(
             )
         }
 
+        composable(
+            route = HabitEditDestination.routeWithArgs,
+            arguments = listOf(navArgument(HabitEditDestination.ID_ARG) { type = NavType.IntType })
+        ) {
+            HabitEditScreen(
+                currentScreenName = stringResource(id = HabitDestination.navTitle),
+                navigateToHabit = { navController.navigate(HabitDestination.route) },
+                navigateToPrinciple = { navController.navigate(PrincipleDestination.route) },
+                navigateToIssue = { navController.navigate(IssueDestination.route) },
+                navigateToYou = { navController.navigate(SettingDestination.route) },
+
+                )}
         composable(
             route = PrincipleEditDestination.routeWithArgs,
             arguments = listOf(navArgument(PrincipleEditDestination.ID_ARG) { type = NavType.IntType })

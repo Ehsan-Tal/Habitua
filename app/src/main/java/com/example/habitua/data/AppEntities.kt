@@ -10,7 +10,7 @@ import com.example.habitua.R
 @Entity(tableName = "habits")
 data class Habit (
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val habitId: Int = 0,
     @DrawableRes val imageResId : Int = R.drawable.tal_derpy,
     val dateCreated: Long = 0,
     var name: String,
@@ -30,6 +30,33 @@ data class Habit (
 // we currently assume it - and we can add days if missed and dropped - just solve for x
 
 enum class Complexity { SIMPLE, MEDIUM, COMPLEX }
+
+@Entity( tableName = "habits_dates")
+data class HabitDate (
+    @PrimaryKey(autoGenerate = true)
+    val dateId: Int = 0,
+    val date: Long,
+    val habitId: Int,
+    var value: Boolean = false
+)
+
+data class HabitDetails (
+    @DrawableRes val imageResId : Int = R.drawable.tal_derpy,
+    val dateCreated: Long = 0,
+    var name: String,
+    var description: String,
+    var complexity: Complexity = Complexity.SIMPLE,
+    var frequency: Int = 1,
+    var isActive: Boolean = false,
+    var currentStreakOrigin: Long? = null,
+    var nextReviewedDate: Long? = null,
+    var dateAcquired: Long? = null,
+    var daysUntilAcquisition: Float? = null,
+    val date: Long,
+    val habitId: Int,
+    var value: Boolean = false
+) //TODO: do we copy Principles or just ughhhhhhhhhhh
+// we ought to complete convert this, I do hate it.
 
 @Entity(tableName = "principles")
 data class Principle (
@@ -58,7 +85,7 @@ data class PrincipleDetails (
     val dateCreated: Long = 0,
     var dateFirstActive: Long? = null,
     val value: Boolean
-)
+)//TODO: change the PrincipleDetails so that it's val principle and val value
 
 fun PrincipleDetails.toPrinciple(): Principle {
     return Principle(

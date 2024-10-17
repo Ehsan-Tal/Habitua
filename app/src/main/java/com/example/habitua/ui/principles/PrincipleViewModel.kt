@@ -56,6 +56,7 @@ class PrincipleViewModel(
                 _principleUiState.value = _principleUiState.value.copy(principleListToday = it)
             }
             _principleUiState.value.currentlyLoading = false
+            //TODO: when empty, this should still return a false.
         }
     }
     private fun getCountOfPrinciplesOnDateBefore(){
@@ -118,47 +119,6 @@ class PrincipleViewModel(
         collectPrincipleAfterUpdates()
     }
 
-
-    // editing the principle
-    private fun validatePrincipleInput(): Boolean {
-        return with(principleUiState.value.editablePrincipleDetails) {
-            name.isNotBlank() && description.isNotBlank()
-        }
-    }
-
-    //TODO: Make a dedicated principle Edit page
-    // And have the addPrinciple go to it with the newly created principleId
-    //
-
-    //TODO: and the moreOptionsClick send the user to it
-    // we can have moreOptionsClick be a () -> Unit after we attach the
-    // principle.id to it
-
-   fun setEditablePrincipleDetails(principleDetail: PrincipleDetails){
-        _principleUiState.value.editablePrincipleDetails = principleDetail
-    }
-    fun editMenuUpdatePrincipleInUiState(principleDetail: PrincipleDetails){
-        _principleUiState.value.editablePrincipleDetails = principleDetail
-    }
-    /**
-     * sent a copy of the updated principle details, which would used to update the principle.
-     * Or takes a
-     */
-    fun editMenuApplyChangesToPrinciple(){
-        if (validatePrincipleInput()){
-            val principle = principleUiState.value.editablePrincipleDetails.toPrinciple()
-            viewModelScope.launch {
-                appRepository.updatePrinciple(principle)
-            }
-        }
-    }
-    fun editMenuDeletePrinciple(){
-        val principle = principleUiState.value.editablePrincipleDetails.toPrinciple()
-        viewModelScope.launch {
-            appRepository.deletePrinciple(principle)
-        }
-    }
-
 }
 
 /**
@@ -170,17 +130,6 @@ class PrincipleViewModel(
  *
  */
 data class PrincipleUiState(
-    var editablePrincipleDetails: PrincipleDetails = PrincipleDetails(
-        principleId = 0,
-        name = "",
-        description = "",
-        date = 0,
-        dateCreated = 0,
-        dateFirstActive = null,
-        value = false,
-    ),// TODO: delete this
-
-
 
     var dateFormat: String = "EEEE, dd-MM",
 
@@ -278,6 +227,4 @@ data class PrincipleUiState(
         return dateBase.atZone(ZoneId.systemDefault()).toLocalDate()
             .isEqual(dateWeekBeforeToday.atZone(ZoneId.systemDefault()).toLocalDate())
     }
-
-
 }
